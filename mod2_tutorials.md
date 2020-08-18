@@ -1,4 +1,4 @@
-# Section 2-1: Introduction to the CS-330 Tutorials
+# Section 2-1: Introduction to the CS-330 Tutorials (EXAMPLE CHANGE)
 
 [Insert video explaining how to use the Git repository with the code for these tutorials]
 
