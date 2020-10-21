@@ -206,7 +206,7 @@ void URender()
     // Transforms the camera
     glm::mat4 view = glm::translate(glm::vec3(0.0f, 0.0f, -3.0f)); //Moves the camera backwards -3 units in Z
 
-    // Creates a perspective projection (field of view, aspect ratio, near, and far are the four parameters)
+    // Creates a perspective projection (field of view, aspect ratio, near plane, and far plane are the four parameters)
     glm::mat4 projection = glm::perspective(45.0f, (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
     // Set the shader to be used
