@@ -125,7 +125,7 @@ If you compile, link and run this example, you should see a window titled "Tutor
 
 ### Exercise:
 
-Check out the documentation for [`glClearColor`](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glClearColor.xhtml), and modify its parameters so the background is red instead of black. 
+Check out the documentation for [`glClearColor`](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glClearColor.xhtml), and modify its parameters so the background is red instead of black. Make sure that you check both lines 40 and 51 in the code as you work.
 
 
 
