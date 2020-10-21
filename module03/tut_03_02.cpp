@@ -227,7 +227,7 @@ void URender()
 // Implements the UCreateMesh function
 void UCreateMesh(GLMesh &mesh)
 {
-    // Specifies normalized device coordinates (x,y, z) and color for triangle vertices
+    // Specifies normalized device coordinates (x,y,z) and color for square vertices
     GLfloat verts[]=
     {
     // Vertex Positions    // Colors
