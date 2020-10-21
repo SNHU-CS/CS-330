@@ -197,7 +197,7 @@ Play with the parameters to the view and the perspective projection matrices.
 
 1. Move the camera to the left by 1 unit. Which coordinate did you modify? Next, move the camera to the right by 1 unit. Which coordinate did you modify? Keep increasing the offset (right or left) and determine at what point the cube disappears completely.
 2. Try changing the Z axis for the camera. What happens when you increase or decrease the value?
-3. Change the field of view of the perspective projection (remember this includes four parameters including field of view, aspect ratio, near plane, and far plane). What happens when you make the field of view very large? Does the object appear larger or smaller? Review LearnOpenGL's ([Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems)) section for more information regarding the perspective projection parameters.
+3. Change the field of view of the perspective projection (remember this includes four parameters including field of view, aspect ratio, near plane, and far plane). What happens when you make the field of view very large? Does the object appear larger or smaller? Review LearnOpenGL's [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems) section for more information regarding the perspective projection parameters.
 4. Move the near plane farther away from the camera. At what point does the cube start to disappear? Remember that the square is centered at the origin, and that the camera is moved backwards by 3 units.
 
 
