@@ -47,7 +47,7 @@ Up until this tutorial, the function `UProcessInput` was only used to handle the
 
 In GLFW, we get the status of an specific key with function `glfwGetKey`, with only two possible outcomes: `GLFW_PRESS` OR `GLFW_RELEASE`. Each one of the keys has an specific identifier. In our case, `GLFW_KEY_W`, `GLFW_KEY_S`, `GLFW_KEY_A` and `GLFW_KEY_D`. If one of these keys is pressed, we print a message to the standard output stream stating so. Finally, if any of these keys was down in the last frame, we also print the current position of the cursor: using function `glfwGetCursorPos`.
 
-When you run the application, be sure to press a key so something occurs. Your output should look similar to:
+When you run the application, be sure to press a key so something occurs. Although your screen will appear black, your output should look similar to:
 
 ```
 INFO: OpenGL Version: 4.4.0 NVIDIA 440.100
@@ -188,7 +188,7 @@ void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 }
 ```
 
-When you run this application, your output should look similar to:
+When you run this application, your screen will appear black but your output should look similar to:
 
 ```
 Mouse at (366, 376)
