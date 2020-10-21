@@ -277,7 +277,7 @@ void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 }
 
 
-// Functioned called to render a frame
+// Function called to render a frame
 void URender()
 {
     // Enable z-depth
