@@ -17,7 +17,7 @@ The following image shows the final result:
 
 Continuing with tutorial 2.8, we modify the `UCreateMesh` function to create a square (instead of a triangle).
 
-    // Specifies normalized device coordinates (x,y, z) and color for triangle vertices
+    // Specifies normalized device coordinates (x,y, z) and color for square vertices
     GLfloat verts[]=
     {
     // Vertex Positions    // Colors
