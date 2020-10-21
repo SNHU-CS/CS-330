@@ -83,7 +83,7 @@ You pressed D! Cursor at position (251, 491)
 
 ### Exercise
 
-Check out ([GLFW's documentation] https://www.glfw.org/docs/latest/group__keys.html) and augment `UProcessInput` to handle multiple keys at the same time. For example, print a message to the screen if `Shift` and `A` are pressed simultaneously.
+Check out [GLFW's Documentation](https://www.glfw.org/docs/latest/group__keys.html) and augment `UProcessInput` to handle multiple keys at the same time. For example, print a message to the screen if `Shift` and `A` are pressed simultaneously.
 
 
 # Section 4-2: Handling Mouse Input
