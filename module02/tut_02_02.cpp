@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
         // -----
         UProcessInput(window);
 
-        // Clear the background
+        // Clear the background and change the background color to black
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
