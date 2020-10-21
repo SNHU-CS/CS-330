@@ -83,7 +83,7 @@ You pressed D! Cursor at position (251, 491)
 
 ### Exercise
 
-Try pressing more than one key pressed in the same frame. Can you think how this functionality could help you enhance the control of your application? Also, check out GLFW's documentation, and augment `UProcessInput` to handle different keys -- or combinations of keys. For example, print a message to the screen if `Shift` and `A` are pressed at the same time.
+Check out ([GLFW's documentation] (https://www.glfw.org/docs/latest/group__keys.html)) and augment `UProcessInput` to handle multiple keys at the same time. For example, print a message to the screen if `Shift` and `A` are pressed simultaneously.
 
 
 # Section 4-2: Handling Mouse Input
