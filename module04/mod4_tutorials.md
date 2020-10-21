@@ -411,7 +411,7 @@ The code for this section ([tut_04_05.cpp](./tut_04_05.cpp)) demonstrates how to
 
 * draw multiple cubes using a single mesh object
 
-If you start the application and move the camera back (by pressing S), you should see multiple cubes:
+If you start the application and move the camera back (by pressing S), you should see multiple cubes. 
 
 ![Multiple Cubes](./multiple_cubes.png)
 
@@ -461,4 +461,4 @@ The way shown here is not the most efficient way to draw the very same mesh mult
 
 ### Exercise
 
-Play with the number of cubes you render by changing the value of nrows, ncols, or nlevels in the URender function. Print the value of `gDeltaTime` to standard output towards the end of URender function. Does the value increase or decrease? What does it imply?
+Play with the number of cubes you render by changing the value of nrows, ncols, or nlevels in the URender function. Print the value of `gDeltaTime` to standard output towards the end of URender function. Does the value increase or decrease? What does it imply? Note that as you increase the number of cubes the responsiveness of the program may degrade. Pressing Esc may not halt the program right away, but it will eventually close.
