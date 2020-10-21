@@ -184,7 +184,7 @@ void UResizeWindow(GLFWwindow* window, int width, int height)
 }
 
 
-// Functioned called to render a frame
+// Function called to render a frame
 void URender()
 {
     // Clear the background
