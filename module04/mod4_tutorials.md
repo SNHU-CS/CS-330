@@ -47,7 +47,7 @@ Up until this tutorial, the function `UProcessInput` was only used to handle the
 
 In GLFW, we get the status of an specific key with function `glfwGetKey`, with only two possible outcomes: `GLFW_PRESS` OR `GLFW_RELEASE`. Each one of the keys has an specific identifier. In our case, `GLFW_KEY_W`, `GLFW_KEY_S`, `GLFW_KEY_A` and `GLFW_KEY_D`. If one of these keys is pressed, we print a message to the standard output stream stating so. Finally, if any of these keys was down in the last frame, we also print the current position of the cursor: using function `glfwGetCursorPos`.
 
-When you run the application, your output should look similar to:
+When you run the application, be sure to press a key so something occurs. Your output should look similar to:
 
 ```
 INFO: OpenGL Version: 4.4.0 NVIDIA 440.100
@@ -83,7 +83,7 @@ You pressed D! Cursor at position (251, 491)
 
 ### Exercise
 
-Test whether it is possible to have more than one key pressed in the same frame. If it is, can you think how this capability could help you enhance the control of your application? Also, check out GLFW's documentation, and augment `UProcessInput` to handle different keys -- or combinations of keys. For example, print a message to the screen if `Shift` and `A` are pressed at the same time.
+Try pressing more than one key pressed in the same frame. Can you think how this functionality could help you enhance the control of your application? Also, check out GLFW's documentation, and augment `UProcessInput` to handle different keys -- or combinations of keys. For example, print a message to the screen if `Shift` and `A` are pressed at the same time.
 
 
 # Section 4-2: Handling Mouse Input
