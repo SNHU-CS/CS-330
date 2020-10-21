@@ -461,4 +461,4 @@ The way shown here is not the most efficient way to draw the very same mesh mult
 
 ### Exercise
 
-Play with the number of cubes you render, and see how the frame rate goes up or down. In order to do this, use the `gDeltaTime` value to calculate the frame rate, and print it to standard output.
+Play with the number of cubes you render by changing the value of nrows, ncols, or nlevels in the URender function. Print the value of `gDeltaTime` to standard output towards the end of URender function. Does the value increase or decrease? What does it imply?
