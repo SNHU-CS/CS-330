@@ -565,7 +565,7 @@ The final change requires replacing the call to `glDrawArrays` with a call to `g
         // Draws the triangle
         glDrawElements(GL_TRIANGLES,  mesh.nvertices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
     }
-Congratulations, you have now reached the end of the tutorial for Module Two!
+_Congratulations, you have now reached the end of the tutorial for Module Two!_
 
 
 
