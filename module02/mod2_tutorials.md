@@ -66,7 +66,7 @@ The main function calls `UInitialize` and runs an infinite loop called the _rend
             glfwPollEvents();
         }
 
-        exit(EXIT_SUCCESS); // Terminates the program successfully.
+        exit(EXIT_SUCCESS); // Terminates the program successfully
     }
 
 
@@ -264,7 +264,7 @@ The first argument `0` in both the call to `glVertexAttribPointer` and `glEnable
 
 For this simple example, the VBO only contains location data, but we will see in the next tutorial how we will also store other type of vertex data (such as vertex color). This is why OpenGL needs our guidance in order to separate the different types of vertex attributes that need to be fed to the vertex shader.
 
-### Drawing with glDrawArrays
+### Drawing With glDrawArrays
 
 Finally, we are ready to tell OpenGL to put all this together and draw the mesh stored in our VBO using the shader program we just created. This is accomplished by the function `URenderMesh`:
 
@@ -311,7 +311,7 @@ In the previous tutorial, we added the `UCreateShaderProgram` function, which co
         glShaderSource(fragmentShaderId, 1, &fragShaderSource, NULL);
 
         // Compile the vertex shader, and print compilation errors (if any).
-        glCompileShader(vertexShaderId); // compile the vertex shader
+        glCompileShader(vertexShaderId); // Compile the vertex shader.
         // Check for shader compile errors.
         glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &success);
         if (!success)
@@ -322,7 +322,7 @@ In the previous tutorial, we added the `UCreateShaderProgram` function, which co
             return false;
         }
 
-        glCompileShader(fragmentShaderId); // compile the fragment shader
+        glCompileShader(fragmentShaderId); // Compile the fragment shader.
         // Check for shader compile errors.
         glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, &success);
         if (!success)
@@ -415,7 +415,7 @@ We have also changed the call to `glVertexAttribPointer` associated with attribu
     // Strides between vertex coordinates is 6 (x, y, r, g, b, a). A tightly packed stride is 0.
     GLint vertexStride =  sizeof(float) * 6;// The number of floats before each
 
-    // Instructs the GPU on how to handle the vertex buffer object data
+    // Instructs the GPU on how to handle the Vertex Buffer Object data
     // Parameters: attribPointerPosition | coordinates per vertex is 2, i.e., x and y |   data type | deactivate normalization |  0 strides | 0 offset
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, vertexStride, 0);
 
