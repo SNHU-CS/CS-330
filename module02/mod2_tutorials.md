@@ -1,5 +1,6 @@
 # Module Two Tutorial
-# Section 2-1: Introduction to the CS-330 Tutorials
+## Section 2-1: Introduction to the CS-330 Tutorials
+### Sample Header Three
 
 All the code for this course's tutorials is stored within the same Git repository as the tutorials themselves. At the root folder of the repository there is a Visual Studio solution file named `cs330_tutorials.sln` that contains the Visual Studio projects for each of the tutorials.
 
