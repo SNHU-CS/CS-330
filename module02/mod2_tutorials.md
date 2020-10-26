@@ -173,8 +173,8 @@ Before we move on to the next tutorial, note the following:
 
         struct GLMesh
         {
-            GLuint vao;     // Handle for the vertex array object
-            GLuint vbo;     // Handle for the vertex buffer object
+            GLuint vao;     // Handle for the Vertex Array Object
+            GLuint vbo;     // Handle for the Vertex Buffer Object
             GLuint nvertices;   // Number of vertices of the mesh
         };
 
@@ -218,7 +218,7 @@ The vertex and fragment shader code needs to be compiled and linked; this is wha
 
     void UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId)
     {
-        // Create a Shader program object.
+        // Create a shader program object.
         programId = glCreateProgram();
 
         // Create the vertex and fragment shader objects.
@@ -299,7 +299,7 @@ In the previous tutorial, we added the `UCreateShaderProgram` function, which co
         int success = 0;
         char infoLog[512];
 
-        // Create a Shader program object.
+        // Create a shader program object.
         programId = glCreateProgram();
 
         // Create the vertex and fragment shader objects.
@@ -493,7 +493,7 @@ No other change is required, since the call to `glDrawArrays` (in `URenderMesh`)
 
 The final outcome should appear as follows:
 
-![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex, so the lower-right vertex of one triangle is the same point as the lower-left vertex on the other. The colored pattern on both triangles is the same. The lower-left vertex has been assigned a blue color, the lower-right vertex has been assigned a green color, and the upper-middle vertex has been assigned a red color.](./two_triangles.png)
+![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex, so the lower-right vertex of one triangle is the same point as the lower-left vertex of the other. The colored pattern on both triangles is the same. The lower-left vertex has been assigned a blue color, the lower-right vertex has been assigned a green color, and the upper-middle vertex has been assigned a red color.](./two_triangles.png)
 
 
 
@@ -507,9 +507,9 @@ Indices allow sharing vertex data for triangles that have a vertex in common. No
 
 Below are the index buffer numbers that will be used to represent positions on the window. The triangles will share the same position or coordinates at index 2. The indices are 0,1,2, 3,2,4. The following image shows the final outcome of this tutorial.
 
-![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex, so the lower-right vertex of one triangle is the same point as the lower-left vertex on the other. The colored pattern on the triangles is slightly different. For the first triangle, the lower-left vertex has been assigned a blue color, the lower-right vertex has been assigned a green color, and the upper-middle vertex has been assigned a red color. For the second triangle, the lower-left vertex has been assigned a green color, the lower-right vertex has been assigned a green color, and the upper-middle vertex has been assigned a red color.](./triangle_indices.png)
+![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex, so the lower-right vertex of one triangle is the same point as the lower-left vertex of the other. The colored pattern on the triangles is slightly different. For the first triangle, the lower-left vertex has been assigned a blue color, the lower-right vertex has been assigned a green color, and the upper-middle vertex has been assigned a red color. For the second triangle, the lower-left vertex has been assigned a green color, the lower-right vertex has been assigned a green color, and the upper-middle vertex has been assigned a red color.](./triangle_indices.png)
 
-The definition of the array `verts` (in `UCreateMesh`) has been updated to remove the duplicate vertex; therefore we are left with five vertices.
+The definition of the array `verts` (in `UCreateMesh`) has been updated to remove the duplicate vertex; therefore, we are left with five vertices.
 
     // Specifies Normalized Device Coordinates (x,y,z) and color (r,g,b,a) for triangle vertices
     GLfloat verts[]=
