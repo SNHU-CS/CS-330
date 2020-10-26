@@ -1,11 +1,12 @@
-# Section 3-1: Introduction to GLM
+# Module Three Tutorial
+## Section 3-1: Introduction to GLM
 
 Computer graphics applications normally require a fair amount of mathematical operations. Therefore, if you are developing an application with C++ and OpenGL, a great library to be familiar with is GLM, which stands for OpenGL Mathematics. The OpenGL part of the name comes from the fact that it is based on the OpenGL Shading Language (GLSL) specifications.
 
 GLM is a header-only library, which means that there are no precompiled libraries. In order to use it, you just need to include the appropriate header files. Pay attention to the include section of the next few tutorials and make sure to visit GLM's reference pages to start learning what it can do and how to use it.
 
 
-# Section 3-2: Transforming an Object using the Model Matrix
+## Section 3-2: Transforming an Object using the Model Matrix
 
 The code for this section ([tut_03_02.cpp](./tut_03_02.cpp)) demonstrates how to
 
@@ -109,13 +110,13 @@ and the fragment shader
 
 Note how, before multiplying the vertex position by the transformation, we convert it to a 4-dimensional vector, with a `1.0` as the fourth coordinate. We do this so we can work in homogenous coordinates.
 
-### Exercise
+#### Exercise
 
 Try changing the parameters that create the scale, rotation and translation matrices (in `URender`). First try changing each one of them independently (e.g. first the scale matrix, then the rotation...), and then try to combine them.
 
 
 
-# Section 3-3: Combining the Model, View, and Projection Matrices
+## Section 3-3: Combining the Model, View, and Projection Matrices
 
 The code for this section ([tut_03_03.cpp](./tut_03_03.cpp)) demonstrates how to
 
@@ -130,7 +131,7 @@ The following image shows the final result:
 
 All of the changes from the previous tutorial are confined to the vertex shader and the `URender` function
 
-## The Model Matrix
+### The Model Matrix
 
 Up until this point we have described the coordinates of the vertices of our primitives (a triangle and a square) in the _normalized device coordinate system_. This was required since we had yet to introduce the model matrix. From this point forward, the vertex locations (in `UCreateMesh`) are in _local coordinates_ (or _local space_). Remember that the model matrix is a 4x4 matrix that transforms points and vectors -- expressed in homogeneous coordinates -- from the object's _local space_ into _world space_.
 
@@ -145,13 +146,13 @@ We build the model matrix in the `URender` function. This time we have changed t
     // Model matrix: transformations are applied right-to-left
     glm::mat4 model = translation * rotation * scale;
 
-## The View Matrix
+### The View Matrix
 
 The view matrix transforms the vertex locations from the _world space_ into the _view space_. The view matrix is, like the model matrix, a 4x4 matrix. In this example, we translate the camera backwards by 3 units.
 
     glm::mat4 view = glm::translate(glm::vec3(0.0f, 0.0f, -3.0f));
 
-## The Projection Matrix
+### The Projection Matrix
 
 There are two basic types of projections that we can apply: perspective and orthographic. In this example, we are going to create a perspective projection matrix -- which mimics how the eye (and real cameras) work. To build this 4x4 matrix, we use GLM's `perspective` function:
 
@@ -159,7 +160,7 @@ There are two basic types of projections that we can apply: perspective and orth
 
 The first parameter is the field-of-view; the second one is the aspect ratio; the third one is the distance of the _near plane_ to the camera; and the last parameter is the distance of the _far plane_ to the camera. Points on the surfaces of objects that are closer to the camera than the near plane, or farther than the far plane, will be _clipped_.
 
-## Combining the Model, View and Projection Matrices
+### Combining the Model, View and Projection Matrices
 
 All three matrices are transferred to the vertex shader as uniform variables:
 
@@ -191,7 +192,7 @@ And the vertex shader combines them, and multiplies the vertex location with it.
     }
 
 
-### Exercise
+#### Exercise
 
 Play with the parameters to the view and the perspective projection matrices.
 
@@ -202,7 +203,7 @@ Play with the parameters to the view and the perspective projection matrices.
 
 
 
-# Section 3-4: Creating and Displaying a Cube
+## Section 3-4: Creating and Displaying a Cube
 
 The code for this section ([tut_03_04.cpp](./tut_03_04.cpp)) demonstrates how to
 
@@ -211,7 +212,7 @@ The code for this section ([tut_03_04.cpp](./tut_03_04.cpp)) demonstrates how to
 
 ![Cube](./cube.png)
 
-## A Cube Mesh
+### A Cube Mesh
 
 In order to replace the square with a cube, the function `UCreateMesh` requires modifications to the `verts` and `indices` arrays
 
@@ -247,7 +248,7 @@ In order to replace the square with a cube, the function `UCreateMesh` requires 
 
 The rest of the function remains the same.
 
-## The Z (Depth) Buffer
+### The Z (Depth) Buffer
 
 Now that we are rendering 3D shapes, it could happen that more than one 3D point projects to the same pixel on the screen. In that case, which one should we use to color this pixel? If we simplify the problem to consider opaque materials only, the answer is: the one that it is closest to the camera. This solution is implemented by the Z Buffer, which is a buffer that stores a depth value for the point closest to the camera that has projected to that pixel. So, for example, if pixel `(100, 200)` already has color red, which was produce by a 3D point with z value `0.3`, but another 3D point (blue) with z value `0.2` (closer) projects also onto pixel `(100, 200)`, then we update the framebuffer at position `(100, 200)` with the color blue, and the z buffer, also at position `(100, 200)`, with value '0.2'.
 
@@ -262,7 +263,7 @@ The Z buffer is enabled and cleared in the `URender` function. The buffer needs 
 
 
 
-# Section 3-5: Creating an Orthographic Projection
+## Section 3-5: Creating an Orthographic Projection
 
 The code for this section ([tut_03_05.cpp](./tut_03_05.cpp)) demonstrates how to
 
@@ -276,7 +277,7 @@ This tutorial requires only changing one line of code. In function `URender`, we
 
     glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);
 
-### Exercise
+#### Exercise
 
 Look at the reference page for the `ortho` function, and play with its parameters to understand how this function behaves.
 
