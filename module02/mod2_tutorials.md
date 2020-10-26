@@ -287,11 +287,11 @@ And that's it. At this point your screen should look like this:
 
 ## Section 2-5: Reporting Shader Compilation and Linking Errors
 
-The code for this section ([tut_02_05.cpp](./tut_02_05.cpp)) demonstrates how to:
+The code for this section ([tut_02_05.cpp](./tut_02_05.cpp)) demonstrates how to do the following:
 
 * Report compilation and linking errors when building a shader program.
 
-In the previous tutorial, we added the `UCreateShaderProgram` function, which compiles the vertex and fragment shaders, and then links them into a single shader program. These compilation and linking operations occur at runtime, so what happens if there are errors? How will we know what went wrong? To solve this issue we are going to enhance the `UCreateShaderProgram` function to report these errors by printing them to the console output.
+In the previous tutorial, we added the `UCreateShaderProgram` function, which compiles the vertex and fragment shaders and then links them into a single shader program. These compilation and linking operations occur at runtime, so what happens if there are errors? How will we know what went wrong? To solve this issue, we are going to enhance the `UCreateShaderProgram` function to report these errors by printing them to the console output.
 
     bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId)
     {
@@ -302,17 +302,17 @@ In the previous tutorial, we added the `UCreateShaderProgram` function, which co
         // Create a Shader program object.
         programId = glCreateProgram();
 
-        // Create the vertex and fragment shader objects
+        // Create the vertex and fragment shader objects.
         GLuint vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
         GLuint fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
 
-        // Retrive the shader source
+        // Retrive the shader source.
         glShaderSource(vertexShaderId, 1, &vtxShaderSource, NULL);
         glShaderSource(fragmentShaderId, 1, &fragShaderSource, NULL);
 
-        // Compile the vertex shader, and print compilation errors (if any)
+        // Compile the vertex shader, and print compilation errors (if any).
         glCompileShader(vertexShaderId); // compile the vertex shader
-        // check for shader compile errors
+        // Check for shader compile errors.
         glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &success);
         if (!success)
         {
@@ -323,7 +323,7 @@ In the previous tutorial, we added the `UCreateShaderProgram` function, which co
         }
 
         glCompileShader(fragmentShaderId); // compile the fragment shader
-        // check for shader compile errors
+        // Check for shader compile errors.
         glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, &success);
         if (!success)
         {
@@ -333,12 +333,12 @@ In the previous tutorial, we added the `UCreateShaderProgram` function, which co
             return false;
         }
 
-        // Attached compiled shaders to the shader program
+        // Attach compiled shaders to the shader program.
         glAttachShader(programId, vertexShaderId);
         glAttachShader(programId, fragmentShaderId);
 
-        glLinkProgram(programId);   // links the shader program
-        // check for linking errors
+        glLinkProgram(programId);   // Links the shader program
+        // Check for linking errors.
         glGetProgramiv(programId, GL_LINK_STATUS, &success);
         if (!success)
         {
@@ -359,25 +359,25 @@ In the previous tutorial, we added the `UCreateShaderProgram` function, which co
         glDeleteProgram(programId);
     }
 
-The code above checks the status of compilation with function `glGetShaderiv` and, if unsuccessful, it retrieves the compilation errors with `glGetShaderInfoLog`. Similarly, the status of linking is queried via the function `glGetProgramiv` and, if unsuccessful, it retrieves the specific error message with function `glGetProgramInfoLog`. In both cases we choose to return `false` to report the failed creation of the shader program (it is up to the caller of this function to continue or abort the execution of the program). 
+The code above checks the status of compilation with function `glGetShaderiv` and, if unsuccessful, it retrieves the compilation errors with `glGetShaderInfoLog`. Similarly, the status of linking is queried via the function `glGetProgramiv` and, if unsuccessful, it retrieves the specific error message with function `glGetProgramInfoLog`. In both cases we choose to return `false` to report the failed creation of the shader program. It is up to the caller of this function to continue or abort the execution of the program. 
 
 #### Exercise:
 
-Modify the vertex/fragment shader to intentionally introduce a syntax error (e.g. remove a semicolon), then compile the project and run it. What errors do you see? Would that information be sufficient to fix the shader code?
+Modify the vertex/fragment shader to intentionally introduce a syntax error (such as by removing a semicolon), then compile the project and run it. What errors do you see? Would that information be sufficient to fix the shader code?
 
 
 ## Section 2-6: Adding Color to Vertices
 
-The code for this section ([tut_02_06.cpp](./tut_02_06.cpp)) demonstrates how to:
+The code for this section ([tut_02_06.cpp](./tut_02_06.cpp)) demonstrates how to do the following:
 
-* Store more than one vertex attribute in the same VBO
-* Interpolate vertex data to be used in the fragment shader (e.g. vertex color)
+* Store more than one vertex attribute in the same VBO.
+* Interpolate vertex data to be used in the fragment shader (such as vertex color).
 
-### How to Store a Second Attribute in the same VBO
+### How to Store a Second Attribute in the Same VBO
 
-The _Vertex Buffer Objects_ stores vertex data in the GPU. So far we have stored only the location, but we are going to change that to also store a different color for each one of the vertices.
+The _Vertex Buffer Object_ stores vertex data in the GPU. So far we have stored only the location, but we are going to change that to also store a different color for each one of the vertices.
 
-In function `UCreateMesh` we update the array with vertex info to include a color for each vertex
+In function `UCreateMesh` we can update the array with vertex info to include a color for each vertex.
 
     // Specifies Normalized Device Coordinates (x,y,z) and color (r,g,b,a) for triangle vertices
     GLfloat verts[]=
@@ -392,7 +392,7 @@ In function `UCreateMesh` we update the array with vertex info to include a colo
         0.0f, 0.0f, 1.0f, 1.0f  // blue
     };
 
-and then we tell OpenGL that this data is there and stored at attribute location 1.
+Then we tell OpenGL that this data is there and stored at attribute location 1.
 
     // Creates the Vertex Attribute Pointer for the screen coordinates
     const GLuint floatsPerVertex = 3; // Number of coordinates per vertex
@@ -401,7 +401,7 @@ and then we tell OpenGL that this data is there and stored at attribute location
     // Strides between vertex coordinates is 6 (x, y, r, g, b, a). A tightly packed stride is 0.
     GLint stride =  sizeof(float) * (floatsPerVertex + floatsPerColor);// The number of floats before each
 
-    // Instructs the GPU on how to handle the vertex buffer object data.
+    // Instructs the GPU on how to handle the vertex buffer object data
     // Parameters: attribPointerPosition | coordinates per vertex is 2, i.e., x and y |   data type | deactivate normalization |  0 strides | 0 offset
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
     glEnableVertexAttribArray(0);
@@ -410,12 +410,12 @@ and then we tell OpenGL that this data is there and stored at attribute location
     glVertexAttribPointer(1, floatsPerColor, GL_FLOAT, GL_FALSE, stride, (char*)(sizeof(float) * floatsPerVertex));
     glEnableVertexAttribArray(1);
 
-We have also changed the call to `glVertexAttribPointer` associated with attribute `0`, since now we need to provide a stride value different than zero (to account for the seven floats that are required to store the data for each vertex: three floats for the location, and four for the color).
+We have also changed the call to `glVertexAttribPointer` associated with attribute `0`, since now we need to provide a stride value different than zero to account for the seven floats that are required to store the data for each vertex: three floats for the location, and four for the color.
 
     // Strides between vertex coordinates is 6 (x, y, r, g, b, a). A tightly packed stride is 0.
     GLint vertexStride =  sizeof(float) * 6;// The number of floats before each
 
-    // Instructs the GPU on how to handle the vertex buffer object data.
+    // Instructs the GPU on how to handle the vertex buffer object data
     // Parameters: attribPointerPosition | coordinates per vertex is 2, i.e., x and y |   data type | deactivate normalization |  0 strides | 0 offset
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, vertexStride, 0);
 
@@ -442,7 +442,7 @@ The first statement maps the vertex data stored as attribute 1 to a `vec4` calle
 
     colorFromVS = colorFromVBO;
 
-The fragment shader needs to be updated to receive as input this interpolated vertex color.
+The fragment shader needs to be updated to receive this interpolated vertex color as input.
 
     #version 440 core
     in vec4 colorFromVS;
@@ -454,21 +454,21 @@ The fragment shader needs to be updated to receive as input this interpolated ve
 
 Then set its output to the incoming interpolated color from the vertex shader. This tutorial produces the following outcome:
 
-![A multi-colored equilateral triangle against a black background, generated using OpenGL. The lower left vertex has been assigned a green color, the lower right vertex has been assigned a blue color, and the upper middle vertex has been assigned a red color.](./triangle_vertex_color.png)
+![A multi-colored equilateral triangle against a black background, generated using OpenGL. The lower-left vertex has been assigned a green color, the lower-right vertex has been assigned a blue color, and the upper-middle vertex has been assigned a red color.](./triangle_vertex_color.png)
 
 
 ## Section 2-7: Drawing Multiple Shapes
 
-The code for this section ([tut_02_07.cpp](./tut_02_07.cpp)) demonstrates how to:
+The code for this section ([tut_02_07.cpp](./tut_02_07.cpp)) demonstrates how to do the following:
 
 * Draw multiple shapes by specifying multiple coordinates in the Vertex Buffer Object.
 
-We modify the `UCreateMesh` function so it holds the data for, not three, but six vertices:
+We modify the `UCreateMesh` function so it holds the data for not three, but six vertices:
 
     // Specifies Normalized Device Coordinates (x,y,z) and color (r,g,b,a) for triangle vertices
     GLfloat verts[]=
     {
-        -0.5f, 0.0f, 0.0f,      // top-first_third of the screen
+        -0.5f, 0.0f, 0.0f,      // top-first third of the screen
         1.0f, 0.0f, 0.0f, 1.0f, // red
 
         -1.0f, -1.0f, 0.0f,     // bottom-left of the screen
@@ -477,7 +477,7 @@ We modify the `UCreateMesh` function so it holds the data for, not three, but si
         0.0f, -1.0f, 0.0f,      // bottom-center of the screen
         0.0f, 1.0f, 0.0f, 1.0f, // green
 
-        0.5f, 0.0f, 0.0f,       // top-second_third of the screen
+        0.5f, 0.0f, 0.0f,       // top-second third of the screen
         1.0f, 0.0f, 0.0f, 1.0f, // red
 
         0.0f, -1.0f, 0.0f,      // bottom-center of the screen
@@ -493,33 +493,33 @@ No other change is required, since the call to `glDrawArrays` (in `URenderMesh`)
 
 The final outcome should appear as follows:
 
-![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex so the lower right vertex of one triangle is the same point as the lower left vertex on the other triangle. The colored pattern on both triangles is the same. The lower left vertex has been assigned a blue color, the lower right vertex has been assigned a green color, and the upper middle vertex has been assigned a red color.](./two_triangles.png)
+![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex, so the lower-right vertex of one triangle is the same point as the lower-left vertex on the other. The colored pattern on both triangles is the same. The lower-left vertex has been assigned a blue color, the lower-right vertex has been assigned a green color, and the upper-middle vertex has been assigned a red color.](./two_triangles.png)
 
 
 
 ## Section 2-8: Using Indices (Index Buffers) to Share Vertex Coordinates
 
-The code for this section ([tut_02_08.cpp](./tut_02_08.cpp)) demonstrates how to:
+The code for this section ([tut_02_08.cpp](./tut_02_08.cpp)) demonstrates how to do the following:
 
 * Reuse vertex data shared by more than one triangle.
 
-Indices allow sharing vertex data for triangles that have a vertex in common. Note that vertices that share the same coordinates must also share the same color. In other words, if two vertices must have different colors then we have to duplicate their location.
+Indices allow sharing vertex data for triangles that have a vertex in common. Note that vertices that share the same coordinates must also share the same color. In other words, if two vertices must have different colors, then we have to duplicate their location.
 
 Below are the index buffer numbers that will be used to represent positions on the window. The triangles will share the same position or coordinates at index 2. The indices are 0,1,2, 3,2,4. The following image shows the final outcome of this tutorial.
 
-![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex so the lower right vertex of one triangle is the same point as the lower left vertex on the other triangle. The colored pattern on both triangles is slightly different. For the first triangle, the lower left vertex has been assigned a blue color, the lower right vertex has been assigned a green color, and the upper middle vertex has been assigned a red color. For the second triangle, the lower left vertex has been assigned a green color, the lower right vertex has been assigned a green color, and the upper middle vertex has been assigned a red color.](./triangle_indices.png)
+![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex, so the lower-right vertex of one triangle is the same point as the lower-left vertex on the other. The colored pattern on the triangles is slightly different. For the first triangle, the lower-left vertex has been assigned a blue color, the lower-right vertex has been assigned a green color, and the upper-middle vertex has been assigned a red color. For the second triangle, the lower-left vertex has been assigned a green color, the lower-right vertex has been assigned a green color, and the upper-middle vertex has been assigned a red color.](./triangle_indices.png)
 
 The definition of the array `verts` (in `UCreateMesh`) has been updated to remove the duplicate vertex; therefore we are left with five vertices.
 
     // Specifies Normalized Device Coordinates (x,y,z) and color (r,g,b,a) for triangle vertices
     GLfloat verts[]=
     {
-        // The two triangles will be drawn using indices
+        // The two triangles will be drawn using indices.
         // Left triangle indices: 0, 1, 2
         // Right triangle indices: 3, 2, 4
 
         // index 0
-        -0.5f, 0.0f, 0.0f,      // top-first_third of the screen
+        -0.5f, 0.0f, 0.0f,      // top-first third of the screen
         1.0f, 0.0f, 0.0f, 1.0f, // red
 
         // index 1
@@ -531,7 +531,7 @@ The definition of the array `verts` (in `UCreateMesh`) has been updated to remov
         0.0f, 1.0f, 0.0f, 1.0f, // green
 
         // index 3
-        0.5f, 0.0f, 0.0f,       // top-second_third of the screen
+        0.5f, 0.0f, 0.0f,       // top-second third of the screen
         1.0f, 0.0f, 0.0f, 1.0f, // red
 
         // index 4
@@ -541,7 +541,7 @@ The definition of the array `verts` (in `UCreateMesh`) has been updated to remov
 
 Next, we have created a VBO to store the indices. For this purpose, we have modified `UCreateMesh` to create two VBOs and make one of them of type `GL_ELEMENT_ARRAY_BUFFER`.
 
-    // Create 2 buffers: first one for the vertex data; second one for the indices
+    // Create two buffers: The first one is for the vertex data; the second one for the indices.
     glGenBuffers(2, mesh.vbos);
     glBindBuffer(GL_ARRAY_BUFFER, mesh.vbos[0]); // Activates the buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
@@ -552,11 +552,11 @@ Next, we have created a VBO to store the indices. For this purpose, we have modi
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.vbos[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-Note that we no longer store the number of vertices as a member of `GLMesh`, but instead now we store the number of indices
+Note that we no longer store the number of vertices as a member of `GLMesh`, but instead now we store the number of indices.
 
     mesh.nIndices = sizeof(indices) / sizeof(indices[0]);
     
-The final change requires replacing the call to `glDrawArrays` with a call to `glDrawElements`. `glDrawElments` tells OpenGL to draw using the indices stored in the index array. Now the function `URenderMesh` looks as follows:
+The final change requires replacing the call to `glDrawArrays` with a call to `glDrawElements`. `glDrawElments` tells OpenGL to draw using the indices stored in the index array. Now the function `URenderMesh` looks like this:
 
     void URenderMesh(const GLMesh& mesh)
     {
