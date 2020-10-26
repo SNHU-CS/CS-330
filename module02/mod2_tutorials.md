@@ -1,3 +1,4 @@
+# Module Two Tutorial
 # Section 2-1: Introduction to the CS-330 Tutorials
 
 All the code for this course's tutorials is stored within the same Git repository as the tutorials themselves. At the root folder of the repository there is a Visual Studio solution file named `cs330_tutorials.sln` that contains the Visual Studio projects for each of the tutorials.
@@ -25,7 +26,7 @@ Please open these files in Visual Studio and make sure you examine them to under
 
 # Section 2-2: Creating an OpenGL Application
 
-The code for this section ([tut_02_02.cpp](./tut_02_02.cpp)) demonstrates how to create a simple OpenGL application:
+The code for this section ([tut_02_02.cpp](./tut_02_02.cpp)) demonstrates how to:
 
 * initialize GLFW and GLEW
 * create a window and an OpenGL context
@@ -136,7 +137,7 @@ Note: When you are ready to quit running the program, press the Esc button.
 
 The code for this section ([tut_02_03.cpp](./tut_02_03.cpp)) demonstrates how to:
 
-* transfer vertex data to the GPU using a _Vertex Buffer Object_ (VBO) and a _Vertex Array Object_ (VAO).
+* Transfer vertex data to the GPU using a _Vertex Buffer Object_ (VBO) and a _Vertex Array Object_ (VAO)
 
 A Vertex Buffer Object (VBO) is an OpenGL feature that provides methods for uploading vertex data (position, normal vector, color, etc.) to the video device for non-immediate-mode rendering. VBOs offer substantial performance gains over immediate mode rendering primarily because the data resides in the video device memory rather than the system memory and so it can be rendered directly by the video device.
 
@@ -160,15 +161,15 @@ In the following exercise we are going to transfer to the GPU the location of th
         glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // Activates the buffer
         glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
-The previous snippet creates an array of floats to store the _normalized device coordinates_ of the vertices of the triangle. As you can observe, the z coordinate for all three vertices is `0.0` because the triangle lies on the plane `z = 0` -- which is parallel to the projection plane of the camera.
+The previous snippet creates an array of floats to store the _normalized device coordinates_ of the vertices of the triangle. As you can observe, the z coordinate for all three vertices is `0.0` because the triangle lies on the plane `z = 0`, which is parallel to the projection plane of the camera.
 
-Remember that VAOs are containers for VBOs: once you bind a VAO, any VBOs that you bind afterwards will be tied to this currently active VAO, and they could later be activated by binding this _parent_ VAO (no need to also bind the VAO's VBOs). A VAO is bound with function `glBindVertexArray`, and a VBO with `glBindBuffer`.
+Remember that VAOs are containers for VBOs: once you bind a VAO, any VBOs that you bind afterwards will be tied to this currently active VAO, and they could later be activated by binding this _parent_ VAO (no need to also bind the VAO's VBOs). A VAO is bound with function `glBindVertexArray` and a VBO with `glBindBuffer`.
 
 Before we move on to the next tutorial, note the following:
 
 * The VAO and VBO created in `UCreateMesh` are destroyed in function `UDestroyMesh`.
 * We have created a triangle (by specifying its normalized device coordinates) and transferred its data to the GPU inside a VBO, but we have yet to render it. Therefore, if you compile, link and run this example, you should still see a screen with a solid background (in the color specified by the call to `glClearColor`), and no triangle in sight.
-* We store the ids for the VAO and the VBO in an instance of the struct GLMesh. We will need these ids to activate the buffers and to destroy them.
+* We store the IDs for the VAO and the VBO in an instance of the struct GLMesh. We will need these IDs to activate the buffers and to destroy them.
 
         struct GLMesh
         {
@@ -184,13 +185,13 @@ Before we move on to the next tutorial, note the following:
 
 The code for this section ([tut_02_04.cpp](./tut_02_04.cpp)) demonstrates how to:
 
-* Compile a vertex and a fragment shader, and then create (and destroy) a shader program
+* Compile a vertex and a fragment shader, then create (and destroy) a shader program
 * Access different attributes of the vertex data stored in a VBO
 * Tell OpenGL to draw a specific mesh
 
 ## Building a Shader Program
 
-A shader program is, at a minimum, a combination of a _vertex shader_ and a _fragment shader_. The OpenGL pipeline calls the vertex shader once per vertex, and the fragment shader once per pixel. For example, if we are drawing a triangle, the vertex shader gets called three times -- each call will receive as input the data for one of the three vertices. On the other hand, the number of times the fragment shader gets called does not directly depend on the complexity of the mesh, but on the number of pixels covered by its projection onto the projection plane. For example, if the triangle is very small and/or is very far from the camera, its projection will cover very few pixels (e.g. 100 pixels), and that's how many times the fragment shader will get called. If, however, the projection covers a large part of the window (even all of it), the fragment shader will get called many more times. So, the vertex shader gets called once per vertex in a mesh, and it receives as input the data specific to that vertex (e.g. location, color, texture coordinates, normal vector...), while the fragment shader gets called once for each pixel covered by the projection of the mesh, and it receives as input the data required to shade that one pixel (more on this later).
+A shader program is, at a minimum, a combination of a _vertex shader_ and a _fragment shader_. The OpenGL pipeline calls the vertex shader once per vertex, and the fragment shader once per pixel. For example, if we are drawing a triangle, the vertex shader gets called three times. Each call will receive as input the data for one of the three vertices. On the other hand, the number of times the fragment shader gets called does not directly depend on the complexity of the mesh, but on the number of pixels covered by its projection onto the projection plane. For example, if the triangle is very small and/or is very far from the camera, its projection will cover very few pixels (e.g. 100 pixels), and that's how many times the fragment shader will get called. If, however, the projection covers a large part of the window (even all of it), the fragment shader will get called many more times. So the vertex shader gets called once per vertex in a mesh and it receives as input the data specific to that vertex (e.g. location, color, texture coordinates, normal vector, etc.), while the fragment shader gets called once for each pixel covered by the projection of the mesh, and it receives as input the data required to shade that one pixel (more on this later).
 
 This tutorial shows about the simplest vertex and fragment shaders you can have. Starting with the following vertex shader
 
@@ -202,7 +203,7 @@ This tutorial shows about the simplest vertex and fragment shaders you can have.
         gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
     }
 
-The programming language used to write shader code in OpenGL is GLSL, and the first precompiler directive tells OpenGL's compiler what version of the API the shader is written for. The second line (starting with `layout`), tells OpenGL how the data stored in the VBO is arranged (more on this later). Finally, every shader program has a `main` function (just like any C++ application), and in this particular vertex shader, all the `main` function does is output the position of this vertex -- when working in 3D (in future tutorials), the vertex shader will output the vertex position after applying the perspective projection; for this example, we output the vertex coordinates in normalized device coordinates.
+The programming language used to write shader code in OpenGL is GLSL, and the first precompiler directive tells OpenGL's compiler what version of the API the shader is written for. The second line (starting with `layout`), tells OpenGL how the data stored in the VBO is arranged (more on this later). Finally, every shader program has a `main` function (just like any C++ application), and in this particular vertex shader, all the `main` function does is output the position of this vertex. When working in 3D in future tutorials, the vertex shader will output the vertex position after applying the perspective projection. For this example, we output the vertex coordinates in normalized device coordinates.
 
 The following fragment shader sets the color of this fragment (i.e. pixel) to green. In other words, all of the pixels covered by the projection of this triangle will get the same green color. Also, note that the color is represented by a 4D vector, with its components being: red, green, blue and the opacity: all four values fall in the range `[0.0, 1.0]`, and for the opacity, `1.0` means fully opaque (`0.0` is fully transparent).
 
@@ -246,11 +247,11 @@ The vertex and fragment shader code needs to be compiled and linked -- this is w
     }
 
 
-Note how this function compiles each shader separately, then attaches them to a single shader program, to finally link this program. At runtime, you might want to switch shader programs -- shader programs normally implement materials, and not all objects in a scene will use the same material. To tell OpenGL that you want to use a specific shader program, you need to call the function `glUseProgram`.
+Note how this function compiles each shader separately, then attaches them to a single shader program, to finally link this program. At runtime, you might want to switch shader programs. Shader programs normally implement materials and not all objects in a scene will use the same material. To tell OpenGL that you want to use a specific shader program, you need to call the function `glUseProgram`.
 
 ## Indexing Vertex Attributes
 
-Remember that the vertex shader is receiving the vertex location (in normalized device coordinates) as a 3D vector (`aPos`). This data is stored in the VBO, but we need to tell OpenGL how to read the VBO -- there could be more than one attribute for each vertex. For this simple example, we are pulling this data out of attribute 0 of the currently bound VBO (the only attribute that exists). We set this up by adding the following three lines of code at the end of `UCreateMesh`
+Remember that the vertex shader is receiving the vertex location (in normalized device coordinates) as a 3D vector (`aPos`). This data is stored in the VBO, but we need to tell OpenGL how to read the VBO since there could be more than one attribute for each vertex. For this simple example, we are pulling this data out of attribute 0 of the currently bound VBO (the only attribute that exists). We set this up by adding the following three lines of code at the end of `UCreateMesh`
 
     // Creates the Vertex Attribute Pointer
     const GLuint floatsPerVertex = 3; // Number of coordinates per vertex
@@ -261,7 +262,7 @@ The first argument `0` in both the call to `glVertexAttribPointer` and `glEnable
 
     layout (location = 0) in vec3 aPos;
 
-For this simple example, the VBO only contains location data, but we will see in the next tutorial how we will also store other type of vertex data (e.g. vertex color) -- this is why OpenGL needs our guidance in order to separate the different types of vertex attributes that need to be fed to the vertex shader.
+For this simple example, the VBO only contains location data, but we will see in the next tutorial how we will also store other type of vertex data (e.g. vertex color). This is why OpenGL needs our guidance in order to separate the different types of vertex attributes that need to be fed to the vertex shader.
 
 ## Drawing with glDrawArrays
 
