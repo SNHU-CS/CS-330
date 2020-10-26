@@ -5,37 +5,37 @@ All the code for this course's tutorials is stored within the same Git repositor
 
 ![The Visual Studio solution file shown in the Solution Explorer, including a list of all tutorials for Modules Two through Six.](./vs_all_projects.png)
 
-These tutorials require several OpenGL libraries, so in order to make the configuration of the projects easier, a couple property sheets named `Graphics_x64.props` and `Graphics_win32.props` have been added to the root of the repository (at the same level as the visual studio solution file). 
+These tutorials require several OpenGL libraries, so in order to make the configuration of the projects easier, property sheets named `Graphics_x64.props` and `Graphics_win32.props` have been added to the root of the repository (at the same level as the Visual Studio solution file). 
 
 ![Under the Solution Explorer, the drop-down menu for tutorial 3.5 is shown with Graphics_win32, Graphics_x64, and Graphics_win32 all indicated.](./property_manager.png)
 
-Please open these files in Visual Studio and make sure you examine them to understand:
+Please open these files in Visual Studio and make sure you examine them to understand the following:
 
-* how we configure Visual Studio with the directories to the header files
+* How we configure Visual Studio with the directories to the header files
 
 ![The Graphics_x64 Property Pages, showing the General menu with the Additional Include Directories indicated.](./graphics_props_include_dir.png)
 
-* how libraries are linked into the executable: by pointing Visual Studio to the location of the libraries, and listing the names of the libraries required
+* How libraries are linked into the executable: by pointing Visual Studio to the location of the libraries and listing the names of the libraries required
 
-![The Graphics_x64 Property Pages with the Additional Library Directories window open. This window shows the listing of required libraries have been added to the project.](./graphics_props_lib_dir.png) | ![The Graphics_x64 Property Pages with the Additional Dependencies window open. This window shows the listing of required .lib files.](./graphics_props_lib_input.png)
+![The Graphics_x64 Property Pages with the Additional Library Directories window open. This window shows the listing of required libraries that have been added to the project.](./graphics_props_lib_dir.png) | ![The Graphics_x64 Property Pages with the Additional Dependencies window open. This window shows the listing of required LIB files.](./graphics_props_lib_input.png)
 
-* Finally, we write a _postbuild_ action to copy the dynamic libraries (aka DLLs) to the _output directory_ that contains the executable. This output directory is also configured in the property sheet.
+* Finally, writing a _postbuild_ action to copy the dynamic libraries (aka DLLs) to the _output directory_ that contains the executable. This output directory is also configured in the property sheet.
 
 ![The Graphics_x64 Property Pages with the General window shown from the Common Properties menu. Here the Output Directory is indicated.](./graphics_props_output_dir.png) | ![The Graphics_x64 Property Pages with Post-Build Event selected from the Build Events drop-down menu. Here the command line is indicated.](./graphics_props_postbuild.png)
 
 
 ## Section 2-2: Creating an OpenGL Application
 
-The code for this section ([tut_02_02.cpp](./tut_02_02.cpp)) demonstrates how to:
+The code for this section ([tut_02_02.cpp](./tut_02_02.cpp)) demonstrates how to do the following:
 
-* initialize GLFW and GLEW
-* create a window and an OpenGL context
+* Initialize GLFW and GLEW.
+* Create a window and an OpenGL context.
 
 This example has two functions that you should pay attention to. These two functions will remain almost unchanged for the rest of this module's tutorials.
 
-### The main function and the Render Loop
+### The Main Function and the Render Loop
 
-The main function calls `UInitialize` and runs an infinite loop called the _render loop_ (in game dev, this is sometimes called the _game loop_). The render loop draws every frame of the application, so the frequency with which it is called dictates the frame rate (e.g. 60 fps).
+The main function calls `UInitialize` and runs an infinite loop called the _render loop_ (in game developmenet, this is sometimes called the _game loop_). The render loop draws every frame of the application, so the frequency with which it is called dictates the frame rate (such as 60 fps).
 
     // main function. Entry point to the OpenGL program
     int main(int argc, char* argv[])
@@ -46,7 +46,7 @@ The main function calls `UInitialize` and runs an infinite loop called the _rend
         if (!UInitialize(argc, argv, &window))
             return EXIT_FAILURE;
 
-        // Sets the background color of the window to black (it will be implicitely used by glClear)
+        // Set the background color of the window to black (it will be implicitely used by glClear).
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         // render loop
@@ -57,22 +57,22 @@ The main function calls `UInitialize` and runs an infinite loop called the _rend
             // -----
             UProcessInput(window);
 
-            // Clear the background
+            // Clear the background.
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+            // glfw: Swap buffers and poll IO events (keys pressed/released, mouse moved, and so on).
             glfwSwapBuffers(window);    // Flips the the back buffer with the front buffer every frame.
             glfwPollEvents();
         }
 
-        exit(EXIT_SUCCESS); // Terminates the program successfully
+        exit(EXIT_SUCCESS); // Terminates the program successfully.
     }
 
 
 ### Initialization
 
-The `UInitialize` function, which is called once (from the `main` function and right before the first iteration of the render loop), initializes GFLW, creates the window and the OpenGL context, and also initializes GLEW (to load the function pointers to OpenGL's API).
+The `UInitialize` function, which is called once (from the `main` function and right before the first iteration of the render loop), initializes GFLW, creates the window and the OpenGL context, and  initializes GLEW (to load the function pointers to OpenGL's API).
 
     bool UInitialize(int argc, char* argv[], GLFWwindow** window)
     {
@@ -118,7 +118,7 @@ The `UInitialize` function, which is called once (from the `main` function and r
     }
 
 
-If you compile, link and run this example, you should see a window titled "Tutorial 2.2" with a black screen. The black screen is the result of the following two lines of code (contained in the `main` function)
+If you compile, link, and run this example, you should see a window titled "Tutorial 2.2" with a black screen. The black screen is the result of the following two lines of code (contained in the `main` function):
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -126,7 +126,7 @@ If you compile, link and run this example, you should see a window titled "Tutor
 
 #### Exercise:
 
-Check out the documentation for [`glClearColor`](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glClearColor.xhtml), and modify its parameters so the background is red instead of black. Make sure that you check both lines 40 and 51 in the code as you work. 
+Check out the documentation for [`glClearColor`](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glClearColor.xhtml) and modify its parameters so the background is red instead of black. Make sure that you check both lines 40 and 51 in the code as you work. 
 
 Note: When you are ready to quit running the program, press the Esc button.
 
@@ -135,7 +135,7 @@ Note: When you are ready to quit running the program, press the Esc button.
 
 ## Section 2-3: Creating a Vertex Buffer Object and a Vertex Array Object
 
-The code for this section ([tut_02_03.cpp](./tut_02_03.cpp)) demonstrates how to:
+The code for this section ([tut_02_03.cpp](./tut_02_03.cpp)) demonstrates how to do the following:
 
 * Transfer vertex data to the GPU using a _Vertex Buffer Object_ (VBO) and a _Vertex Array Object_ (VAO)
 
