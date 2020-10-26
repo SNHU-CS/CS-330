@@ -127,9 +127,9 @@ The code for this section ([tut_03_03.cpp](./tut_03_03.cpp)) demonstrates how to
 
 The following image shows the final result:
 
-![MPV Matrix](./mvp.png)
+![A multicolored square on a black background, which was created using OpenGL. The bottom of the square has been stretched so it looks closer while the top appears farther away. Each vertex has an assigned color with the upper left being blue, the upper right being green, the lower left being pink, and the lower right being red.](./mvp.png)
 
-All of the changes from the previous tutorial are confined to the vertex shader and the `URender` function
+All of the changes from the previous tutorial are confined to the vertex shader and the `URender` function.
 
 ### The Model Matrix
 
@@ -154,11 +154,11 @@ The view matrix transforms the vertex locations from the _world space_ into the 
 
 ### The Projection Matrix
 
-There are two basic types of projections that we can apply: perspective and orthographic. In this example, we are going to create a perspective projection matrix -- which mimics how the eye (and real cameras) work. To build this 4x4 matrix, we use GLM's `perspective` function:
+There are two basic types of projections that we can apply: perspective and orthographic. In this example, we are going to create a perspective projection matrix, which mimics how the eye (and real cameras) work. To build this 4x4 matrix we use GLM's `perspective` function:
 
     glm::mat4 projection = glm::perspective(45.0f, (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
-The first parameter is the field-of-view; the second one is the aspect ratio; the third one is the distance of the _near plane_ to the camera; and the last parameter is the distance of the _far plane_ to the camera. Points on the surfaces of objects that are closer to the camera than the near plane, or farther than the far plane, will be _clipped_.
+The first parameter is the field-of-view; the second is the aspect ratio; the third is the distance of the _near plane_ to the camera; and the last parameter is the distance of the _far plane_ to the camera. Points on the surfaces of objects that are closer to the camera than the near plane, or farther than the far plane, will be _clipped_.
 
 ### Combining the Model, View and Projection Matrices
 
@@ -173,7 +173,7 @@ All three matrices are transferred to the vertex shader as uniform variables:
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-And the vertex shader combines them, and multiplies the vertex location with it. Remember that matrix transformations are applied right-to-left, so the model matrix (being the first transformation) will be on the right.
+The vertex shader combines them and multiplies the vertex location with it. Remember that matrix transformations are applied right-to-left, so the model matrix (being the first transformation) will be on the right.
 
     layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
     layout (location = 1) in vec4 color;  // Color data from Vertex Attrib Pointer 1
@@ -205,12 +205,12 @@ Play with the parameters to the view and the perspective projection matrices.
 
 ## Section 3-4: Creating and Displaying a Cube
 
-The code for this section ([tut_03_04.cpp](./tut_03_04.cpp)) demonstrates how to
+The code for this section ([tut_03_04.cpp](./tut_03_04.cpp)) demonstrates how to:
 
 * Enable and clear the Z-buffer
 * Create a cube
 
-![Cube](./cube.png)
+![A multicolored cube shown against a black background, all of which was created using OpenGL. The cube is tilted so the top and two sides are visible. Every vertex has its own color assigned.](./cube.png)
 
 ### A Cube Mesh
 
@@ -250,7 +250,7 @@ The rest of the function remains the same.
 
 ### The Z (Depth) Buffer
 
-Now that we are rendering 3D shapes, it could happen that more than one 3D point projects to the same pixel on the screen. In that case, which one should we use to color this pixel? If we simplify the problem to consider opaque materials only, the answer is: the one that it is closest to the camera. This solution is implemented by the Z Buffer, which is a buffer that stores a depth value for the point closest to the camera that has projected to that pixel. So, for example, if pixel `(100, 200)` already has color red, which was produce by a 3D point with z value `0.3`, but another 3D point (blue) with z value `0.2` (closer) projects also onto pixel `(100, 200)`, then we update the framebuffer at position `(100, 200)` with the color blue, and the z buffer, also at position `(100, 200)`, with value '0.2'.
+Now that we are rendering 3D shapes, it could happen that more than one 3D point projects to the same pixel on the screen. In that case, which one should we use to color this pixel? If we simplify the problem to consider opaque materials only, the answer is: the one that is closest to the camera. This solution is implemented by the Z Buffer, which is a buffer that stores a depth value for the point closest to the camera that has projected to that pixel. So, for example, if pixel `(100, 200)` already has color red, which was produce by a 3D point with z value `0.3`, but another 3D point (blue) with z value `0.2` (closer) projects also onto pixel `(100, 200)`, then we update the framebuffer at position `(100, 200)` with the color blue, and the z buffer, also at position `(100, 200)`, with value '0.2'.
 
 The Z buffer is enabled and cleared in the `URender` function. The buffer needs to be cleared the same way that we clear the frame buffer: with function `glClear`.
 
@@ -265,13 +265,13 @@ The Z buffer is enabled and cleared in the `URender` function. The buffer needs 
 
 ## Section 3-5: Creating an Orthographic Projection
 
-The code for this section ([tut_03_05.cpp](./tut_03_05.cpp)) demonstrates how to
+The code for this section ([tut_03_05.cpp](./tut_03_05.cpp)) demonstrates how to:
 
 * Create an orthographic projection matrix using GLM's `ortho` function
 
 The following image shows the final result:
 
-![Ortho](./ortho.png)
+![A multicolored cube shown against a black background, all of which was created using OpenGL. The cube is tilted so the top and two sides are visible. The cube is also displayed using an orthographic projection, which means everything appears at the same scale using parallel lines (rather than show objects or parts of objects that are further away as being smaller). Every vertex has its own color assigned.](./ortho.png)
 
 This tutorial requires only changing one line of code. In function `URender`, we replace the call to `perspective` with `ortho`
 
@@ -279,5 +279,8 @@ This tutorial requires only changing one line of code. In function `URender`, we
 
 #### Exercise
 
-Look at the reference page for the `ortho` function, and play with its parameters to understand how this function behaves.
+Look at the [reference page](https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glOrtho.xml) for the `ortho` function, and play with its parameters to understand how this function behaves.
+
+_Congratulations, you have now reached the end of the tutorial for Module Three!_
+
 
