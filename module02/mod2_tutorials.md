@@ -2,25 +2,25 @@
 
 All the code for this course's tutorials is stored within the same Git repository as the tutorials themselves. At the root folder of the repository there is a Visual Studio solution file named `cs330_tutorials.sln` that contains the Visual Studio projects for each of the tutorials.
 
-![The Visual Studio Solution shown in the Solution Explorer, including a list of all tutorials for Modules Two through Six.](./vs_all_projects.png)
+![The Visual Studio solution file shown in the Solution Explorer, including a list of all tutorials for Modules Two through Six.](./vs_all_projects.png)
 
-These tutorials require several libraries (OpenGL, GLFW, GLEW, stb_image and GLM), so in order to make the configuration of the projects easier, a couple property sheets named `Graphics_x64.props` and `Graphics_win32.props` have been added to the root of the repository (at the same level as the visual studio solution file). 
+These tutorials require several OpenGL libraries, so in order to make the configuration of the projects easier, a couple property sheets named `Graphics_x64.props` and `Graphics_win32.props` have been added to the root of the repository (at the same level as the visual studio solution file). 
 
-![Graphics Property Sheet Configuration](./property_manager.png)
+![Under the Solution Explorer, the drop-down menu for tutorial 3.5 is shown with Graphics_win32, Graphics_x64, and Graphics_win32 all indicated.](./property_manager.png)
 
 Please open these files in Visual Studio and make sure you examine them to understand:
 
 * how we configure Visual Studio with the directories to the header files
 
-![Graphics Property Sheet Configuration](./graphics_props_include_dir.png)
+![The Graphics_x64 Property Pages, showing the General menu with the Additional Include Directories indicated.](./graphics_props_include_dir.png)
 
-* how libraries are linked into the executable: by pointing Visual Studio to the location of the libraries, and listing the names of the libraries required.
+* how libraries are linked into the executable: by pointing Visual Studio to the location of the libraries, and listing the names of the libraries required
 
-![Graphics Property Sheet Configuration](./graphics_props_lib_dir.png) | ![Graphics Property Sheet Configuration](./graphics_props_lib_input.png)
+![The Graphics_x64 Property Pages with the Additional Library Directories window open. This window shows the listing of required libraries have been added to the project.](./graphics_props_lib_dir.png) | ![The Graphics_x64 Property Pages with the Additional Dependencies window open. This window shows the listing of required .lib files.](./graphics_props_lib_input.png)
 
-* Finally, we write a _postbuild_ action to copy the dynamic libraries (aka DLLs) to the _output directory_ that contains the executable -- this output directory is also configured in the property sheet.
+* Finally, we write a _postbuild_ action to copy the dynamic libraries (aka DLLs) to the _output directory_ that contains the executable. This output directory is also configured in the property sheet.
 
-![Graphics Property Sheet Configuration](./graphics_props_output_dir.png) | ![Graphics Property Sheet Configuration](./graphics_props_postbuild.png)
+![The Graphics_x64 Property Pages with the General window shown from the Common Properties menu. Here the Output Directory is indicated.](./graphics_props_output_dir.png) | ![The Graphics_x64 Property Pages with Post-Build Event selected from the Build Events drop-down menu. Here the command line is indicated.](./graphics_props_postbuild.png)
 
 
 # Section 2-2: Creating an OpenGL Application
