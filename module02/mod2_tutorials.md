@@ -276,11 +276,11 @@ Finally, we are ready to tell OpenGL to put all this together and draw the mesh 
         glDrawArrays(GL_TRIANGLES, 0, mesh.nvertices); // Draws the triangle
     }
 
-With a call to `glBindVertexArray` we activate our VAO -- remember that it is just a container for VBOs, so all these VBOs will also be bound at this point -- and then we call `glDrawArrays` (`glDrawArrays` is one of the most used functions in the OpenGL API, so make sure you review its [reference page](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDrawArrays.xhtml)).
+With a call to `glBindVertexArray` we activate our VAO -- remember that it is just a container for VBOs so all these VBOs will also be bound at this point -- and then we call `glDrawArrays` (`glDrawArrays` is one of the most used functions in the OpenGL API, so make sure you review its [reference page](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDrawArrays.xhtml)).
 
 And that's it. At this point your screen should look like:
 
-![Triangle Indices](./triangle_green.png)
+![A green equilateral triangle against a black background, generated using OpenGL.](./triangle_green.png)
 
 
 
@@ -375,7 +375,7 @@ The code for this section ([tut_02_06.cpp](./tut_02_06.cpp)) demonstrates how to
 
 ### How to Store a Second Attribute in the same VBO
 
-The _Vertex Buffer Objects_ store vertex data in the GPU. So far we have stored only the location, but we are going to change that to store also a different color for each one of the vertices.
+The _Vertex Buffer Objects_ stores vertex data in the GPU. So far we have stored only the location, but we are going to change that to also store a different color for each one of the vertices.
 
 In function `UCreateMesh` we update the array with vertex info to include a color for each vertex
 
@@ -410,7 +410,7 @@ and then we tell OpenGL that this data is there and stored at attribute location
     glVertexAttribPointer(1, floatsPerColor, GL_FLOAT, GL_FALSE, stride, (char*)(sizeof(float) * floatsPerVertex));
     glEnableVertexAttribArray(1);
 
-Also, note that we have also changed the call to `glVertexAttribPointer` associated with attribute `0`, since now we need to provide a stride value different than zero (to account for the seven floats that are required to store the data for each vertex: three floats for the location, and four for the color).
+We have also changed the call to `glVertexAttribPointer` associated with attribute `0`, since now we need to provide a stride value different than zero (to account for the seven floats that are required to store the data for each vertex: three floats for the location, and four for the color).
 
     // Strides between vertex coordinates is 6 (x, y, r, g, b, a). A tightly packed stride is 0.
     GLint vertexStride =  sizeof(float) * 6;// The number of floats before each
@@ -422,7 +422,7 @@ Also, note that we have also changed the call to `glVertexAttribPointer` associa
 
 ### Accessing Vertex Colors in the Vertex and the Fragment Shader
 
-With the vertex color successfully stored in our VBO, now we need to put them to work in the shader code. To do this, we update the vertex shader to look like follows:
+With the vertex color successfully stored in our VBO, now we need to put them to work in the shader code. To do this, we update the vertex shader to appear as follows:
 
     #version 440 core
     layout (location = 0) in vec3 aPos;
@@ -438,7 +438,7 @@ You should spot the three lines that have been added:
 
     layout (location = 1) in vec4 colorFromVBO;
 
-The first statement maps the vertex data stored as attribute 1 to a `vec4` called `colorFromVBO`. The second one is the declaration of an `out vec4` called `colorFromVS`, which will be used to pass the vertex color to the fragment shader. OpenGL will do a bilinear interpolation of these vertex colors, so any point inside the triangle gets a combination of the color of the three vertices based on the distance of this point to the three vertices. We directly transfer this data from the VBO to the output of the vertex shader with the statement:
+The first statement maps the vertex data stored as attribute 1 to a `vec4` called `colorFromVBO`. The second is the declaration of an `out vec4` called `colorFromVS`, which will be used to pass the vertex color to the fragment shader. OpenGL will do a bilinear interpolation of these vertex colors, so any point inside the triangle gets a combination of the color of the three vertices based on the distance of this point to the three vertices. We directly transfer this data from the VBO to the output of the vertex shader with the statement:
 
     colorFromVS = colorFromVBO;
 
@@ -452,9 +452,9 @@ The fragment shader needs to be updated to receive as input this interpolated ve
         FragColor = colorFromVS;
     }
 
-And then set its output to the incoming interpolated color from the vertex shader. This tutorial produces the following outcome:
+Then set its output to the incoming interpolated color from the vertex shader. This tutorial produces the following outcome:
 
-![Triangle Vertex Color](./triangle_vertex_color.png)
+![A multi-colored equilateral triangle against a black background, generated using OpenGL. The lower left vertex has been assigned a green color, the lower right vertex has been assigned a blue color, and the upper middle vertex has been assigned a red color.](./triangle_vertex_color.png)
 
 
 ## Section 2-7: Drawing Multiple Shapes
@@ -491,9 +491,9 @@ We modify the `UCreateMesh` function so it holds the data for, not three, but si
 
 No other change is required, since the call to `glDrawArrays` (in `URenderMesh`) is already written to handle the number of vertices (stored in `mesh.nvertices`).
 
-The final outcome should look like:
+The final outcome should appear as follows:
 
-![Two Triangles](./two_triangles.png)
+![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex so the lower right vertex of one triangle is the same point as the lower left vertex on the other triangle. The colored pattern on both triangles is the same. The lower left vertex has been assigned a blue color, the lower right vertex has been assigned a green color, and the upper middle vertex has been assigned a red color.](./two_triangles.png)
 
 
 
@@ -503,13 +503,13 @@ The code for this section ([tut_02_08.cpp](./tut_02_08.cpp)) demonstrates how to
 
 * Reuse vertex data shared by more than one triangle.
 
-Indices allow sharing vertex data for triangles that have a vertex in common (note that vertices that share the same coordinates also must share the same color; in other words, if two vertices must have different colors, then we have to duplicate their location).
+Indices allow sharing vertex data for triangles that have a vertex in common. Note that vertices that share the same coordinates must also share the same color. In other words, if two vertices must have different colors then we have to duplicate their location.
 
 Below are the index buffer numbers that will be used to represent positions on the window. The triangles will share the same position or coordinates at index 2. The indices are 0,1,2, 3,2,4. The following image shows the final outcome of this tutorial.
 
-![Triangle Indices](./triangle_indices.png)
+![Two multi-colored equilateral triangles positioned side by side against a black background, generated using OpenGL. Both triangles share one vertex so the lower right vertex of one triangle is the same point as the lower left vertex on the other triangle. The colored pattern on both triangles is slightly different. For the first triangle, the lower left vertex has been assigned a blue color, the lower right vertex has been assigned a green color, and the upper middle vertex has been assigned a red color. For the second triangle, the lower left vertex has been assigned a green color, the lower right vertex has been assigned a green color, and the upper middle vertex has been assigned a red color.](./triangle_indices.png)
 
-The definition of the array `verts` (in `UCreateMesh`) has been updated to remove the duplicate vertex -- therefore we are left with five vertices.
+The definition of the array `verts` (in `UCreateMesh`) has been updated to remove the duplicate vertex; therefore we are left with five vertices.
 
     // Specifies Normalized Device Coordinates (x,y,z) and color (r,g,b,a) for triangle vertices
     GLfloat verts[]=
@@ -565,7 +565,7 @@ The final change requires replacing the call to `glDrawArrays` with a call to `g
         // Draws the triangle
         glDrawElements(GL_TRIANGLES,  mesh.nvertices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
     }
-
+Congratulations, you have now reached the end of the tutorial for Module Two!
 
 
 
