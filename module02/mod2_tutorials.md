@@ -1,6 +1,5 @@
 # Module Two Tutorial
 ## Section 2-1: Introduction to the CS-330 Tutorials
-### Sample Header Three
 
 All the code for this course's tutorials is stored within the same Git repository as the tutorials themselves. At the root folder of the repository there is a Visual Studio solution file named `cs330_tutorials.sln` that contains the Visual Studio projects for each of the tutorials.
 
@@ -25,7 +24,7 @@ Please open these files in Visual Studio and make sure you examine them to under
 ![The Graphics_x64 Property Pages with the General window shown from the Common Properties menu. Here the Output Directory is indicated.](./graphics_props_output_dir.png) | ![The Graphics_x64 Property Pages with Post-Build Event selected from the Build Events drop-down menu. Here the command line is indicated.](./graphics_props_postbuild.png)
 
 
-# Section 2-2: Creating an OpenGL Application
+## Section 2-2: Creating an OpenGL Application
 
 The code for this section ([tut_02_02.cpp](./tut_02_02.cpp)) demonstrates how to:
 
@@ -34,7 +33,7 @@ The code for this section ([tut_02_02.cpp](./tut_02_02.cpp)) demonstrates how to
 
 This example has two functions that you should pay attention to. These two functions will remain almost unchanged for the rest of this module's tutorials.
 
-## The main function and the Render Loop
+### The main function and the Render Loop
 
 The main function calls `UInitialize` and runs an infinite loop called the _render loop_ (in game dev, this is sometimes called the _game loop_). The render loop draws every frame of the application, so the frequency with which it is called dictates the frame rate (e.g. 60 fps).
 
@@ -71,7 +70,7 @@ The main function calls `UInitialize` and runs an infinite loop called the _rend
     }
 
 
-## Initialization
+### Initialization
 
 The `UInitialize` function, which is called once (from the `main` function and right before the first iteration of the render loop), initializes GFLW, creates the window and the OpenGL context, and also initializes GLEW (to load the function pointers to OpenGL's API).
 
@@ -125,7 +124,7 @@ If you compile, link and run this example, you should see a window titled "Tutor
     glClear(GL_COLOR_BUFFER_BIT);
 
 
-### Exercise:
+#### Exercise:
 
 Check out the documentation for [`glClearColor`](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glClearColor.xhtml), and modify its parameters so the background is red instead of black. Make sure that you check both lines 40 and 51 in the code as you work. 
 
@@ -134,7 +133,7 @@ Note: When you are ready to quit running the program, press the Esc button.
 
 
 
-# Section 2-3: Creating a Vertex Buffer Object and a Vertex Array Object
+## Section 2-3: Creating a Vertex Buffer Object and a Vertex Array Object
 
 The code for this section ([tut_02_03.cpp](./tut_02_03.cpp)) demonstrates how to:
 
@@ -182,7 +181,7 @@ Before we move on to the next tutorial, note the following:
 
 
 
-# Section 2-4: Creating a Shader Program and Drawing a Triangle
+## Section 2-4: Creating a Shader Program and Drawing a Triangle
 
 The code for this section ([tut_02_04.cpp](./tut_02_04.cpp)) demonstrates how to:
 
@@ -190,7 +189,7 @@ The code for this section ([tut_02_04.cpp](./tut_02_04.cpp)) demonstrates how to
 * Access different attributes of the vertex data stored in a VBO
 * Tell OpenGL to draw a specific mesh
 
-## Building a Shader Program
+### Building a Shader Program
 
 A shader program is, at a minimum, a combination of a _vertex shader_ and a _fragment shader_. The OpenGL pipeline calls the vertex shader once per vertex, and the fragment shader once per pixel. For example, if we are drawing a triangle, the vertex shader gets called three times. Each call will receive as input the data for one of the three vertices. On the other hand, the number of times the fragment shader gets called does not directly depend on the complexity of the mesh, but on the number of pixels covered by its projection onto the projection plane. For example, if the triangle is very small and/or is very far from the camera, its projection will cover very few pixels (e.g. 100 pixels), and that's how many times the fragment shader will get called. If, however, the projection covers a large part of the window (even all of it), the fragment shader will get called many more times. So the vertex shader gets called once per vertex in a mesh and it receives as input the data specific to that vertex (e.g. location, color, texture coordinates, normal vector, etc.), while the fragment shader gets called once for each pixel covered by the projection of the mesh, and it receives as input the data required to shade that one pixel (more on this later).
 
@@ -250,7 +249,7 @@ The vertex and fragment shader code needs to be compiled and linked -- this is w
 
 Note how this function compiles each shader separately, then attaches them to a single shader program, to finally link this program. At runtime, you might want to switch shader programs. Shader programs normally implement materials and not all objects in a scene will use the same material. To tell OpenGL that you want to use a specific shader program, you need to call the function `glUseProgram`.
 
-## Indexing Vertex Attributes
+### Indexing Vertex Attributes
 
 Remember that the vertex shader is receiving the vertex location (in normalized device coordinates) as a 3D vector (`aPos`). This data is stored in the VBO, but we need to tell OpenGL how to read the VBO since there could be more than one attribute for each vertex. For this simple example, we are pulling this data out of attribute 0 of the currently bound VBO (the only attribute that exists). We set this up by adding the following three lines of code at the end of `UCreateMesh`
 
@@ -265,7 +264,7 @@ The first argument `0` in both the call to `glVertexAttribPointer` and `glEnable
 
 For this simple example, the VBO only contains location data, but we will see in the next tutorial how we will also store other type of vertex data (e.g. vertex color). This is why OpenGL needs our guidance in order to separate the different types of vertex attributes that need to be fed to the vertex shader.
 
-## Drawing with glDrawArrays
+### Drawing with glDrawArrays
 
 Finally, we are ready to tell OpenGL to put all this together and draw the mesh stored in our VBO using the shader program we just created. This is accomplished by the function `URenderMesh`:
 
@@ -286,7 +285,7 @@ And that's it. At this point your screen should look like:
 
 
 
-# Section 2-5: Reporting Shader Compilation and Linking Errors
+## Section 2-5: Reporting Shader Compilation and Linking Errors
 
 The code for this section ([tut_02_05.cpp](./tut_02_05.cpp)) demonstrates how to:
 
@@ -362,19 +361,19 @@ In the previous tutorial, we added the `UCreateShaderProgram` function, which co
 
 The code above checks the status of compilation with function `glGetShaderiv` and, if unsuccessful, it retrieves the compilation errors with `glGetShaderInfoLog`. Similarly, the status of linking is queried via the function `glGetProgramiv` and, if unsuccessful, it retrieves the specific error message with function `glGetProgramInfoLog`. In both cases we choose to return `false` to report the failed creation of the shader program (it is up to the caller of this function to continue or abort the execution of the program). 
 
-### Exercise:
+#### Exercise:
 
 Modify the vertex/fragment shader to intentionally introduce a syntax error (e.g. remove a semicolon), then compile the project and run it. What errors do you see? Would that information be sufficient to fix the shader code?
 
 
-# Section 2-6: Adding Color to Vertices
+## Section 2-6: Adding Color to Vertices
 
 The code for this section ([tut_02_06.cpp](./tut_02_06.cpp)) demonstrates how to:
 
 * Store more than one vertex attribute in the same VBO
 * Interpolate vertex data to be used in the fragment shader (e.g. vertex color)
 
-## How to Store a Second Attribute in the same VBO
+### How to Store a Second Attribute in the same VBO
 
 The _Vertex Buffer Objects_ store vertex data in the GPU. So far we have stored only the location, but we are going to change that to store also a different color for each one of the vertices.
 
@@ -421,7 +420,7 @@ Also, note that we have also changed the call to `glVertexAttribPointer` associa
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, vertexStride, 0);
 
 
-## Accessing Vertex Colors in the Vertex and the Fragment Shader
+### Accessing Vertex Colors in the Vertex and the Fragment Shader
 
 With the vertex color successfully stored in our VBO, now we need to put them to work in the shader code. To do this, we update the vertex shader to look like follows:
 
@@ -458,7 +457,7 @@ And then set its output to the incoming interpolated color from the vertex shade
 ![Triangle Vertex Color](./triangle_vertex_color.png)
 
 
-# Section 2-7: Drawing Multiple Shapes
+## Section 2-7: Drawing Multiple Shapes
 
 The code for this section ([tut_02_07.cpp](./tut_02_07.cpp)) demonstrates how to:
 
@@ -498,7 +497,7 @@ The final outcome should look like:
 
 
 
-# Section 2-8: Using Indices (Index Buffers) to Share Vertex Coordinates
+## Section 2-8: Using Indices (Index Buffers) to Share Vertex Coordinates
 
 The code for this section ([tut_02_08.cpp](./tut_02_08.cpp)) demonstrates how to:
 
