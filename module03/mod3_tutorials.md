@@ -8,15 +8,15 @@ GLM is a header-only library, which means that there are no precompiled librarie
 
 ## Section 3-2: Transforming an Object using the Model Matrix
 
-The code for this section ([tut_03_02.cpp](./tut_03_02.cpp)) demonstrates how to
+The code for this section ([tut_03_02.cpp](./tut_03_02.cpp)) demonstrates how to:
 
-* translate, rotate and scale an object using the model matrix and uniform variables 
+* Translate, rotate, and scale an object using the model matrix and uniform variables 
 
 The following image shows the final result:
 
-![Model transform](./model_transform.png)
+![A multicolored square shown against a black background and created using OpenGL. The square is positioned at a slight angle as though it has been turned slightly to the right. Each vertex has been assigned a different color with the upper left vertex being red, the upper right vertex being green, the lower left vertex being pink, and the lower right vertex being blue.](./model_transform.png)
 
-Continuing with tutorial 2.8, we modify the `UCreateMesh` function to create a square (instead of a triangle).
+Continuing from the knowledge you gained in tutorial 2.8, we modify the `UCreateMesh` function to create a square (instead of a triangle).
 
     // Specifies normalized device coordinates (x,y, z) and color for square vertices
     GLfloat verts[]=
@@ -28,7 +28,7 @@ Continuing with tutorial 2.8, we modify the `UCreateMesh` function to create a s
     -0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f, 1.0f  // Top Left Vertex 3
     };
 
- In function `URender`, we build the `transformation` matrix that represents the affine transformation resulting from
+ In function `URender`, we build the `transformation` matrix that represents the affine transformation resulting from the following:
 
 1. Scaling the square to half its original size
 2. Rotating it by 45 degrees in the z axis
@@ -36,10 +36,10 @@ Continuing with tutorial 2.8, we modify the `UCreateMesh` function to create a s
 
 All of these three transformations are represented by a 4x4 homogeneous matrix. Also, transformations are applied right to left, so if scaling needs to occur first, it will have to be the rightmost matrix.
 
-After the `transformation` matrix has been calculated, we need to pass it to the vertex shader as a `uniform`. Uniform variables are per-mesh attributes -- i.e. they are shared by all vertices. In order to transfer this matrix as a uniform, we 
+After the `transformation` matrix has been calculated, we need to pass it to the vertex shader as a `uniform`. Uniform variables are per-mesh attributes, i.e. they are shared by all vertices. In order to transfer this matrix as a uniform, we complete the following:
 
 1. Retrieve the uniform's location (in memory) within the active program by calling `glGetUniformLocation`
-2. We transfer the data by calling `glUniformMatrix4fv` (note that there is a large collection of `glUniform` matrices, so make sure to review their reference pages) 
+2. We transfer the data by calling `glUniformMatrix4fv` (note that there is a large collection of `glUniform` matrices, so make sure to review their [reference pages](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glUniform.xhtml)) 
 
 ```
 void URender()
