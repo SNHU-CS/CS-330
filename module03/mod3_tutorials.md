@@ -81,7 +81,7 @@ void URender()
 }
 ```
 
-The fragment shader will remain unchanged, but the vertex shader now has to declare this uniform variable matrix, and use it to transform the incoming vertex position.
+The fragment shader will remain unchanged, but the vertex shader now has to declare this uniform variable matrix and use it to transform the incoming vertex position.
 
     layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
     layout (location = 1) in vec4 color;  // Color data from Vertex Attrib Pointer 1
@@ -96,7 +96,7 @@ The fragment shader will remain unchanged, but the vertex shader now has to decl
         vertexColor = color; // references incoming color data
     }
 
-and the fragment shader
+Also review the fragment shader.
 
     in vec4 vertexColor; // Variable to hold incoming color data from vertex shader
 
@@ -112,18 +112,18 @@ Note how, before multiplying the vertex position by the transformation, we conve
 
 #### Exercise
 
-Try changing the parameters that create the scale, rotation and translation matrices (in `URender`). First try changing each one of them independently (e.g. first the scale matrix, then the rotation...), and then try to combine them.
+Try changing the parameters that create the scale, rotation, and translation matrices (in `URender`). First try changing each one of them independently (e.g. first the scale matrix, then the rotation, etc.) and then try to combine them.
 
 
 
 ## Section 3-3: Combining the Model, View, and Projection Matrices
 
-The code for this section ([tut_03_03.cpp](./tut_03_03.cpp)) demonstrates how to
+The code for this section ([tut_03_03.cpp](./tut_03_03.cpp)) demonstrates how to:
 
-* create a model matrix
-* create a view matrix
-* create a projection matrix using GLM's `perspective` function
-* combine the model, view and perspective projection matrices
+* Create a model matrix
+* Create a view matrix
+* Create a projection matrix using GLM's `perspective` function
+* Combine the model, view, and perspective projection matrices
 
 The following image shows the final result:
 
