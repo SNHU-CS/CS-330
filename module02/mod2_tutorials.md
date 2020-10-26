@@ -434,7 +434,7 @@ With the vertex color successfully stored in our VBO, now we need to put them to
        colorFromVS = colorFromVBO;
     }
 
-You should spot the three lines that have been added:
+You should spot the three lines that have been added. Let's look at the following line more closely:
 
     layout (location = 1) in vec4 colorFromVBO;
 
