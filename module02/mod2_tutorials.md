@@ -1,8 +1,8 @@
 # Section 2-1: Introduction to the CS-330 Tutorials
 
-All the code for this course's tutorials is stored within the same Git repository as the tutorials themselves. At the root folder of the repository there is a Visual Studio solution file named `cs330_tutorials.sln` that contains the Visual Studio projects for each and everyone of the tutorials.
+All the code for this course's tutorials is stored within the same Git repository as the tutorials themselves. At the root folder of the repository there is a Visual Studio solution file named `cs330_tutorials.sln` that contains the Visual Studio projects for each of the tutorials.
 
-![Visual Studio Solution](./vs_all_projects.png)
+![The Visual Studio Solution shown in the Solution Explorer, including a list of all tutorials for Modules Two through Six.](./vs_all_projects.png)
 
 These tutorials require several libraries (OpenGL, GLFW, GLEW, stb_image and GLM), so in order to make the configuration of the projects easier, a couple property sheets named `Graphics_x64.props` and `Graphics_win32.props` have been added to the root of the repository (at the same level as the visual studio solution file). 
 
