@@ -3,7 +3,7 @@
 
 Computer graphics applications normally require a fair amount of mathematical operations. Therefore, if you are developing an application with C++ and OpenGL, a great library to be familiar with is GLM, which stands for OpenGL Mathematics. The OpenGL part of the name comes from the fact that it is based on the OpenGL Shading Language (GLSL) specifications.
 
-GLM is a header-only library, which means that there are no precompiled libraries. In order to use it, you just need to include the appropriate header files. Pay attention to the include section of the next few tutorials and make sure to visit GLM's reference pages to start learning what it can do and how to use it.
+GLM is a header-only library, which means that there are no precompiled libraries. In order to use it, you just need to include the appropriate header files. Pay attention to the "include" sections of the next few tutorials and make sure to visit GLM's reference pages to start learning what it can do and how to use it.
 
 
 ## Section 3-2: Transforming an Object Using the Model Matrix
@@ -118,32 +118,32 @@ Try changing the parameters that create the scale, rotation, and translation mat
 
 ## Section 3-3: Combining the Model, View, and Projection Matrices
 
-The code for this section ([tut_03_03.cpp](./tut_03_03.cpp)) demonstrates how to:
+The code for this section ([tut_03_03.cpp](./tut_03_03.cpp)) demonstrates how to do the following:
 
-* Create a model matrix
-* Create a view matrix
-* Create a projection matrix using GLM's `perspective` function
-* Combine the model, view, and perspective projection matrices
+* Create a model matrix.
+* Create a view matrix.
+* Create a projection matrix using GLM's `perspective` function.
+* Combine the model, view, and perspective projection matrices.
 
 The following image shows the final result:
 
-![A multicolored square on a black background, which was created using OpenGL. The bottom of the square has been stretched so it looks closer while the top appears farther away. Each vertex has an assigned color with the upper left being blue, the upper right being green, the lower left being pink, and the lower right being red.](./mvp.png)
+![A multicolored square on a black background, created using OpenGL. The bottom of the square has been stretched so it looks closer while the top appears farther away. Each vertex has an assigned color with the upper-left being blue, the upper-right being green, the lower-left being pink, and the lower-right being red.](./mvp.png)
 
 All of the changes from the previous tutorial are confined to the vertex shader and the `URender` function.
 
 ### The Model Matrix
 
-Up until this point we have described the coordinates of the vertices of our primitives (a triangle and a square) in the _normalized device coordinate system_. This was required since we had yet to introduce the model matrix. From this point forward, the vertex locations (in `UCreateMesh`) are in _local coordinates_ (or _local space_). Remember that the model matrix is a 4x4 matrix that transforms points and vectors -- expressed in homogeneous coordinates -- from the object's _local space_ into _world space_.
+Up until this point, we have described the coordinates of the vertices of our primitives (a triangle and a square) in the _normalized device coordinate system_. This was required since we had yet to introduce the model matrix. From this point forward, the vertex locations in `UCreateMesh` are in _local coordinates_ (or _local space_). Remember that the model matrix is a 4x4 matrix that transforms points and vectors (expressed in homogeneous coordinates) from the object's _local space_ into _world space_.
 
-We build the model matrix in the `URender` function. This time we have changed the scale transformation to enlarge the square, and the rotation matrix to rotate around the x axis.
+We build the model matrix in the `URender` function. This time, we have changed the scale transformation to enlarge the square, and changed the rotation matrix to rotate around the x axis.
 
     // 1. Scales the object by 2
     glm::mat4 scale = glm::scale(glm::vec3(2.0f, 2.0f, 2.0f));
-    // 2. Rotates shape by 15 degrees in the x axis
+    // 2. Rotates the shape by 15 degrees in the x axis
     glm::mat4 rotation = glm::rotate(15.0f, glm::vec3(1.0, 0.0f, 0.0f));
-    // 3. Place object at the origin
+    // 3. Places object at the origin
     glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
-    // Model matrix: transformations are applied right-to-left
+    // Model matrix: Transformations are applied right-to-left.
     glm::mat4 model = translation * rotation * scale;
 
 ### The View Matrix
@@ -154,17 +154,17 @@ The view matrix transforms the vertex locations from the _world space_ into the 
 
 ### The Projection Matrix
 
-There are two basic types of projections that we can apply: perspective and orthographic. In this example, we are going to create a perspective projection matrix, which mimics how the eye (and real cameras) work. To build this 4x4 matrix we use GLM's `perspective` function:
+There are two basic types of projections that we can apply: perspective and orthographic. In this example, we are going to create a perspective projection matrix, which mimics how the eye and real cameras work. To build this 4x4 matrix, we use GLM's `perspective` function:
 
     glm::mat4 projection = glm::perspective(45.0f, (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
-The first parameter is the field-of-view; the second is the aspect ratio; the third is the distance of the _near plane_ to the camera; and the last parameter is the distance of the _far plane_ to the camera. Points on the surfaces of objects that are closer to the camera than the near plane, or farther than the far plane, will be _clipped_.
+The first parameter is the field-of-view, the second is the aspect ratio, the third is the distance of the _near plane_ to the camera, and the last is the distance of the _far plane_ to the camera. Points on the surfaces of objects that are closer to the camera than the near plane, or farther than the far plane, will be _clipped_.
 
-### Combining the Model, View and Projection Matrices
+### Combining the Model, View, and Projection Matrices
 
 All three matrices are transferred to the vertex shader as uniform variables:
 
-    // Retrieves and passes transform matrices to the Shader program
+    // Retrieves and passes transform matrices to the shader program
     GLint modelLoc = glGetUniformLocation(gProgramId, "model");
     GLint viewLoc = glGetUniformLocation(gProgramId, "view");
     GLint projLoc = glGetUniformLocation(gProgramId, "projection");
@@ -178,7 +178,7 @@ The vertex shader combines them and multiplies the vertex location with it. Reme
     layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
     layout (location = 1) in vec4 color;  // Color data from Vertex Attrib Pointer 1
 
-    out vec4 vertexColor; // variable to transfer color data to the fragment shader
+    out vec4 vertexColor; // Variable to transfer color data to the fragment shader
 
     //Global variables for the transform matrices
     uniform mat4 model;
@@ -187,8 +187,8 @@ The vertex shader combines them and multiplies the vertex location with it. Reme
 
     void main()
     {
-        gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices to clip coordinates
-        vertexColor = color; // references incoming color data
+        gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices to clip coordinates
+        vertexColor = color; // References incoming color data
     }
 
 
@@ -196,33 +196,33 @@ The vertex shader combines them and multiplies the vertex location with it. Reme
 
 Play with the parameters to the view and the perspective projection matrices.
 
-1. Move the camera to the left by 1 unit. Which coordinate did you modify? Next, move the camera to the right by 1 unit. Which coordinate did you modify? Keep increasing the offset (right or left) and determine at what point the cube disappears completely.
+1. Move the camera to the left by one unit. Which coordinate did you modify? Next, move the camera to the right by one unit. Which coordinate did you modify? Keep increasing the offset (right or left) and determine at what point the cube disappears completely.
 2. Try changing the Z axis for the camera. What happens when you increase or decrease the value?
-3. Change the field of view of the perspective projection (remember this includes four parameters including field of view, aspect ratio, near plane, and far plane). What happens when you make the field of view very large? Does the object appear larger or smaller? Review LearnOpenGL's [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems) section for more information regarding the perspective projection parameters.
-4. Move the near plane farther away from the camera. At what point does the cube start to disappear? Remember that the square is centered at the origin, and that the camera is moved backwards by 3 units.
+3. Change the field of view of the perspective projection. Remember, this includes four parameters: field of view, aspect ratio, near plane, and far plane. What happens when you make the field of view very large? Does the object appear larger or smaller? Review LearnOpenGL's [Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems) section for more information regarding the perspective projection parameters.
+4. Move the near plane farther away from the camera. At what point does the cube start to disappear? Remember that the square is centered at the origin, and that the camera is moved backward by three units.
 
 
 
 ## Section 3-4: Creating and Displaying a Cube
 
-The code for this section ([tut_03_04.cpp](./tut_03_04.cpp)) demonstrates how to:
+The code for this section ([tut_03_04.cpp](./tut_03_04.cpp)) demonstrates how to do the following:
 
-* Enable and clear the Z-buffer
-* Create a cube
+* Enable and clear the Z-buffer.
+* Create a cube.
 
 ![A multicolored cube shown against a black background, all of which was created using OpenGL. The cube is tilted so the top and two sides are visible. Every vertex has its own color assigned.](./cube.png)
 
 ### A Cube Mesh
 
-In order to replace the square with a cube, the function `UCreateMesh` requires modifications to the `verts` and `indices` arrays
+In order to replace the square with a cube, the function `UCreateMesh` requires modifications to the `verts` and `indices` arrays.
 
      // Position and Color data
     GLfloat verts[] = {
         // Vertex Positions    // Colors (r,g,b,a)
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f, // Top Right Vertex 0
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f, // Bottom Right Vertex 1
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f, // Bottom Left Vertex 2
-        -0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f, 1.0f, // Top Left Vertex 3
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f, // Top-Right Vertex 0
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f, // Bottom-Right Vertex 1
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f, // Bottom-Left Vertex 2
+        -0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f, 1.0f, // Top-Left Vertex 3
 
          0.5f, -0.5f, -1.0f,  0.5f, 0.5f, 1.0f, 1.0f, // 4 br  right
          0.5f,  0.5f, -1.0f,  1.0f, 1.0f, 0.5f, 1.0f, //  5 tl  right
@@ -250,14 +250,14 @@ The rest of the function remains the same.
 
 ### The Z (Depth) Buffer
 
-Now that we are rendering 3D shapes, it could happen that more than one 3D point projects to the same pixel on the screen. In that case, which one should we use to color this pixel? If we simplify the problem to consider opaque materials only, the answer is: the one that is closest to the camera. This solution is implemented by the Z Buffer, which is a buffer that stores a depth value for the point closest to the camera that has projected to that pixel. So, for example, if pixel `(100, 200)` already has color red, which was produce by a 3D point with z value `0.3`, but another 3D point (blue) with z value `0.2` (closer) projects also onto pixel `(100, 200)`, then we update the framebuffer at position `(100, 200)` with the color blue, and the z buffer, also at position `(100, 200)`, with value '0.2'.
+Now that we are rendering 3D shapes, it could happen that more than one 3D point projects to the same pixel on the screen. In that case, which one should we use to color this pixel? If we simplify the problem to consider opaque materials only, the answer is: the one that is closest to the camera. This solution is implemented by the Z buffer, which is a buffer that stores a depth value for the point closest to the camera that has projected to that pixel. So, for example, if pixel `(100, 200)` already has the color red (which was produced by a 3D point with z value `0.3`), but another 3D point (blue) with z value `0.2` (closer) also projects onto pixel `(100, 200)`, then we update the framebuffer at position `(100, 200)` with the color blue and the z buffer, also at position `(100, 200)`, with value '0.2'.
 
-The Z buffer is enabled and cleared in the `URender` function. The buffer needs to be cleared the same way that we clear the frame buffer: with function `glClear`.
+The Z buffer is enabled and cleared in the `URender` function. The buffer needs to be cleared the same way that we clear the frame buffer, with function `glClear`.
 
-    // Enable z-depth
+    // Enable z-depth.
     glEnable(GL_DEPTH_TEST);
     
-    // Clear the frame and z buffers
+    // Clear the frame and z buffers.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -265,15 +265,15 @@ The Z buffer is enabled and cleared in the `URender` function. The buffer needs 
 
 ## Section 3-5: Creating an Orthographic Projection
 
-The code for this section ([tut_03_05.cpp](./tut_03_05.cpp)) demonstrates how to:
+The code for this section ([tut_03_05.cpp](./tut_03_05.cpp)) demonstrates how to do the following:
 
-* Create an orthographic projection matrix using GLM's `ortho` function
+* Create an orthographic projection matrix using GLM's `ortho` function.
 
 The following image shows the final result:
 
-![A multicolored cube shown against a black background, all of which was created using OpenGL. The cube is tilted so the top and two sides are visible. The cube is also displayed using an orthographic projection, which means everything appears at the same scale using parallel lines (rather than show objects or parts of objects that are further away as being smaller). Every vertex has its own color assigned.](./ortho.png)
+![A multicolored cube shown against a black background, all of which was created using OpenGL. The cube is tilted so the top and two sides are visible. The cube is displayed using an orthographic projection, which means everything appears at the same scale using parallel lines (rather than showing objects or parts of objects that are further away as being smaller). Every vertex has its own color assigned.](./ortho.png)
 
-This tutorial requires only changing one line of code. In function `URender`, we replace the call to `perspective` with `ortho`
+This tutorial only requires changing one line of code. In function `URender`, we replace the call to `perspective` with `ortho`.
 
     glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);
 
