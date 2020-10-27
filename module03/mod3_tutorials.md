@@ -254,10 +254,10 @@ Now that we are rendering 3D shapes, it could happen that more than one 3D point
 
 The Z buffer is enabled and cleared in the `URender` function. The buffer needs to be cleared the same way that we clear the frame buffer, with function `glClear`.
 
-    // Enable z-depth.
+    // Enable Z-depth.
     glEnable(GL_DEPTH_TEST);
     
-    // Clear the frame and z buffers.
+    // Clear the frame and Z buffers.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -271,7 +271,7 @@ The code for this section ([tut_03_05.cpp](./tut_03_05.cpp)) demonstrates how to
 
 The following image shows the final result:
 
-![A multicolored cube shown against a black background, created using OpenGL. The cube is tilted so the top and two sides are visible. The cube is displayed using an orthographic projection, which means everything appears at the same scale using parallel lines (rather than showing objects or parts of objects that are further away as being smaller). Every vertex has its own color assigned.](./ortho.png)
+![A multicolored cube shown against a black background, created using OpenGL. The cube is tilted so the top and two sides are visible. The cube is displayed using an orthographic projection, which means everything appears at the same scale using parallel lines (rather than showing objects or parts of objects that are farther away as being smaller). Every vertex has its own color assigned.](./ortho.png)
 
 This tutorial only requires changing one line of code. In function `URender`, we replace the call to `perspective` with `ortho`.
 
