@@ -6,26 +6,26 @@ Computer graphics applications normally require a fair amount of mathematical op
 GLM is a header-only library, which means that there are no precompiled libraries. In order to use it, you just need to include the appropriate header files. Pay attention to the include section of the next few tutorials and make sure to visit GLM's reference pages to start learning what it can do and how to use it.
 
 
-## Section 3-2: Transforming an Object using the Model Matrix
+## Section 3-2: Transforming an Object Using the Model Matrix
 
-The code for this section ([tut_03_02.cpp](./tut_03_02.cpp)) demonstrates how to:
+The code for this section ([tut_03_02.cpp](./tut_03_02.cpp)) demonstrates how to do the following:
 
-* Translate, rotate, and scale an object using the model matrix and uniform variables 
+* Translate, rotate, and scale an object using the model matrix and uniform variables. 
 
 The following image shows the final result:
 
-![A multicolored square shown against a black background and created using OpenGL. The square is positioned at a slight angle as though it has been turned slightly to the right. Each vertex has been assigned a different color with the upper left vertex being red, the upper right vertex being green, the lower left vertex being pink, and the lower right vertex being blue.](./model_transform.png)
+![A multicolored square shown against a black background, created using OpenGL. The square is positioned at a slight angle as though it has been turned slightly to the right. Each vertex has been assigned a different color with the upper-left vertex being red, the upper-right vertex being green, the lower-left vertex being pink, and the lower-right vertex being blue.](./model_transform.png)
 
-Continuing from the knowledge you gained in tutorial 2.8, we modify the `UCreateMesh` function to create a square (instead of a triangle).
+Continuing from the knowledge you gained in tutorial 2.8, we can modify the `UCreateMesh` function to create a square (instead of a triangle).
 
     // Specifies normalized device coordinates (x,y, z) and color for square vertices
     GLfloat verts[]=
     {
     // Vertex Positions    // Colors
-     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f, // Top Right Vertex 0
-     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f, // Bottom Right Vertex 1
-    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f, // Bottom Left Vertex 2
-    -0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f, 1.0f  // Top Left Vertex 3
+     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f, // Top-Right Vertex 0
+     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f, // Bottom-Right Vertex 1
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f, // Bottom-Left Vertex 2
+    -0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f, 1.0f  // Top-Left Vertex 3
     };
 
  In function `URender`, we build the `transformation` matrix that represents the affine transformation resulting from the following:
@@ -34,50 +34,50 @@ Continuing from the knowledge you gained in tutorial 2.8, we modify the `UCreate
 2. Rotating it by 45 degrees in the z axis
 3. Translating it by 0.5 in the y axis
 
-All of these three transformations are represented by a 4x4 homogeneous matrix. Also, transformations are applied right to left, so if scaling needs to occur first, it will have to be the rightmost matrix.
+All of these transformations are represented by a 4x4 homogeneous matrix. Also, transformations are applied right to left, so if scaling needs to occur first, it will have to be the rightmost matrix.
 
-After the `transformation` matrix has been calculated, we need to pass it to the vertex shader as a `uniform`. Uniform variables are per-mesh attributes, i.e. they are shared by all vertices. In order to transfer this matrix as a uniform, we complete the following:
+After the `transformation` matrix has been calculated, we need to pass it to the vertex shader as a `uniform`. Uniform variables are per-mesh attributes; they are shared by all vertices. In order to transfer this matrix as a uniform, we will complete the following:
 
-1. Retrieve the uniform's location (in memory) within the active program by calling `glGetUniformLocation`
-2. We transfer the data by calling `glUniformMatrix4fv` (note that there is a large collection of `glUniform` matrices, so make sure to review their [reference pages](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glUniform.xhtml)) 
+1. Retrieve the uniform's location (in memory) within the active program by calling `glGetUniformLocation`.
+2. Transfer the data by calling `glUniformMatrix4fv`. Note that there is a large collection of `glUniform` matrices, so make sure to review their [reference pages](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glUniform.xhtml).
 
 ```
 void URender()
 {
-    // Clear the background
+    // Clear the background.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // 1. Scales the shape down by half of its original size in all 3 dimensions
     glm::mat4 scale = glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));
 
-    // 2. Rotates shape by 45 degrees on the z axis
+    // 2. Rotates the shape by 45 degrees on the z axis
     glm::mat4 rotation = glm::rotate(45.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
     // 3. Translates by 0.5 in the y axis
     glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.5f, 0.0f));
 
-    // Transformations are applied right-to-left order
+    // Transformations are applied in right-to-left order.
     glm::mat4 transformation = translation * rotation * scale;
 
-    // Set the shader to be used
+    // Set the shader to be used.
     glUseProgram(gProgramId);
 
     // Sends transform information to the Vertex shader
     GLuint transformLocation = glGetUniformLocation(gProgramId, "shaderTransform");
     glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transformation));
 
-    // Activate the VBOs contained within the mesh's VAO
+    // Activate the VBOs contained within the mesh's VAO.
     glBindVertexArray(gMesh.vao);
 
-    // Draws the triangle
+    // Draw the triangle.
     glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 
-    // Deactivate the Vertex Array Object
+    // Deactivate the Vertex Array Object.
     glBindVertexArray(0);
 
-    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-    glfwSwapBuffers(gWindow);    // Flips the the back buffer with the front buffer every frame.
+    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved, and so on).
+    glfwSwapBuffers(gWindow);    // Flips the the back buffer with the front buffer every frame
 }
 ```
 
@@ -86,14 +86,14 @@ The fragment shader will remain unchanged, but the vertex shader now has to decl
     layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
     layout (location = 1) in vec4 color;  // Color data from Vertex Attrib Pointer 1
 
-    out vec4 vertexColor; // variable to transfer color data to the fragment shader
+    out vec4 vertexColor; // Variable to transfer color data to the fragment shader
 
     uniform mat4 shaderTransform; // 4x4 matrix variable for transforming vertex data
 
     void main()
     {
-        gl_Position = shaderTransform * vec4(position, 1.0f); // transforms vertex data using matrix
-        vertexColor = color; // references incoming color data
+        gl_Position = shaderTransform * vec4(position, 1.0f); // Transforms vertex data using matrix
+        vertexColor = color; // References incoming color data
     }
 
 Also review the fragment shader.
@@ -108,11 +108,11 @@ Also review the fragment shader.
     }
 
 
-Note how, before multiplying the vertex position by the transformation, we convert it to a 4-dimensional vector, with a `1.0` as the fourth coordinate. We do this so we can work in homogenous coordinates.
+Note how, before multiplying the vertex position by the transformation, we convert it to a 4-dimensional vector with a `1.0` as the fourth coordinate. We do this so we can work in homogenous coordinates.
 
 #### Exercise
 
-Try changing the parameters that create the scale, rotation, and translation matrices (in `URender`). First try changing each one of them independently (e.g. first the scale matrix, then the rotation, etc.) and then try to combine them.
+Try changing the parameters that create the scale, rotation, and translation matrices (in `URender`). First try changing each one of them independently (first the scale matrix, then the rotation, and so on) and then try to combine them.
 
 
 
@@ -180,7 +180,7 @@ The vertex shader combines them and multiplies the vertex location with it. Reme
 
     out vec4 vertexColor; // variable to transfer color data to the fragment shader
 
-    //Global variables for the  transform matrices
+    //Global variables for the transform matrices
     uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
