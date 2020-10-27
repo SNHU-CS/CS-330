@@ -51,7 +51,7 @@ void URender()
     // 1. Scales the shape down by half of its original size in all 3 dimensions
     glm::mat4 scale = glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));
 
-    // 2. Rotates the shape by 45 degrees on the z axis
+    // 2. Rotates the shape by 45 degrees in the z axis
     glm::mat4 rotation = glm::rotate(45.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
     // 3. Translates by 0.5 in the y axis
@@ -148,7 +148,7 @@ We build the model matrix in the `URender` function. This time, we have changed 
 
 ### The View Matrix
 
-The view matrix transforms the vertex locations from the _world space_ into the _view space_. The view matrix is, like the model matrix, a 4x4 matrix. In this example, we translate the camera backwards by 3 units.
+The view matrix transforms the vertex locations from the _world space_ into the _view space_. The view matrix is, like the model matrix, a 4x4 matrix. In this example, we translate the camera backward by three units.
 
     glm::mat4 view = glm::translate(glm::vec3(0.0f, 0.0f, -3.0f));
 
@@ -158,7 +158,7 @@ There are two basic types of projections that we can apply: perspective and orth
 
     glm::mat4 projection = glm::perspective(45.0f, (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
-The first parameter is the field-of-view, the second is the aspect ratio, the third is the distance of the _near plane_ to the camera, and the last is the distance of the _far plane_ to the camera. Points on the surfaces of objects that are closer to the camera than the near plane, or farther than the far plane, will be _clipped_.
+The first parameter is the field of view, the second is the aspect ratio, the third is the distance of the _near plane_ to the camera, and the last is the distance of the _far plane_ to the camera. Points on the surfaces of objects that are closer to the camera than the near plane, or farther than the far plane, will be _clipped_.
 
 ### Combining the Model, View, and Projection Matrices
 
@@ -207,10 +207,10 @@ Play with the parameters to the view and the perspective projection matrices.
 
 The code for this section ([tut_03_04.cpp](./tut_03_04.cpp)) demonstrates how to do the following:
 
-* Enable and clear the Z-buffer.
+* Enable and clear the Z buffer.
 * Create a cube.
 
-![A multicolored cube shown against a black background, all of which was created using OpenGL. The cube is tilted so the top and two sides are visible. Every vertex has its own color assigned.](./cube.png)
+![A multicolored cube shown against a black background, created using OpenGL. The cube is tilted so the top and two sides are visible. Every vertex has its own color assigned.](./cube.png)
 
 ### A Cube Mesh
 
@@ -250,7 +250,7 @@ The rest of the function remains the same.
 
 ### The Z (Depth) Buffer
 
-Now that we are rendering 3D shapes, it could happen that more than one 3D point projects to the same pixel on the screen. In that case, which one should we use to color this pixel? If we simplify the problem to consider opaque materials only, the answer is: the one that is closest to the camera. This solution is implemented by the Z buffer, which is a buffer that stores a depth value for the point closest to the camera that has projected to that pixel. So, for example, if pixel `(100, 200)` already has the color red (which was produced by a 3D point with z value `0.3`), but another 3D point (blue) with z value `0.2` (closer) also projects onto pixel `(100, 200)`, then we update the framebuffer at position `(100, 200)` with the color blue and the z buffer, also at position `(100, 200)`, with value '0.2'.
+Now that we are rendering 3D shapes, it could happen that more than one 3D point projects to the same pixel on the screen. In that case, which one should we use to color this pixel? If we simplify the problem to consider opaque materials only, the answer is: the one that is closest to the camera. This solution is implemented by the Z buffer, which is a buffer that stores a depth value for the point closest to the camera that has projected to that pixel. So, for example, if pixel `(100, 200)` already has the color red (which was produced by a 3D point with z value `0.3`), but another 3D point (blue) with z value `0.2` (closer) also projects onto pixel `(100, 200)`, then we update the framebuffer at position `(100, 200)` with the color blue and the z buffer, also at position `(100, 200)`, with value `0.2`.
 
 The Z buffer is enabled and cleared in the `URender` function. The buffer needs to be cleared the same way that we clear the frame buffer, with function `glClear`.
 
@@ -271,7 +271,7 @@ The code for this section ([tut_03_05.cpp](./tut_03_05.cpp)) demonstrates how to
 
 The following image shows the final result:
 
-![A multicolored cube shown against a black background, all of which was created using OpenGL. The cube is tilted so the top and two sides are visible. The cube is displayed using an orthographic projection, which means everything appears at the same scale using parallel lines (rather than showing objects or parts of objects that are further away as being smaller). Every vertex has its own color assigned.](./ortho.png)
+![A multicolored cube shown against a black background, created using OpenGL. The cube is tilted so the top and two sides are visible. The cube is displayed using an orthographic projection, which means everything appears at the same scale using parallel lines (rather than showing objects or parts of objects that are further away as being smaller). Every vertex has its own color assigned.](./ortho.png)
 
 This tutorial only requires changing one line of code. In function `URender`, we replace the call to `perspective` with `ortho`.
 
