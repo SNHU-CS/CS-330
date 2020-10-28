@@ -459,3 +459,5 @@ The method demonstrated in this tutorial is not the most efficient way to draw t
 #### Exercise
 
 Play with the number of cubes you render by changing the value of `nrows`, `ncols`, or `nlevels` in the `URender` function. Print the value of `gDeltaTime` to standard output towards the end of the `URender` function. Does the value increase or decrease? What does that change imply? Note that as you increase the number of cubes the responsiveness of the program may degrade. Pressing Esc may not halt the program right away, but it will eventually close.
+
+_Congratulations, you have now reached the end of the tutorial for Module Four!_
