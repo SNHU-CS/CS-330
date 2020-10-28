@@ -113,7 +113,7 @@ glfwSetMouseButtonCallback(*window, UMouseButtonCallback);
 
 ### Mouse Position Callback
 
-The mouse position callback is straightforward. Whenever the mouse moves, the callback gets called, getting as input the x and y screen coordinates of the cursor.
+The mouse position callback is straightforward. Whenever the mouse moves, the callback gets called and recieves the X and Y screen coordinates of the cursor as input.
 
 ```
 // glfw: whenever the mouse moves, this callback is called
@@ -126,7 +126,7 @@ void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 
 ### Mouse Scrolling Callback
 
-The mouse scroll callback is pretty similar. For a regular mouse the `xoffset` input will always be zero, since the wheel is one-dimensional (either goes up or down). A value of `yoffset` of `1.0` means rolling one way, and `-1.0` the opposite -- test which one is which. Note: The reason why this callback gets both a `xoffset` and `yoffset` is to support more advanced input devices. 
+The mouse scroll callback is pretty similar. For a regular mouse the `xoffset` input will always be zero, since the wheel is one-dimensional (either goes up or down). A value of `yoffset` of `1.0` means rolling one way, and `-1.0` the opposite -- test to determine which one is which. Note that the reason this callback gets both a `xoffset` and `yoffset` is to support more advanced input devices. 
 
 ```
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
@@ -139,10 +139,10 @@ void UMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 
 ### Mouse Button Callback
 
-Finally, we examine the button callback, which is very similar to the keyboard handling callback (from tutorial 4.1). This function receives several input integer values. The two we care about are:
+Finally we examine the button callback, which is very similar to the keyboard handling callback (from tutorial 4.1). This function receives several input integer values. The two we care about are button and action:
 
-* __button__: it holds the id of the button triggering the event. For a regular three-button mouse, we might receive `GLFW_MOUSE_BUTTON_LEFT`, `GLFW_MOUSE_BUTTON_MIDDLE` or `GLFW_MOUSE_BUTTON_RIGHT`.
-* __action__: as with the keyboard events, this variable can only hold two values, `GLFW_PRESS` or `GLFW_RELEASE`.
+* __Button__: It holds the ID of the button triggering the event. For a regular three-button mouse, we might receive `GLFW_MOUSE_BUTTON_LEFT`, `GLFW_MOUSE_BUTTON_MIDDLE` or `GLFW_MOUSE_BUTTON_RIGHT`.
+* __Action__: As with the keyboard events, this variable can only hold two values, `GLFW_PRESS` or `GLFW_RELEASE`.
 
 ```
 // glfw: handle mouse button events
@@ -185,7 +185,7 @@ void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 }
 ```
 
-When you run this application, your screen will appear black but your output should look similar to:
+When you run this application, your screen will appear black but your output should look similar to the following:
 
 ```
 Mouse at (366, 376)
@@ -229,14 +229,14 @@ Modify the mouse position and mouse button callbacks so the position of the curs
 
 ## Section 4-3: Controlling the Camera with the Keyboard
 
-The code for this section ([tut_04_03.cpp](./tut_04_03.cpp)) demonstrates how to
+The code for this section ([tut_04_03.cpp](./tut_04_03.cpp)) demonstrates how to:
 
-* draw a mesh with a color per face.
-* update the position of the camera with the keyboard and GLM's `lookAt` function
+* Draw a mesh with one color per face
+* Update the position of the camera with the keyboard and GLM's `lookAt` function
 
 ### Per-Face (and not Per-Vertex) Colors
 
-This tutorial contains quite a bit more code than 4.2, and it is actually closer to tutorial 3.4 (which introduced the perspective projection). But unlike tutorial 3.4, we want to draw a cube that has a color per face. This prevents us from drawing using indices -- and `glDrawElements` -- since each vertex will belong to three different faces, and each face will have a different color -- therefore we cannot share a vertex among different faces, so we will have to add three vertices for every actual location. If a cube has eight vertices, then we will end up with 24 vertices in total. Please take a look at `UCreateMesh`. Also, we will now go back to rendering using `glDrawArrays`.
+This tutorial contains quite a bit more code than 4.2, and it is actually closer to tutorial 3.4 (which introduced the perspective projection). But unlike tutorial 3.4, we want to draw a cube that has a color per face instead of per vertex. This prevents us from drawing using indices (and `glDrawElements`) since each vertex will belong to three different faces and each face will have a different color. This means we cannot share a vertex among different faces so we will have to add three vertices for every actual location. If a cube has eight vertices, then we will end up with 24 vertices in total. Please take a look at `UCreateMesh`. Also, we will now go back to rendering using `glDrawArrays`.
 
 ### Camera Control
 
@@ -288,7 +288,7 @@ gDeltaTime = currentFrame - gLastFrame;
 gLastFrame = currentFrame;
 ```
 
-With the camera position (`gCameraPos`) always up-to-date thanks to function `UProcessInput`, in `URender`, we use GLM's `lookAt` function to create the view matrix. This function requires three inputs: the camera's position, the target (what the camera is looking at) and the up vector of the camera.
+With the camera position (`gCameraPos`) always up-to-date thanks to function `UProcessInput`, in `URender`, we use GLM's `lookAt` function to create the view matrix. This function requires three inputs: the camera's position, the target (what the camera is looking at), and the up vector of the camera.
 
 ```
 glm::mat4 view = glm::lookAt(gCameraPos, gCameraPos + gCameraFront, gCameraUp);
@@ -299,33 +299,33 @@ Finally, we transfer its value to the vertex shader inside a uniform variable.
 When you first start the application, you should see the image on the left, but if you move the camera back (by pressing `S`) and then to the left (by pressing `A`) you should see something similar to the image on the right:
 
 
-![Initial View](./camera_init.png) | ![Move back and left](./camera_s_a.png) 
+![A multicolored 3D cube against a black background that was generated using OpenGL. The cube is angled so the top and one side is visible with the top being colored pink and the side being colored green.](./camera_init.png) | ![A multicolored 3D cube against a black background that was generated using OpenGL. The cube is angled so the top and two sides are visible. The top is colored pink, the right side is colored green, and the left side is colored blue. This image displays the same object as the previous image, but the viewpoint is further away from the cube and has shifted slightly to the left.](./camera_s_a.png) 
 
 #### Exercise
 
-Modify the `UProcessInput` function to also handle keys `Q` and `E`. For example, when pressing `E `move the camera straight up, and when pressing `Q` straight down.
+Modify the `UProcessInput` function to also handle keys `Q` and `E`. For example, when pressing `E `move the camera straight up and when pressing `Q` straight down.
 
 
 
 
 ## Section 4-4: Controlling the Camera with the Keyboard and Mouse
 
-The code for this section ([tut_04_04.cpp](./tut_04_04.cpp)) demonstrates how to
+The code for this section ([tut_04_04.cpp](./tut_04_04.cpp)) demonstrates how to:
 
-* control the orientation of the camera with the mouse
-* adjust the field-of-view of the perpective projection with the mouse wheel
+* Control the orientation of the camera with the mouse
+* Adjust the field-of-view of the perpective projection with the mouse wheel
 
 So far we know how to move the camera forwards/backwards and left/right using the WASD keys, but we need more freedom than that. In order to be able to move in all directions, we are going to recruit the help of the mouse. Thankfully, LearnOpengl has a `Camera` class ([camera.h](../includes/learnOpengl/camera.h)) that does exactly what we need.
 
-The `Camera` class has member variables that keep track of the state of the camera (e.g. location and orientation), as well as some configuration values (e.g. camera speed, mouse sensitivity...). In order to use this class we will need to initialize an instance of `Camera`, and then we will call four of its methods: `ProcessKeyboard`, `ProcessMouseMovement`, `ProcessMouseScroll` and `GetViewMatrix`.
+The `Camera` class has member variables that keep track of the state of the camera (e.g. location and orientation), as well as some configuration values (e.g. camera speed, mouse sensitivity, etc.). In order to use this class we will need to initialize an instance of `Camera` and then we will call four of its methods: `ProcessKeyboard`, `ProcessMouseMovement`, `ProcessMouseScroll`, and `GetViewMatrix`.
 
 ### ProcessKeyboard
 
-The `ProcessKeyboard` member function does basically what our `UProcessInput` function was doing in previous tutorials: it updates the position of the camera when keys `W`, `A`, `S` and/or `D` are pressed
+The `ProcessKeyboard` member function does basically what our `UProcessInput` function was doing in previous tutorials. It updates the position of the camera when keys `W`, `A`, `S` and/or `D` are pressed.
 
 ### ProcessMouseScroll
 
-The `ProcessMouseScroll` does not actually change the position or orientation of the camera, but it updates its `Zoom` value, which will be used to set the field-of-view of the perspective projection. Notice that the zoom value is clamped to the range `[1.0, 45.0]` degrees.
+The `ProcessMouseScroll` does not actually change the position or orientation of the camera. Instead it updates its `Zoom` value, which will be used to set the field-of-view of the perspective projection. Notice that the zoom value is clamped to the range `[1.0, 45.0]` degrees.
 
 ```
 void Camera::ProcessMouseScroll(float yoffset)
@@ -342,7 +342,7 @@ We call this function from `UMouseScrollCallback`.
 
 ### ProcessMouseMovement
 
-This function handles the change in orientation. It takes as input the offset in x and y of the cursor: difference in position between this frame and the last frame. It uses this offset to update the yaw and pitch of the camera. Finally, it calls the `updateCameraVectors` to recompute the three axis of the camera (front, right and up).
+This function handles the change in orientation. It takes as input the offset in X and Y of the cursor, or the difference in position between this frame and the last frame. It uses this offset to update the yaw and pitch of the camera. Finally, it calls the `updateCameraVectors` to recompute the three axis of the camera (front, right, and up).
 
 ```
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
@@ -367,7 +367,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
 }
 ```
 
-We call this function from our own `UMousePositionCallback`
+We call this function from our own `UMousePositionCallback`.
 
 ```
 void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos)
@@ -391,7 +391,7 @@ void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 
 ### Building the Projection and View Matrices
 
-In function `URender`, we query the instance of `Camera` to retrieve the view and perspective projection matrices.
+In function `URender` we query the instance of `Camera` to retrieve the view and perspective projection matrices.
 
 ```
     glm::mat4 view = gCamera.GetViewMatrix();
@@ -404,15 +404,15 @@ If you run this application, you should be able to move the position of the came
 
 ## Section 4-5: Drawing Multiple Cubes
 
-The code for this section ([tut_04_05.cpp](./tut_04_05.cpp)) demonstrates how to
+The code for this section ([tut_04_05.cpp](./tut_04_05.cpp)) demonstrates how to:
 
-* draw multiple cubes using a single mesh object
+* Draw multiple cubes using a single mesh object
 
 If you start the application and move the camera back (by pressing S), you should see multiple cubes. 
 
-![Multiple Cubes](./multiple_cubes.png)
+![Multiple multicolored cubes against a black background, generated using OpenGL. About a half dozen rows of cubes move away from the point of view on either side of the image. Each row continues far into the distance until the cubes are too small to be made visible. Every cube is identical though shown from a slightly different perspective. The closest side is, which is parallel to the field of view, dark blue. On the right, the upper side is pink and the lower side is green. On the left, the upper side is red and the lower side is light blue. The sixth side (the one directly opposite the dark blue side) is always facing away from the camera so we cannot determine what color it is fromt the image.](./multiple_cubes.png)
 
-All the changes from this tutorial are confined to function `URender`. We first initialize some variables that will control how many rows, columns and stacks of cubes we will draw (`nrows`, `ncols` and `nlevels`). We also configure how far apart we will be spacing them (`xsize`, `ysize` and `zsize`).
+All the changes from this tutorial are confined to function `URender`. We first initialize some variables that will control how many rows, columns, and stacks of cubes we will draw (`nrows`, `ncols`, and `nlevels`). We also configure how far apart we will be spacing them (`xsize`, `ysize`, and `zsize`).
 
 ```
 const int nrows = 10;
@@ -424,7 +424,7 @@ const float ysize = 10.0f;
 const float zsize = 10.0f;
 ```
 
-The view and projection matrices are the same for all cubes, so that code remains unchanged. The model matrix must change if we are going to draw cubes at different positions (and potentially orientations and scales), so we move that code inside a triple-nested for loop.
+The view and projection matrices are the same for all cubes, so that code remains unchanged. The model matrix must change if we are going to draw cubes at different positions (and potentially orientations and scales), so we move that code inside a triple-nested FOR loop.
 
 ```
 // 1. Scales the object by 2
@@ -454,8 +454,8 @@ for (int i = 0; i < nrows; ++i)
 
 ### Instancing
 
-The way shown here is not the most efficient way to draw the very same mesh multiple times (if your computer drops to a very low frame rate, try reducing the number of cubes by lowering the values of `nrows`, `ncols` and/or `nlevels`). The problem is inside the triple-nested for loop: we are calling the functions `glUniformMatrix4fv` and `glDrawArrays` for every iteration -- and calling these functions is expensive. The efficient way to accomplish the same output is by using _instancing_: we pass the data to the GPU once, but we tell OpenGL how to draw it multiple times. In this case, we would pass the model matrices (one for each cube) inside a _uniform block_ and we would render by calling `glDrawArraysInstanced`.
+The method demonstrated in this tutorial is not the most efficient way to draw the very same mesh multiple times (if your computer drops to a very low frame rate, try reducing the number of cubes by lowering the values of `nrows`, `ncols`, and/or `nlevels`). The problem is inside the triple-nested FOR loop we are calling the functions `glUniformMatrix4fv` and `glDrawArrays` for every iteration -- and calling these functions is expensive. The efficient way to accomplish the same output is by using _instancing_ where we pass the data to the GPU once but tell OpenGL how to draw it multiple times. In this case, we would pass the model matrices (one for each cube) inside a _uniform block_ and we would render by calling `glDrawArraysInstanced`.
 
 #### Exercise
 
-Play with the number of cubes you render by changing the value of nrows, ncols, or nlevels in the URender function. Print the value of `gDeltaTime` to standard output towards the end of URender function. Does the value increase or decrease? What does it imply? Note that as you increase the number of cubes the responsiveness of the program may degrade. Pressing Esc may not halt the program right away, but it will eventually close.
+Play with the number of cubes you render by changing the value of 'nrows', 'ncols', or 'nlevels' in the 'URender' function. Print the value of `gDeltaTime` to standard output towards the end of the 'URender' function. Does the value increase or decrease? What does that change imply? Note that as you increase the number of cubes the responsiveness of the program may degrade. Pressing Esc may not halt the program right away, but it will eventually close.
