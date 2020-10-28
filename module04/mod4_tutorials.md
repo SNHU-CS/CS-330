@@ -1,4 +1,5 @@
-# Section 4-1: Handling Keyboard Input
+# Module Four Tutorial
+## Section 4-1: Handling Keyboard Input
 
 The code for this section ([tut_04_01.cpp](./tut_04_01.cpp)) demonstrates how to
 
@@ -81,12 +82,12 @@ You pressed W! Cursor at position (251, 491)
 You pressed D! Cursor at position (251, 491)
 ```
 
-### Exercise
+#### Exercise
 
 Check out [GLFW's Documentation](https://www.glfw.org/docs/latest/group__keys.html) and augment `UProcessInput` to handle multiple keys at the same time. For example, print a message to the screen if `Shift` and `A` are pressed simultaneously.
 
 
-# Section 4-2: Handling Mouse Input
+## Section 4-2: Handling Mouse Input
 
 The code for this section ([tut_04_02.cpp](./tut_04_02.cpp)) demonstrates how to
 
@@ -114,7 +115,7 @@ glfwSetScrollCallback(*window, UMouseScrollCallback);
 glfwSetMouseButtonCallback(*window, UMouseButtonCallback);
 ```
 
-## Mouse Position Callback
+### Mouse Position Callback
 
 The mouse position callback is straightforward. Whenever the mouse moves, the callback gets called, getting as input the x and y screen coordinates of the cursor.
 
@@ -127,7 +128,7 @@ void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 }
 ```
 
-## Mouse Scrolling Callback
+### Mouse Scrolling Callback
 
 The mouse scroll callback is pretty similar. For a regular mouse the `xoffset` input will always be zero, since the wheel is one-dimensional (either goes up or down). A value of `yoffset` of `1.0` means rolling one way, and `-1.0` the opposite -- test which one is which. Note: The reason why this callback gets both a `xoffset` and `yoffset` is to support more advanced input devices. 
 
@@ -140,7 +141,7 @@ void UMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 }
 ```
 
-## Mouse Button Callback
+### Mouse Button Callback
 
 Finally, we examine the button callback, which is very similar to the keyboard handling callback (from tutorial 4.1). This function receives several input integer values. The two we care about are:
 
@@ -224,24 +225,24 @@ Right mouse button pressed
 Right mouse button released
 ```
 
-### Exercise
+#### Exercise
 
 Modify the mouse position and mouse button callbacks so the position of the cursor is only printed when the left button is down.
 
 
 
-# Section 4-3: Controlling the Camera with the Keyboard
+## Section 4-3: Controlling the Camera with the Keyboard
 
 The code for this section ([tut_04_03.cpp](./tut_04_03.cpp)) demonstrates how to
 
 * draw a mesh with a color per face.
 * update the position of the camera with the keyboard and GLM's `lookAt` function
 
-## Per-Face (and not Per-Vertex) Colors
+### Per-Face (and not Per-Vertex) Colors
 
 This tutorial contains quite a bit more code than 4.2, and it is actually closer to tutorial 3.4 (which introduced the perspective projection). But unlike tutorial 3.4, we want to draw a cube that has a color per face. This prevents us from drawing using indices -- and `glDrawElements` -- since each vertex will belong to three different faces, and each face will have a different color -- therefore we cannot share a vertex among different faces, so we will have to add three vertices for every actual location. If a cube has eight vertices, then we will end up with 24 vertices in total. Please take a look at `UCreateMesh`. Also, we will now go back to rendering using `glDrawArrays`.
 
-## Camera Control
+### Camera Control
 
 Since we are going to control the position of the camera (we will deal with the orientation in the next tutorial) with the keyboard, we first need to declare a couple of variables to store the camera's location and orientation. At the top of our file, and inside of the unnamed namespace, we add the following declarations:
 
@@ -304,14 +305,14 @@ When you first start the application, you should see the image on the left, but 
 
 ![Initial View](./camera_init.png) | ![Move back and left](./camera_s_a.png) 
 
-### Exercise
+#### Exercise
 
 Modify the `UProcessInput` function to also handle keys `Q` and `E`. For example, when pressing `E `move the camera straight up, and when pressing `Q` straight down.
 
 
 
 
-# Section 4-4: Controlling the Camera with the Keyboard and Mouse
+## Section 4-4: Controlling the Camera with the Keyboard and Mouse
 
 The code for this section ([tut_04_04.cpp](./tut_04_04.cpp)) demonstrates how to
 
@@ -322,11 +323,11 @@ So far we know how to move the camera forwards/backwards and left/right using th
 
 The `Camera` class has member variables that keep track of the state of the camera (e.g. location and orientation), as well as some configuration values (e.g. camera speed, mouse sensitivity...). In order to use this class we will need to initialize an instance of `Camera`, and then we will call four of its methods: `ProcessKeyboard`, `ProcessMouseMovement`, `ProcessMouseScroll` and `GetViewMatrix`.
 
-## ProcessKeyboard
+### ProcessKeyboard
 
 The `ProcessKeyboard` member function does basically what our `UProcessInput` function was doing in previous tutorials: it updates the position of the camera when keys `W`, `A`, `S` and/or `D` are pressed
 
-## ProcessMouseScroll
+### ProcessMouseScroll
 
 The `ProcessMouseScroll` does not actually change the position or orientation of the camera, but it updates its `Zoom` value, which will be used to set the field-of-view of the perspective projection. Notice that the zoom value is clamped to the range `[1.0, 45.0]` degrees.
 
@@ -343,7 +344,7 @@ void Camera::ProcessMouseScroll(float yoffset)
 
 We call this function from `UMouseScrollCallback`.
 
-## ProcessMouseMovement
+### ProcessMouseMovement
 
 This function handles the change in orientation. It takes as input the offset in x and y of the cursor: difference in position between this frame and the last frame. It uses this offset to update the yaw and pitch of the camera. Finally, it calls the `updateCameraVectors` to recompute the three axis of the camera (front, right and up).
 
@@ -392,7 +393,7 @@ void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 }
 ```
 
-## Building the Projection and View Matrices
+### Building the Projection and View Matrices
 
 In function `URender`, we query the instance of `Camera` to retrieve the view and perspective projection matrices.
 
@@ -405,7 +406,7 @@ In function `URender`, we query the instance of `Camera` to retrieve the view an
 If you run this application, you should be able to move the position of the camera with the WASD keys, zoom in/out with the mouse wheel, and change the orientation of the camera by moving the mouse.
 
 
-# Section 4-5: Drawing Multiple Cubes
+## Section 4-5: Drawing Multiple Cubes
 
 The code for this section ([tut_04_05.cpp](./tut_04_05.cpp)) demonstrates how to
 
@@ -455,10 +456,10 @@ for (int i = 0; i < nrows; ++i)
 }
 ```
 
-### Instancing
+#### Instancing
 
 The way shown here is not the most efficient way to draw the very same mesh multiple times (if your computer drops to a very low frame rate, try reducing the number of cubes by lowering the values of `nrows`, `ncols` and/or `nlevels`). The problem is inside the triple-nested for loop: we are calling the functions `glUniformMatrix4fv` and `glDrawArrays` for every iteration -- and calling these functions is expensive. The efficient way to accomplish the same output is by using _instancing_: we pass the data to the GPU once, but we tell OpenGL how to draw it multiple times. In this case, we would pass the model matrices (one for each cube) inside a _uniform block_ and we would render by calling `glDrawArraysInstanced`.
 
-### Exercise
+#### Exercise
 
 Play with the number of cubes you render by changing the value of nrows, ncols, or nlevels in the URender function. Print the value of `gDeltaTime` to standard output towards the end of URender function. Does the value increase or decrease? What does it imply? Note that as you increase the number of cubes the responsiveness of the program may degrade. Pressing Esc may not halt the program right away, but it will eventually close.
