@@ -7,7 +7,7 @@ The code for this section ([tut_04_01.cpp](./tut_04_01.cpp)) demonstrates how to
 
 This tutorial is a simplified application that initializes GLFW, GLEW, and OpenGL; creates a window and an OpenGL context; and handles keyboard input.
 
-Up until this tutorial, the function `UProcessInput` was only used to handle the `ESC` key (to terminate the application). In this tutorial we will update it to also handle the keys `W,` `A`, `S`, and `D`.
+Up until this tutorial, the function `UProcessInput` was only used to handle the `ESC` key (to terminate the application). In this tutorial we update it to also handle the keys `W,` `A`, `S`, and `D`.
 
     void UProcessInput(GLFWwindow* window)
     {
