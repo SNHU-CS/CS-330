@@ -1,11 +1,11 @@
 # Module Four Tutorial
 ## Section 4-1: Handling Keyboard Input
 
-The code for this section ([tut_04_01.cpp](./tut_04_01.cpp)) demonstrates how to
+The code for this section ([tut_04_01.cpp](./tut_04_01.cpp)) demonstrates how to:
 
-* handle keyboard input using GLFW
+* Handle keyboard input using GLFW
 
-This tutorial is a bare-bones application that initializes GLFW, GLEW and OpenGL; creates a window and an OpenGL context; and handles keyboard input.
+This tutorial is a simplified application that initializes GLFW and GLEW and OpenGL, creates a window and an OpenGL context, and handles keyboard input.
 
 Up until this tutorial, the function `UProcessInput` was only used to handle the `ESC` key (to terminate the application). In this tutorial we update it to also handle keys `W,` `A`, `S` and `D`.
 
@@ -46,9 +46,9 @@ Up until this tutorial, the function `UProcessInput` was only used to handle the
     }
 
 
-In GLFW, we get the status of an specific key with function `glfwGetKey`, with only two possible outcomes: `GLFW_PRESS` OR `GLFW_RELEASE`. Each one of the keys has an specific identifier. In our case, `GLFW_KEY_W`, `GLFW_KEY_S`, `GLFW_KEY_A` and `GLFW_KEY_D`. If one of these keys is pressed, we print a message to the standard output stream stating so. Finally, if any of these keys was down in the last frame, we also print the current position of the cursor: using function `glfwGetCursorPos`.
+In GLFW, we get the status of an specific key with the function `glfwGetKey`, which has only two possible outcomes: `GLFW_PRESS` OR `GLFW_RELEASE`. Each one of the keys has an specific identifier. In our case, `GLFW_KEY_W`, `GLFW_KEY_S`, `GLFW_KEY_A` and `GLFW_KEY_D`. If one of these keys is pressed, we print a message to the standard output stream stating so. Finally, if any of these keys was still pressed in the last frame, we also print the current position of the cursor using the function `glfwGetCursorPos`.
 
-When you run the application, be sure to press a key so something occurs. Although your screen will appear black, your output should look similar to:
+When you run the application, be sure to press a key so something occurs. Although your screen will appear black, your output should look similar to the following:
 
 ```
 INFO: OpenGL Version: 4.4.0 NVIDIA 440.100
@@ -89,15 +89,11 @@ Check out [GLFW's Documentation](https://www.glfw.org/docs/latest/group__keys.ht
 
 ## Section 4-2: Handling Mouse Input
 
-The code for this section ([tut_04_02.cpp](./tut_04_02.cpp)) demonstrates how to
+The code for this section ([tut_04_02.cpp](./tut_04_02.cpp)) demonstrates how to:
 
-* handle mouse input using GLFW
+* Handle mouse input using GLFW
 
-There are three different tasks that we need to implement to cover all mouse input:
-
-* retrieve the position of the cursor
-* handle scrolling events
-* handle mouse clicks
+There are three different tasks that we need to implement to cover all mouse input, including 1) retrieve the position of the cursor, 2) handle scrolling events, and 3) handle mouse clicks.
 
 In order to do this, we are going to implement three callback functions:
 
@@ -107,7 +103,7 @@ void UMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 ```
 
-We need to register these callbacks functions so GLFW knows what code to execute for each of the three different types of mouse events. In the `UInitialize` function we register these three callbacks:
+We need to register these callback functions so GLFW knows what code to execute for each of the three different types of mouse events. In the `UInitialize` function we register these three callbacks:
 
 ```
 glfwSetCursorPosCallback(*window, UMousePositionCallback);
