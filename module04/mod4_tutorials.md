@@ -456,7 +456,7 @@ for (int i = 0; i < nrows; ++i)
 }
 ```
 
-#### Instancing
+### Instancing
 
 The way shown here is not the most efficient way to draw the very same mesh multiple times (if your computer drops to a very low frame rate, try reducing the number of cubes by lowering the values of `nrows`, `ncols` and/or `nlevels`). The problem is inside the triple-nested for loop: we are calling the functions `glUniformMatrix4fv` and `glDrawArrays` for every iteration -- and calling these functions is expensive. The efficient way to accomplish the same output is by using _instancing_: we pass the data to the GPU once, but we tell OpenGL how to draw it multiple times. In this case, we would pass the model matrices (one for each cube) inside a _uniform block_ and we would render by calling `glDrawArraysInstanced`.
 
