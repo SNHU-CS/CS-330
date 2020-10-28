@@ -46,7 +46,7 @@ Up until this tutorial, the function `UProcessInput` was only used to handle the
     }
 
 
-In GLFW, we get the status of a specific key with the function `glfwGetKey`, which has only two possible outcomes: `GLFW_PRESS` OR `GLFW_RELEASE`. Each one of the keys has a specific identifier: in our case, `GLFW_KEY_W`, `GLFW_KEY_S`, `GLFW_KEY_A`, and `GLFW_KEY_D`. If one of these keys is pressed, we print a message to the standard output stream stating so. Finally, if any of these keys was still pressed in the last frame, we also print the current position of the cursor using the function `glfwGetCursorPos`.
+In GLFW, we get the status of a specific key with the function `glfwGetKey`, which has only two possible outcomes: `GLFW_PRESS` and `GLFW_RELEASE`. Each one of the keys has a specific identifier: in our case, `GLFW_KEY_W`, `GLFW_KEY_S`, `GLFW_KEY_A`, and `GLFW_KEY_D`. If one of these keys is pressed, we print a message to the standard output stream stating so. Finally, if any of these keys was still pressed in the last frame, we also print the current position of the cursor using the function `glfwGetCursorPos`.
 
 When you run the application, be sure to press a key so something occurs. Although your screen will appear black, your output should look similar to the following:
 
@@ -126,7 +126,7 @@ void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 
 ### Mouse Scrolling Callback
 
-The mouse scroll callback is pretty similar. For a regular mouse, the `xoffset` input will always be zero, since the wheel is one-dimensional (either goes up or down). A value of `yoffset` of `1.0` means rolling one way, and `-1.0` the opposite. Test to determine which one is which. Note that the reason this callback gets both a `xoffset` and `yoffset` is to support more advanced input devices. 
+The mouse scroll callback is pretty similar. For a regular mouse, the `xoffset` input will always be zero, since the wheel is one-dimensional (either goes up or down). A value of `yoffset` of `1.0` means rolling one way, and `-1.0` the opposite. Test to determine which one is which. Note that the reason this callback gets both an `xoffset` and `yoffset` is to support more advanced input devices. 
 
 ```
 // glfw: Whenever the mouse scroll wheel scrolls, this callback is called.
@@ -227,7 +227,7 @@ Modify the mouse position and mouse button callbacks so the position of the curs
 
 
 
-## Section 4-3: Controlling the Camera with the Keyboard
+## Section 4-3: Controlling the Camera With the Keyboard
 
 The code for this section ([tut_04_03.cpp](./tut_04_03.cpp)) demonstrates how to do the following:
 
@@ -299,7 +299,7 @@ Finally, we will transfer its value to the vertex shader inside a uniform variab
 When you first start the application, you should see the image on the left. If you move the camera back (by pressing `S`) and then to the left (by pressing `A`), you should see something similar to the image on the right.
 
 
-![A multicolored 3D cube against a black background, generated using OpenGL. The cube is angled so the top and one side are visible with the top  colored pink and the side  colored green.](./camera_init.png) | ![A multicolored 3D cube against a black background, generated using OpenGL. The cube is angled so the top and two sides are visible. The top is colored pink, the right side is colored green, and the left side is colored blue. This image displays the same object as the previous image, but the viewpoint is farther away from the cube and has shifted slightly to the left.](./camera_s_a.png) 
+![A multicolored 3D cube against a black background, generated using OpenGL. The cube is angled so the top and one side are visible with the top colored pink and the side colored green.](./camera_init.png) | ![A multicolored 3D cube against a black background, generated using OpenGL. The cube is angled so the top and two sides are visible. The top is colored pink, the right side is colored green, and the left side is colored blue. This image displays the same object as the previous image, but the viewpoint is farther away from the cube and has shifted slightly to the left.](./camera_s_a.png) 
 
 #### Exercise
 
@@ -308,7 +308,7 @@ Modify the `UProcessInput` function to also handle the keys `Q` and `E`. For exa
 
 
 
-## Section 4-4: Controlling the Camera with the Keyboard and Mouse
+## Section 4-4: Controlling the Camera With the Keyboard and Mouse
 
 The code for this section ([tut_04_04.cpp](./tut_04_04.cpp)) demonstrates how to do the following:
 
