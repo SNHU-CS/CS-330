@@ -467,3 +467,5 @@ The following image shows the final result when `multipleTextures` is `true`:
 
 Instead of drawing the bandana over the emoji (where there is bandana), multiply/add/substract the values of these two textures in all areas of the image. What do you get? Do you understand why?
 
+_Congratulations, you have now reached the end of the tutorial for Module Five!_
+
