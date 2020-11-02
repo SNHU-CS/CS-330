@@ -1,5 +1,5 @@
 # Module Five Tutorial
-## Section 5-1: Loading and Image
+## Section 5-1: Loading an Image
 
 All the tutorials in this module require that we load an image. For this purpose, we are going to use the STB library. This library is a single-file library that does not require linking against any precompiled static or dynamic libraries: we just need to include the `stb_image.h` header file, as in:
 
