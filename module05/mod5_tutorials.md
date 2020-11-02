@@ -203,11 +203,11 @@ The following image shows the final result:
 
 ## Section 5-3: Texturing to a Cube
 
-The code for this section ([tut_05_03.cpp](./tut_05_03.cpp)) demonstrates how to
+The code for this section ([tut_05_03.cpp](./tut_05_03.cpp)) demonstrates how to:
 
-* texture a cube
+* Apply texture to a cube
 
-The code for this tutorial is almost identical to the previous one, demonstrating how the shader code does not need to change to apply a texture to a different (in this case, more complex) mesh. The most relevant changes are in function `UCreateMesh`, which now has the data -- vertex locations and vertex coordinates -- for a cube. Note that for this example, we have dropped the vertex colors, yet we keep the vertex locations as attribute `0` and the vertex coordinates as attribute `2` -- there is no requirement preventing us from skipping an attribute index.
+The code for this tutorial is almost identical to the previous one, demonstrating how the shader code does not need to change to apply a texture to a different (in this case, more complex) mesh. The most relevant changes are in function `UCreateMesh`, which now has the data -- vertex locations and vertex coordinates -- for a cube. Note that for this example, we have dropped the vertex colors, yet we keep the vertex locations as attribute `0` and the vertex coordinates as attribute `2`. There is no requirement preventing us from skipping an attribute index.
 
 ```
 GLfloat verts[] = {
@@ -281,22 +281,22 @@ glEnableVertexAttribArray(2);
 
 The following image shows the final result:
 
-![Textured cube](./happy_on_cube.png)
+![A textured cube created using OpenGL. The cube is tilted so three sides are visible, all of which have the same texture applied. The texutre is a simple yellow smiley face against a light blue background.](./happy_on_cube.png)
 
 
 ## Section 5-4: Tiling and Texture Wrapping
 
-The code for this section ([tut_05_04.cpp](./tut_05_04.cpp)) demonstrates how to
+The code for this section ([tut_05_04.cpp](./tut_05_04.cpp)) demonstrates how to:
 
-* tile a texture
-* configure the wrapping parameters of a texture
+* Tile a texture
+* Configure the wrapping parameters of a texture
 
 ### Texture Tiling
 
-Imagine that you have a texture of a brickwall that looks perfect when applied to a plane of size 2x2 meters. If we want to apply the same texture to a wall that extends for 100 meters, the texture will look awful: very stretched. To solve this problem, we can _tile_ the texture. And doing this in OpenGL is very simple: we just need to define two parameters:
+Imagine that you have a texture of a brickwall that looks perfect when applied to a plane of size 2x2 meters. If we want to apply the same texture to a wall that extends for 100 meters, the texture will appear very stretched and not produce the desired image. To solve this problem, we can _tile_ the texture. Doing this in OpenGL is very simple, we just need to define two parameters:
 
-* a scale factor for the horizontal axis of the texture
-* a scale factor for the vertical axis of the texture
+* A scale factor for the horizontal axis of the texture
+* A scale factor for the vertical axis of the texture
 
 We are going to encapsulate these two values inside a `vec2`, which is declared in a global variable in our unnamed namespace.
 
@@ -304,14 +304,14 @@ We are going to encapsulate these two values inside a `vec2`, which is declared 
 static glm::vec2 gUVScale(5.0f, 5.0f);
 ```
 
-We pass this vector as a uniform, therefore in `URender` we add the following two lines
+We pass this vector as a uniform. Therefore in `URender` we add the following two lines.
 
 ```
 GLint UVScaleLoc = glGetUniformLocation(gProgramId, "uvScale");
 glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 ```
 
-And in the fragment shader, we multiply the texture coordinates by these two scale factors
+And in the fragment shader, we multiply the texture coordinates by the following two scale factors.
 
 ```
 in vec2 vertexTextureCoordinate;
@@ -333,35 +333,32 @@ But how does GLSL's `texture` function deal with texture coordinates that fall o
 
 OpenGL supports four different wrapping modes:
 
-* `GL_REPEAT`: The default behavior; repeats the texture image. This means that the texel value is the same for texture coordinates `(0.2, 0.7)`, `(1.2, 0.7)` and `(33.2, 1000.7)`.
-* `GL_MIRRORED_REPEAT`: Same as GL_REPEAT but mirrors the image with each repeat: texture coordinates which truncate to an odd integer are mirrored values of the ones that truncate to an even integeger. For example, texture coordinate `0.7` is the same as `1.3` (they're both `0.3` from `1.0`). 
+* `GL_REPEAT`: The default behavior which repeats the texture image. This means that the texel value is the same for texture coordinates `(0.2, 0.7)`, `(1.2, 0.7)`, and `(33.2, 1000.7)`.
+* `GL_MIRRORED_REPEAT`: The same as `GL_REPEAT` but mirrors the image with each repeat. Texture coordinates that truncate to an odd integer are mirrored values of the ones that truncate to an even integeger. For example, texture coordinate `0.7` is the same as `1.3` (they're both `0.3` from `1.0`). 
 * `GL_CLAMP_TO_EDGE`: Clamps the vertex coordinates to the range `[0.0, 1.0]`.
 * `GL_CLAMP_TO_BORDER`: Clamps the vertex coordinates to the range `[0.0, 1.0]`. Coordinates outside the range are given a pre-defined border color.
 
 In order to facilitate visualizing the difference between these four wrapping modes, the `UProcessInput` function has been updated to enable switching between these four modes using keys `1`, `2`, `3` and `4`:
 
-* `1` --> `GL_REPEAT`
-* `2` --> `GL_MIRRORED_REPEAT`
-* `3` --> `GL_CLAMP_TO_EDGE`
-* `4` --> `GL_CLAMP_TO_BORDER`
+* `1` is used for `GL_REPEAT`
+* `2` is used for `GL_MIRRORED_REPEAT`
+* `3` is used for `GL_CLAMP_TO_EDGE`
+* `4` is used for `GL_CLAMP_TO_BORDER`
 
 Also in the same function, the keys `[` and `]` decrease and increase, respectively, the texture tiling parameters.
 
 The following image shows the final result for a tiling value of `(2.0, 2.0)`.
 
 
-![Repeat](./smiley_repeat.png) | ![Mirrored](./smiley_mirrored.png)
-![Clamped](./smiley_clamped.png) | ![Border](./smiley_border.png)
+![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. This image repeats four times on each side of the cube. All the smiley faces are right side up and facing in the same direction.](./smiley_repeat.png) | ![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. This image repeats four times on each side of the cube with the two smiley faces in the bottom row facing right side up and the two in the top row having been flipped upside-down. ](./smiley_mirrored.png)
+![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. Although there is space for the smiley face to repeat four times on each side of the cube, only one smiley face is present in the lower left corner of each side. The remaining background is the same light blue color as the background of the smiley face image.](./smiley_clamped.png) | ![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. Although there is space for the smiley face to repeat four times on each side of the cube, only one smiley face is present in the lower left corner of each side. The remaining background is a bright pink color.](./smiley_border.png)
 
 Top-left `GL_REPEAT`; top-right `GL_MIRRORED_REPEAT`; bottom-left `GL_CLAMP_TO_EDGE`; bottom-right `GL_CLAMP_TO_BORDER` (with a border color of `(1.0, 0.0, 1.0, 1.0)`).
 
 
 #### Exercise
 
-Switch between the different four wrapping modes (using keys `1`, `2`, `3` and `4`) at the same time that you examine the results for different texture tiling values (controled with keys `[` and `]`). Investigate what happens when
-
-* the scaling values increase
-* the scaling values are negative
+Switch between the different four wrapping modes (using keys `1`, `2`, `3` and `4`) at the same time that you examine the results for different texture tiling values (controled with keys `[` and `]`). Investigate what happens when the scaling values increase and when the scaling values are negative.
 
 
 
