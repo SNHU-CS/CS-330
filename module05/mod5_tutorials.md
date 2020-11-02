@@ -364,17 +364,17 @@ Switch between the different four wrapping modes (using keys `1`, `2`, `3` and `
 
 ## Section 5-5: Combining Multiple Textures
 
-The code for this section ([tut_05_05.cpp](./tut_05_05.cpp)) demonstrates how to
+The code for this section ([tut_05_05.cpp](./tut_05_05.cpp)) demonstrates how to:
 
-* combine more than one texture in the fragment shader
+* Combine more than one texture in the fragment shader
 
-The two textures that we want to combine are:
+The two textures that will be combining are a smiley face and a bandana.
 
-![Smiley](./smiley.png) | ![Bandana](./bandana.png)
+![A simple yellow smiley face against a light blue background.](./smiley.png) | ![A white bandana with snhu written on it. The background of this image is transparent, which is represented by a gray checked pattern.](./bandana.png)
 
-(the gray squares represent the transparent areas of the image)
+Note that the gray checked pattern represents the transparent areas of the image.
 
-Since we are going to use two different textures, we declare to _texture ids_ (and a boolean to turn on/off the second texture)
+Since we are going to use two different textures we declare two _texture IDs_ along with a boolean to turn the second texture on and off.
 
 ```
 GLuint gTextureIdHappy;
@@ -382,7 +382,7 @@ GLuint gTextureIdHat;
 bool gIsHatOn = true;
 ```
 
-and we load the two textures in `main`
+We load the two textures in `main`.
 
 ```
 const char * texFilename = "../../resources/textures/smiley.png";
@@ -405,14 +405,14 @@ glUniform1i(glGetUniformLocation(gProgramId, "uTextureBase"), 0);
 glUniform1i(glGetUniformLocation(gProgramId, "uTextureExtra"), 1);
 ```
 
-Also, we release this memory before exiting the application
+Also, we release this memory before exiting the application.
 
 ```
 UDestroyTexture(gTextureIdHappy);
 UDestroyTexture(gTextureIdHat);
 ```
 
-Note how we assign the base texture to texture unit 0, and the extra texture (the bandana) to texture unit 1. In the render function we activate active texture units 0 and 1 before rendering.
+Note how we assign the base texture to texture unit 0 and the extra texture (the bandana) to texture unit 1. In the render function we activate active texture units 0 and 1 before rendering.
 
 ```
 glActiveTexture(GL_TEXTURE0);
@@ -426,7 +426,7 @@ glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws 
 
 ### The Fragment Shader
 
-The vertex shader remains unchanged, but in the fragment shader now we have two `2DSampler` uniform variables, one for the smiley texture (`uTextureBase`) and the other one for the bandana (`uTextureExtra`). Remember that this second texture has a lot of transparency.
+The vertex shader remains unchanged but in the fragment shader now we have two `2DSampler` uniform variables, one for the smiley texture (`uTextureBase`) and the other one for the bandana (`uTextureExtra`). Remember that this second texture has a lot of transparency.
 
 ```
 in vec2 vertexTextureCoordinate;
@@ -455,12 +455,12 @@ In order to demonstrate the implementation, the `UProcessInput` has been modifie
 
 The following image shows the final result when `multipleTextures` is `true`:
 
-![Multiple Textures](./happy_with_bandana.png)
+![A square with two textures applied using OpenGL. The resulting appearance is a simple yellow smiley face against a light blue background, but the smiley face is wearing a white bandana that reads snhu.](./happy_with_bandana.png)
 
 
 #### Exercise
 
-Instead of drawing the bandana over the emoji (where there is bandana), multiply/add/substract the values of these two textures in all areas of the image. What do you get? Do you understand why?
+Instead of drawing the bandana over the emoji (where the bandana currently resides) multiply, add, and/or substract the values of these two textures in all areas of the image. What do you get? Do you understand why? For additional information, you may wish to review the LearnOpenGL section on [Blending](https://learnopengl.com/Advanced-OpenGL/Blending).
 
 _Congratulations, you have now reached the end of the tutorial for Module Five!_
 
