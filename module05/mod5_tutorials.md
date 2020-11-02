@@ -1,4 +1,5 @@
-# Section 5-1: Loading and Image
+# Module Five Tutorial
+## Section 5-1: Loading and Image
 
 All the tutorials in this module require that we load an image. For this purpose, we are going to use the STB library. This library is a single-file library that does not require linking against any precompiled static or dynamic libraries: we just need to include the `stb_image.h` header file, as in:
 
@@ -35,7 +36,7 @@ A few comments regarding the previous code snippet:
 And that's it for image loading (flipping and unloading).
 
 
-# Section 5-2: Loading and Applying a Texture
+## Section 5-2: Loading and Applying a Texture
 
 The code for this section ([tut_05_02.cpp](./tut_05_02.cpp)) demonstrates how to
 
@@ -43,7 +44,7 @@ The code for this section ([tut_05_02.cpp](./tut_05_02.cpp)) demonstrates how to
 * load and bind a texture
 * access a texture in the fragment shader
 
-## Assigning Texture Coordinates to a Mesh
+### Assigning Texture Coordinates to a Mesh
 
 For this example, we are going to texture a cube. Texture coordinates are just floating-point values that map an image to the range `[0.0, 1.0]` both in X and Y. However, as we will see later, texture coordinates can take values outside of the `[0.0, 1.0]` range.
 
@@ -77,7 +78,7 @@ glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof
 glEnableVertexAttribArray(2);
 ```
 
-## Loading and Binding a Texture
+### Loading and Binding a Texture
 
 In order to load and bind a texture, we introduce the new function `UCreateTexture`
 
@@ -156,7 +157,7 @@ glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 0);
 
 If we call `glActiveTexture` with parameter `GL_TEXTURE0`, then we pass to `glUniform1i` parameter `0`. If we had called `glActiveTexture` with parameter `GL_TEXTURE7`, then we would have had to pass to `glUniform1i` parameter `7`. The number of active texture units is implementation dependant, and can be queried from OpenGL.
 
-## Accessing a Texture in the Fragment Shader
+### Accessing a Texture in the Fragment Shader
 
 Each call to the vertex shader receives and outputs the vertex coordinates for a vertex, so OpenGL does a perspective-correct interpolation, producing the vertex coordinates to be used in the fragment shader.
 
@@ -195,14 +196,14 @@ The following image shows the final result:
 ![Textured plane](./happy_on_plane.png)
 
 
-### Exercise
+#### Exercise
 
 * Comment out the call to `flipImageVertically` (in `UCreateTexture`) and see what happens.
 * Try loading a grayscale image with just one channel. What does `flipImageVertically` return? And `UCreateTexture`? Can you upgrade `flipImageVertically` to handle this image format?
 * Change the active texture unit that stores the single image used in this tutorial. Put it in unit 5, or 11. What lines of code would you need to change to make it work?
 
 
-# Section 5-3: Texturing to a Cube
+## Section 5-3: Texturing to a Cube
 
 The code for this section ([tut_05_03.cpp](./tut_05_03.cpp)) demonstrates how to
 
@@ -285,14 +286,14 @@ The following image shows the final result:
 ![Textured cube](./happy_on_cube.png)
 
 
-# Section 5-4: Tiling and Texture Wrapping
+## Section 5-4: Tiling and Texture Wrapping
 
 The code for this section ([tut_05_04.cpp](./tut_05_04.cpp)) demonstrates how to
 
 * tile a texture
 * configure the wrapping parameters of a texture
 
-## Texture Tiling
+### Texture Tiling
 
 Imagine that you have a texture of a brickwall that looks perfect when applied to a plane of size 2x2 meters. If we want to apply the same texture to a wall that extends for 100 meters, the texture will look awful: very stretched. To solve this problem, we can _tile_ the texture. And doing this in OpenGL is very simple: we just need to define two parameters:
 
@@ -330,7 +331,7 @@ void main()
 
 But how does GLSL's `texture` function deal with texture coordinates that fall outside the range `[0.0, 1.0]`? For that we need to tell OpenGL how to _wrap_ the texture coordinates.
 
-## Texture Wrapping
+### Texture Wrapping
 
 OpenGL supports four different wrapping modes:
 
@@ -357,7 +358,7 @@ The following image shows the final result for a tiling value of `(2.0, 2.0)`.
 Top-left `GL_REPEAT`; top-right `GL_MIRRORED_REPEAT`; bottom-left `GL_CLAMP_TO_EDGE`; bottom-right `GL_CLAMP_TO_BORDER` (with a border color of `(1.0, 0.0, 1.0, 1.0)`).
 
 
-### Exercise
+#### Exercise
 
 Switch between the different four wrapping modes (using keys `1`, `2`, `3` and `4`) at the same time that you examine the results for different texture tiling values (controled with keys `[` and `]`). Investigate what happens when
 
@@ -366,7 +367,7 @@ Switch between the different four wrapping modes (using keys `1`, `2`, `3` and `
 
 
 
-# Section 5-5: Combining Multiple Textures
+## Section 5-5: Combining Multiple Textures
 
 The code for this section ([tut_05_05.cpp](./tut_05_05.cpp)) demonstrates how to
 
@@ -428,7 +429,7 @@ glBindTexture(GL_TEXTURE_2D, gTextureIdHat);
 glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 ```
 
-## The Fragment Shader
+### The Fragment Shader
 
 The vertex shader remains unchanged, but in the fragment shader now we have two `2DSampler` uniform variables, one for the smiley texture (`uTextureBase`) and the other one for the bandana (`uTextureExtra`). Remember that this second texture has a lot of transparency.
 
@@ -462,7 +463,7 @@ The following image shows the final result when `multipleTextures` is `true`:
 ![Multiple Textures](./happy_with_bandana.png)
 
 
-### Exercise
+#### Exercise
 
 Instead of drawing the bandana over the emoji (where there is bandana), multiply/add/substract the values of these two textures in all areas of the image. What do you get? Do you understand why?
 
