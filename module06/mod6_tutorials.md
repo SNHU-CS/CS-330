@@ -1,4 +1,5 @@
-# Section 6-1: The Phong Shading Model
+# Module Six Tutorial
+## Section 6-1: The Phong Shading Model
 
 The code for this section ([tut_06_01.cpp](./tut_06_01.cpp)) demonstrates how to
 
@@ -7,7 +8,7 @@ The code for this section ([tut_06_01.cpp](./tut_06_01.cpp)) demonstrates how to
 
 In order to demonstrate the Phong Shading model we are going to use a point light and a cube.
 
-## Creating a Point Light
+### Creating a Point Light
 
 In computer graphics, there are several types of lights (e.g. point, directional, area and spot lights). For this example we are going to add to our scene a point light. Point lights have a location, but do not have a direction (light emits uniformly in all directions). Therefore, a point light is described by:
 
@@ -23,7 +24,7 @@ uniform vec3 lightColor;
 uniform vec3 lightPos;
 ```
 
-## Implementing the Phong Shading Model
+### Implementing the Phong Shading Model
 
 The Phong Shading model approximates the interaction between light and the surface of an object by three different terms: the ambient, diffuse and specular components.
 
@@ -181,12 +182,12 @@ The following image shows the final result:
 
 ![Phong Shaded Cube](./phong_shaded.png)
 
-### Exercise
+#### Exercise
 
 Convert the `specularIntensity` and `highlightSize` local variables into uniform variables, and add code to the C++ application to control them via the keyboard (in `UProcessInput`), so you can increase/decrease their values at runtime.
 
 
-# Section 6-2: Animating an Object
+## Section 6-2: Animating an Object
 
 The code for this section ([tut_06_02.cpp](./tut_06_02.cpp)) demonstrates how to
 
@@ -226,7 +227,7 @@ If you run this application, you should see a scene similar to the one in tutori
 ![Orbit](./orbit02.png) | ![Orbit](./orbit03.png)
 
 
-### Exercise
+#### Exercise
 
 * Change the `angularVelocity` value. What happens when it is negative?
 * Change the axis of rotation to `(1.0, 0.0, 0.0)`, `(0.0, 0.0, 1.0)` and `(1.0, 1.0, 0.0)`. What is the effect of rotating around `(0.0, 1.0, 0.0)` versus `(0.0, -1.0, 0.0)`?
@@ -234,7 +235,7 @@ If you run this application, you should see a scene similar to the one in tutori
 
 
 
-# Section 6-3: Textures and the Phong Shading Model
+## Section 6-3: Textures and the Phong Shading Model
 
 The code for this section ([tut_06_03.cpp](./tut_06_03.cpp)) demonstrates how to
 
@@ -308,4 +309,6 @@ void main()
 The following image shows the final result. Remember that you can still pause/resume the light's animation with `K` and `L`, and that you can move the camera around using WASD controls and the mouse.
 
 ![Texture and Shading](./texture_and_shading.png)
+
+_Congratulations, you have now reached the end of the tutorial for Module Six!_
 
