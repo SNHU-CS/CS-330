@@ -230,7 +230,7 @@ If you run this application, you should see a scene similar to the one in tutori
 #### Exercise
 
 * Change the `angularVelocity` value. What happens when it is negative?
-* Change the axis of rotation to `(1.0, 0.0, 0.0)`, `(0.0, 0.0, 1.0)` and `(1.0, 1.0, 0.0)`. What is the effect of rotating around `(0.0, 1.0, 0.0)` versus `(0.0, -1.0, 0.0)`?
+* What is the effect of rotating around `(0.0, 1.0, 0.0)` versus `(0.0, -1.0, 0.0)`? AFter you observe the differences, try changing the axis of rotation to `(1.0, 0.0, 0.0)`, `(0.0, 0.0, 1.0)`, and `(1.0, 1.0, 0.0)` then see how the animation varies. 
 * As well as animating the position, animate the color of the light. In other words, in function `URender`, use the variable `gDeltaTime` to update the light's color (`gLightColor`). Hint: the RGB representation of a color is a 3D point, so you could rotate this _point_ the same way that we rotate the light's location -- just make sure that you normalize the rotated point so each color channel remains in the `[0.0, 1.0]` range, and then you convert to homogeneous coordinates 4D vector by tacking a `1.0` at the end of it.
 
 
