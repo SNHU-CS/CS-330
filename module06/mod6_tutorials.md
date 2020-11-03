@@ -1,10 +1,10 @@
 # Module Six Tutorial
 ## Section 6-1: The Phong Shading Model
 
-The code for this section ([tut_06_01.cpp](./tut_06_01.cpp)) demonstrates how to
+The code for this section ([tut_06_01.cpp](./tut_06_01.cpp)) demonstrates how to:
 
-* create a spotlight
-* implement the Phong Shading Model
+* Create a spotlight
+* Implement the Phong Shading Model
 
 In order to demonstrate the Phong Shading model we are going to use a point light and a cube.
 
@@ -189,9 +189,9 @@ Convert the `specularIntensity` and `highlightSize` local variables into uniform
 
 ## Section 6-2: Animating an Object
 
-The code for this section ([tut_06_02.cpp](./tut_06_02.cpp)) demonstrates how to
+The code for this section ([tut_06_02.cpp](./tut_06_02.cpp)) demonstrates how to:
 
-* animate an object
+* Animate an object
 
 Animating an object, in its simplest form, is just updating its location, orientation, size and/or any other attribute as a function of time. For this simple example, we are going to have the point light orbit around the origin. This will demonstrate how to use time to update the position of our light, but also will allow us to examine the results of the Phong Shading model for different relative positions of the light respect to the object, as well as the camera respect to the object and the light -- remember that you can still control the camera with the WASD controls and the mouse. Also, to have some control over the animation, we have updated the `UProcessInput` function to stop the orbiting when pressing key `k`, and resume it when pressing `L`.
 
@@ -237,9 +237,9 @@ If you run this application, you should see a scene similar to the one in tutori
 
 ## Section 6-3: Textures and the Phong Shading Model
 
-The code for this section ([tut_06_03.cpp](./tut_06_03.cpp)) demonstrates how to
+The code for this section ([tut_06_03.cpp](./tut_06_03.cpp)) demonstrates how to:
 
-* combine a texture with the Phong Shading model
+* Combine a texture with the Phong Shading model
 
 In `UCreateTexture` we now have three attributes for each vertex: position, normal and vertex coordinates. These have vertex attribute indices of 0, 1 and 2 respectively. Everything else is a combination of tutorials 6-1 and 6-2:
 
