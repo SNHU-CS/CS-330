@@ -114,7 +114,7 @@ bool UCreateTexture(const char* filename, GLuint &textureId)
         glGenerateMipmap(GL_TEXTURE_2D);
 
         stbi_image_free(image);
-        glBindTexture(GL_TEXTURE_2D, 0); // Unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind the texture.
 
         return true;
     }
@@ -124,7 +124,7 @@ bool UCreateTexture(const char* filename, GLuint &textureId)
 }
 ```
 
-This function only handles images with three and four channels (RGB and RGBA). The wrapping parameters will be explained later, but filtering parameters are configured to perform linear interpolation. When we read the texture we will likely not have integer texture coordinates, so what texel (pixel) do we access for texture coordinates `(5.2, 12.8)`? GL_LINEAR tells OpenGL to do a bilinear interpolation with the four closest neighboring texels: `(5, 12)`, `(5, 13)`, `(6, 12)` and `(6, 13)`.
+This function only handles images with three and four channels (RGB and RGBA). The wrapping parameters will be explained later, but filtering parameters are configured to perform linear interpolation. When we read the texture we will likely not have integer texture coordinates, so what texel (pixel) do we access for texture coordinates `(5.2, 12.8)`? GL_LINEAR tells OpenGL to do a bilinear interpolation with the four closest neighboring texels: `(5, 12)`, `(5, 13)`, `(6, 12)`, and `(6, 13)`.
 
 ```
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -203,9 +203,9 @@ The following image shows the final result:
 
 ## Section 5-3: Texturing to a Cube
 
-The code for this section ([tut_05_03.cpp](./tut_05_03.cpp)) demonstrates how to:
+The code for this section ([tut_05_03.cpp](./tut_05_03.cpp)) demonstrates how to do the following:
 
-* Apply texture to a cube
+* Apply texture to a cube.
 
 The code for this tutorial is almost identical to the previous one, demonstrating how the shader code does not need to change to apply a texture to a different (in this case, more complex) mesh. The most relevant changes are in function `UCreateMesh`, which now has the data (vertex locations and vertex coordinates) for a cube. Note that for this example, we have dropped the vertex colors, yet we keep the vertex locations as attribute `0` and the vertex coordinates as attribute `2`. There is no requirement preventing us from skipping an attribute index.
 
@@ -334,7 +334,7 @@ But how does GLSL's `texture` function deal with texture coordinates that fall o
 OpenGL supports four different wrapping modes:
 
 * `GL_REPEAT`: The default behavior which repeats the texture image. This means that the texel value is the same for texture coordinates `(0.2, 0.7)`, `(1.2, 0.7)`, and `(33.2, 1000.7)`.
-* `GL_MIRRORED_REPEAT`: The same as `GL_REPEAT` but mirroring the image with each repeat. Texture coordinates that truncate to an odd integer are mirrored values of the ones that truncate to an even integeger. For example, texture coordinate `0.7` is the same as `1.3` (they're both `0.3` from `1.0`). 
+* `GL_MIRRORED_REPEAT`: The same as `GL_REPEAT` but mirroring the image with each repeat. Texture coordinates that truncate to an odd integer are mirrored values of the ones that truncate to an even integer. For example, texture coordinate `0.7` is the same as `1.3` (they're both `0.3` from `1.0`). 
 * `GL_CLAMP_TO_EDGE`: This clamps the vertex coordinates to the range `[0.0, 1.0]`.
 * `GL_CLAMP_TO_BORDER`: This clamps the vertex coordinates to the range `[0.0, 1.0]`. Coordinates outside the range are given a pre-defined border color.
 
@@ -345,12 +345,12 @@ In order to facilitate visualizing the differences between these four wrapping m
 * `3` is used for `GL_CLAMP_TO_EDGE`
 * `4` is used for `GL_CLAMP_TO_BORDER`
 
-Also in the same function, the keys `[` and `]` decrease and increase, respectively, the texture tiling parameters.
+Also in the same function, the keys `[` and `]` decrease and increase the texture tiling parameters, respectively.
 
-The following image shows the final result for a tiling value of `(2.0, 2.0)`.
+The following images show the final results for a tiling value of `(2.0, 2.0)`.
 
 
-![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. This image repeats four times on each side of the cube. All the smiley faces are right side up and facing in the same direction.](./smiley_repeat.png) | ![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. This image repeats four times on each side of the cube with the two smiley faces in the bottom row facing right side up and the two in the top row having been flipped upside down. ](./smiley_mirrored.png)
+![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. This image repeats four times on each side of the cube. All the smiley faces are right side up and facing in the same direction.](./smiley_repeat.png) | ![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. This image repeats four times on each side of the cube with the two smiley faces in the bottom row facing right-side up and the two in the top row having been flipped upside down. ](./smiley_mirrored.png)
 ![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. Although there is space for the smiley face to repeat four times on each side of the cube, only one smiley face is present in the lower-left corner of each side. The remaining background is the same light blue color as the background of the smiley face image.](./smiley_clamped.png) | ![A textured cube generated using OpenGL. The cube is tilted so three sides are visible. The applied texture is a simple yellow smiley face against a light blue background. Although there is space for the smiley face to repeat four times on each side of the cube, only one smiley face is present in the lower-left corner of each side. The remaining background is a bright pink color.](./smiley_border.png)
 
 Top-left `GL_REPEAT`; top-right `GL_MIRRORED_REPEAT`; bottom-left `GL_CLAMP_TO_EDGE`; bottom-right `GL_CLAMP_TO_BORDER` (with a border color of `(1.0, 0.0, 1.0, 1.0)`).
