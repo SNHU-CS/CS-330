@@ -181,7 +181,7 @@ This example application renders the light as a small white cube for visualizati
 
 The following image shows the final result:
 
-![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and appears in the foreground to right. It is white and is used as a light source. The large cube appears orange in color and is lightest in the upper-right corner, with a shadow being cast the further away the surface is from that point.](./phong_shaded.png)
+![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and appears in the foreground to right. It is white and is used as a light source. The larger cube appears orange in color and is lightest in the upper-right corner, with a shadow being cast the further away the surface is from that point.](./phong_shaded.png)
 
 #### Exercise
 
