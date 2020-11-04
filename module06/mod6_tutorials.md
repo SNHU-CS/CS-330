@@ -10,7 +10,7 @@ In order to demonstrate the Phong Lighting Model, we are going to use a point li
 
 ### Creating a Point Light
 
-In computer graphics, there are several types of lights (such as point, directional, area, and spot lights). For this example, we are going to add a point light to our scene. Point lights have a location but do not have a direction since they emit light uniformly in all directions. Therefore, a point light is described by the following two components:
+In computer graphics, there are several types of lights (such as point, directional, area, and spot lights). For this example, we are going to add a point light to our scene. Point lights have a location but do not have a direction, since they emit light uniformly in all directions. Therefore, a point light is described by the following two components:
 
 * Its position in the world
 * Its color
@@ -125,13 +125,13 @@ void main()
 {
     gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
 
-    vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment or pixel position in world space only (exclude view and projection)
+    vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment or pixel position in world space only (excludes view and projection)
 
     vertexNormal = mat3(transpose(inverse(model))) * normal; // Gets normal vectors in world space only and excludes normal translation properties
 }
 ```
 
-In the fragment shader, we take the object color, position, and normal, as well as the light and camera properties to compute the three terms of the Phong Lighting model.
+In the fragment shader, we take the object color, position, and normal, as well as the light and camera properties, to compute the three terms of the Phong Lighting model.
 
 ```
 in vec3 vertexNormal; // For incoming normals
@@ -168,16 +168,16 @@ void main()
     float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
     vec3 specular = specularIntensity * specularComponent * lightColor;
 
-    // Calculate phong result.
+    // Calculate Phong result.
     vec3 phong = (ambient + diffuse + specular) * objectColor;
 
     fragmentColor = vec4(phong, 1.0f); // Send lighting results to GPU.
 }
 ```
 
-We have defined two floating-point variables, `specularIntensity` and `highlightSize`, which are required in the computation of the specular light. These are properties of the material of the object (as the color) but for this simple example are hardcoded inside the fragment shader.
+We have defined two floating-point variables, `specularIntensity` and `highlightSize`, which are required in the computation of the specular light. These are properties of the material of the object (such as the color), but for this simple example are hardcoded inside the fragment shader.
 
-This example application renders the light as a small white cube for visualization purposes. Take a look at the `URender` function to understand how the same cube mesh is rendered a second time with a different model matrix specific for this smaller cube.
+This example application renders the light as a small white cube for visualization purposes. Take a look at the `URender` function to understand how the same cube mesh is rendered a second time with a different model matrix specific to this smaller cube.
 
 The following image shows the final result:
 
@@ -194,7 +194,7 @@ The code for this section ([tut_06_02.cpp](./tut_06_02.cpp)) demonstrates how to
 
 * Animate an object.
 
-Animating an object, in its simplest form, is just updating its location, orientation, size and any other attributes as a function of time. For this simple example, we are going to have the point light orbit around the origin. This will demonstrate how to use time to update the position of our light. It will also allow us to examine the results of the Phong Lighting model for different relative positions of the light respective to the object, as well as the camera in respect to the object and the light. Remember that you can still control the camera with the WASD controls and the mouse. Also, to have some control over the animation, we have updated the `UProcessInput` function to stop the orbiting when pressing key `K`, and resume it when pressing `L`.
+Animating an object, in its simplest form, is just updating its location, orientation, size, and any other attributes as a function of time. For this simple example, we are going to have the point light orbit around the origin. This will demonstrate how to use time to update the position of our light. It will also allow us to examine the results of the Phong Lighting model for different relative positions of the light and the object, as well as the camera in respect to the object and the light. Remember that you can still control the camera with the WASD controls and the mouse. Also, to have some control over the animation, we have updated the `UProcessInput` function to stop the orbiting when pressing key `K`, and resume it when pressing `L`.
 
 In `URender` we define the orbiting angular speed as `45` degrees/second and update the position by rotating it around the Y axis (the up direction in world space). Also remember that variable `gDeltaTime` holds the time elapsed in seconds since the last frame (the last iteration of the render loop).
 
@@ -224,8 +224,8 @@ glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition
 
 If you run this application, you should see a scene similar to the one in tutorial 6-1, but now the light should be moving. Remember that you can pause its motion with key `K` and resume with `L`.
 
-![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The large cube appears orange in color. Here the smaller cube is positioned to the upper-left of the larger one and provides just a bit of light on the left side of the larger cube, with the rest in shadow.](./orbit00.png) | ![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The large cube appears orange in color. Here the smaller cube is behind the larger one, but is just barely visible to the upper-right. The larger cube is almost completely in shadow.](./orbit01.png)
-![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The large cube appears orange in color. Here the smaller cube is directly in front of the larger one so it floats almost in line with the top of the larger cube. This creates a very bright spot on the larger cube and the rest of its face is also illuminated, though not to quite the same extreme.](./orbit02.png) | ![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The large cube appears orange in color. Here the smaller cube is in front of the larger one but is just to the upper-left of it. This makes the upper-left the brightest spot, while the rest of the larger cube's face is slightly more shadowed further away from the light source.](./orbit03.png)
+![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The larger cube appears orange in color. Here the smaller cube is positioned to the upper-left of the larger one and provides just a bit of light on the left side of the larger cube, with the rest in shadow.](./orbit00.png) | ![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The larger cube appears orange in color. Here the smaller cube is behind the larger one, but is just barely visible to the upper-right. The larger cube is almost completely in shadow.](./orbit01.png)
+![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The larger cube appears orange in color. Here the smaller cube is directly in front of the larger one so it floats almost in line with the top of the larger cube. This creates a very bright spot on the larger cube and the rest of its face is also illuminated, though not to quite the same extreme.](./orbit02.png) | ![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The larger cube appears orange in color. Here the smaller cube is in front of the larger one but is just to the upper-left of it. This makes the upper-left the brightest spot, while the rest of the larger cube's face is slightly more shadowed further away from the light source.](./orbit03.png)
 
 
 #### Exercise
@@ -308,7 +308,7 @@ void main()
 
 The following image shows the final result. Remember that you can still pause and resume the light's animation with `K` and `L`, and that you can move the camera around using WASD controls and the mouse.
 
-![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The large cube has a tiled smiley face texture applied so there is a five-by-five grid of smiley faces on each face. The smileys are yellow in color against a light blue background. The smaller cube is slightly in front of the larger cube and is poitioned to the upper-left. This makes the upper-left side of the larger cube appear brightest with the surface seeming darker the further away it is from the light source.](./texture_and_shading.png)
+![Two cubes, one large and one small, created using OpenGL. The smaller cube is about a quarter as tall as the larger one and is used as a light source, so it appears white. The larger cube has a tiled smiley face texture applied so there is a five-by-five grid of smiley faces on each face. The smileys are yellow in color against a light blue background. The smaller cube is slightly in front of the larger cube and is poitioned to the upper-left. This makes the upper-left side of the larger cube appear brightest, with the surface seeming darker the further away it is from the light source.](./texture_and_shading.png)
 
 _Congratulations, you have now reached the end of the tutorial for Module Six!_
 
