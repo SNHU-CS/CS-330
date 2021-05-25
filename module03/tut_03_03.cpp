@@ -18,26 +18,26 @@ using namespace std; // Standard namespace
 // Unnamed namespace
 namespace
 {
-const char* const WINDOW_TITLE = "Tutorial 3.3"; // Macro for window title
+    const char* const WINDOW_TITLE = "Tutorial 3.3"; // Macro for window title
 
-// Variables for window width and height
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+    // Variables for window width and height
+    const int WINDOW_WIDTH = 800;
+    const int WINDOW_HEIGHT = 600;
 
-// Stores the GL data relative to a given mesh
-struct GLMesh
-{
-    GLuint vao;         // Handle for the vertex array object
-    GLuint vbos[2];     // Handles for the vertex buffer objects
-    GLuint nIndices;    // Number of indices of the mesh
-};
+    // Stores the GL data relative to a given mesh
+    struct GLMesh
+    {
+        GLuint vao;         // Handle for the vertex array object
+        GLuint vbos[2];     // Handles for the vertex buffer objects
+        GLuint nIndices;    // Number of indices of the mesh
+    };
 
-// Main GLFW window
-GLFWwindow* gWindow = nullptr;
-// Triangle mesh data
-GLMesh gMesh;
-// Shader program
-GLuint gProgramId;
+    // Main GLFW window
+    GLFWwindow* gWindow = nullptr;
+    // Triangle mesh data
+    GLMesh gMesh;
+    // Shader program
+    GLuint gProgramId;
 }
 
 /* User-defined Function prototypes to:
@@ -45,46 +45,46 @@ GLuint gProgramId;
  * redraw graphics on the window when resized,
  * and render graphics on the screen
  */
-bool UInitialize(int, char*[], GLFWwindow** window);
+bool UInitialize(int, char* [], GLFWwindow** window);
 void UResizeWindow(GLFWwindow* window, int width, int height);
 void UProcessInput(GLFWwindow* window);
-void UCreateMesh(GLMesh &mesh);
-void UDestroyMesh(GLMesh &mesh);
+void UCreateMesh(GLMesh& mesh);
+void UDestroyMesh(GLMesh& mesh);
 void URender();
-bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId);
+bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
 void UDestroyShaderProgram(GLuint programId);
 
 
 /* Vertex Shader Source Code*/
-const GLchar * vertexShaderSource = GLSL(440,
-    layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
-    layout (location = 1) in vec4 color;  // Color data from Vertex Attrib Pointer 1
+const GLchar* vertexShaderSource = GLSL(440,
+    layout(location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
+layout(location = 1) in vec4 color;  // Color data from Vertex Attrib Pointer 1
 
-    out vec4 vertexColor; // variable to transfer color data to the fragment shader
+out vec4 vertexColor; // variable to transfer color data to the fragment shader
 
-    //Global variables for the  transform matrices
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
+//Global variables for the  transform matrices
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-    void main()
-    {
-        gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices to clip coordinates
-        vertexColor = color; // references incoming color data
-    }
+void main()
+{
+    gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices to clip coordinates
+    vertexColor = color; // references incoming color data
+}
 );
 
 
 /* Fragment Shader Source Code*/
-const GLchar * fragmentShaderSource = GLSL(440,
+const GLchar* fragmentShaderSource = GLSL(440,
     in vec4 vertexColor; // Variable to hold incoming color data from vertex shader
 
-    out vec4 fragmentColor;
+out vec4 fragmentColor;
 
-    void main()
-    {
-        fragmentColor = vec4(vertexColor);
-    }
+void main()
+{
+    fragmentColor = vec4(vertexColor);
+}
 );
 
 
@@ -143,7 +143,7 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
 
     // GLFW: window creation
     // ---------------------
-    *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
+    * window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
     if (*window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -236,16 +236,16 @@ void URender()
 
 
 // Implements the UCreateMesh function
-void UCreateMesh(GLMesh &mesh)
+void UCreateMesh(GLMesh& mesh)
 {
     // Specifies screen coordinates (x,y) and color for triangle vertices
-    GLfloat verts[]=
+    GLfloat verts[] =
     {
-    // Vertex Positions    // Colors
-     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f, // Top Right Vertex 0
-     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f, // Bottom Right Vertex 1
-    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f, // Bottom Left Vertex 2
-    -0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f, 1.0f  // Top Left Vertex 3
+        // Vertex Positions    // Colors
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f, // Top Right Vertex 0
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f, // Bottom Right Vertex 1
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f, // Bottom Left Vertex 2
+        -0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f, 1.0f  // Top Left Vertex 3
     };
 
     const GLuint floatsPerVertex = 3;
@@ -262,13 +262,13 @@ void UCreateMesh(GLMesh &mesh)
     // Data for the indices
     GLushort indices[] = { 0, 1, 3,  // Triangle 1
                          1, 2, 3   // Triangle 2
-                        };
+    };
     mesh.nIndices = sizeof(indices) / sizeof(indices[0]);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.vbos[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride =  sizeof(float) * (floatsPerVertex + floatsPerColor);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerColor);// The number of floats before each
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -279,7 +279,7 @@ void UCreateMesh(GLMesh &mesh)
 }
 
 
-void UDestroyMesh(GLMesh &mesh)
+void UDestroyMesh(GLMesh& mesh)
 {
     glDeleteVertexArrays(1, &mesh.vao);
     glDeleteBuffers(2, mesh.vbos);
@@ -287,7 +287,7 @@ void UDestroyMesh(GLMesh &mesh)
 
 
 // Implements the UCreateShaders function
-bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId)
+bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId)
 {
     // Compilation and linkage error reporting
     int success = 0;
