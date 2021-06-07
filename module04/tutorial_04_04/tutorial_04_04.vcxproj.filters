@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\tut_04_04.cpp">
+    <ClCompile Include="..\scene3D">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
