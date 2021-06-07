@@ -1,3 +1,4 @@
+// UPDATED CAMERA.H FILE REQUIRED.
 #include <iostream>             // cout, cerr
 #include <cstdlib>              // EXIT_FAILURE
 #include <GL/glew.h>            // GLEW library
@@ -20,7 +21,7 @@ using namespace std; // Standard namespace
 // Unnamed namespace
 namespace
 {
-const char* const WINDOW_TITLE = "Tutorial 4.4"; // Macro for window title
+const char* const WINDOW_TITLE = "Katie'S Assignment"; // Macro for window title
 
 // Variables for window width and height
 const int WINDOW_WIDTH = 800;
@@ -30,8 +31,8 @@ const int WINDOW_HEIGHT = 600;
 struct GLMesh
 {
     GLuint vao;         // Handle for the vertex array object
-    GLuint vbo;         // Handle for the vertex buffer object
-    GLuint nVertices;    // Number of indices of the mesh
+    GLuint vbos[2];     // Handles for the vertex buffer objects
+    GLuint nIndices;    // Number of indices of the mesh
 };
 
 // Main GLFW window
@@ -208,14 +209,21 @@ void UProcessInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        gCamera.ProcessKeyboard(FORWARD, gDeltaTime);
+    // move scene backward, forward
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         gCamera.ProcessKeyboard(BACKWARD, gDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(FORWARD, gDeltaTime);
+    // move scene left, right
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         gCamera.ProcessKeyboard(LEFT, gDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         gCamera.ProcessKeyboard(RIGHT, gDeltaTime);
+    //move scene down, up
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(UP, gDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(DOWN, gDeltaTime);
 }
 
 
@@ -261,7 +269,7 @@ void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
     switch (button)
     {
         case GLFW_MOUSE_BUTTON_LEFT:
-        {
+ {
             if (action == GLFW_PRESS)
                 cout << "Left mouse button pressed" << endl;
             else
@@ -315,7 +323,14 @@ void URender()
 
     // camera/view transformation
     glm::mat4 view = gCamera.GetViewMatrix();
+/*
+    // camera/view transformation - stationary
+    //glm::mat4 view = glm::lookAt(gCameraPos, gCameraPos + gCameraFront, gCameraUp);
 
+
+    // Creates a orthographic projection
+    //glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);
+ */
     // Creates a perspective projection
     glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
@@ -335,7 +350,7 @@ void URender()
     glBindVertexArray(gMesh.vao);
 
     // Draws the triangles
-    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 
     // Deactivate the Vertex Array Object
     glBindVertexArray(0);
@@ -348,67 +363,45 @@ void URender()
 // Implements the UCreateMesh function
 void UCreateMesh(GLMesh &mesh)
 {
-     // Vertex data
+    // Using indexed drawing- store only the unique vertices and then specify the order at which we want to draw these vertices in.
+    // Position and Color data of pyramid
     GLfloat verts[] = {
         // Vertex Positions    // Colors (r,g,b,a)
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.0f,  0.5f, 0.0f,   1.0f, 0.5f, 0.0f, 1.0f, // V0 Top center vertex
+         0.5f, -0.5f, 0.5f,   0.0f, 1.0f, 0.5f, 1.0f, // V1 Front Bottom-Right
+        -0.5f, -0.5f, 0.5f,   0.5f, 0.0f, 1.0f, 1.0f, // V2 Front Bottom-Left
 
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.5f,  -0.5f, -0.5f,  1.0f, 0.0f, 1.0f, 1.0f, // V3 Back bottom-right
+         -0.5f, -0.5f, -0.5f,  0.5f, 0.5f, 1.0f, 1.0f, // V4 Back bottom-left
+    };
 
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f
+    // Index data to share position data of pyramid
+    GLushort indices[] = {
+        0, 1, 2,  // Triangle 1 - front
+        0, 1, 3,  // Triangle 2 - right
+        0, 3, 4,  // Triangle 3 - back
+        0, 2, 4,  // Triangle 4 - left
+        1, 2, 4,  // Triangle 5 - bottom/front
+        1, 3, 4,   // Triangle 6 - bottom/back
     };
 
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerColor = 4;
 
-    mesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerColor));
-
     glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
     glBindVertexArray(mesh.vao);
 
-    // Create VBO
-    glGenBuffers(1, &mesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // Activates the buffer
+    // Create 2 buffers: first one for the vertex data; second one for the indices
+    glGenBuffers(2, mesh.vbos);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbos[0]); // Activates the buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
-    // Strides between vertex coordinates
-    GLint stride =  sizeof(float) * (floatsPerVertex + floatsPerColor);
+    mesh.nIndices = sizeof(indices) / sizeof(indices[0]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.vbos[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerColor);// The number of floats before each
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -422,7 +415,7 @@ void UCreateMesh(GLMesh &mesh)
 void UDestroyMesh(GLMesh &mesh)
 {
     glDeleteVertexArrays(1, &mesh.vao);
-    glDeleteBuffers(1, &mesh.vbo);
+    glDeleteBuffers(1, mesh.vbos);
 }
 
 
