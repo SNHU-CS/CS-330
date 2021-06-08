@@ -76,10 +76,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
+    <IncludePath>D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLFW\include;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\glm;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\include;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLAD;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\lib\Release\x64;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\lib\Release\Win32;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLFW\lib-vc2019;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
+    <IncludePath>D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLFW\include;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\glm;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\include;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLAD;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\lib\Release\x64;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\lib\Release\Win32;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLFW\lib-vc2019;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLFW\include;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\glm;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\include;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLAD;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\lib\Release\x64;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\lib\Release\Win32;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLFW\lib-vc2019;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLFW\include;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\glm;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\include;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLAD;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\lib\Release\x64;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLEW\lib\Release\Win32;D:\ladyg\Documents\coding projects\Code Libraries\OpenGL\GLFW\lib-vc2019;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
