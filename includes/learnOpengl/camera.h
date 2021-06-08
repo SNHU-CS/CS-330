@@ -102,6 +102,8 @@ public:
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
+    // handles changes in orientation
+ 
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
     {
         xoffset *= MouseSensitivity;
@@ -124,6 +126,7 @@ public:
     }
 
     // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
+    // zoom value is clamped to the range [1.0, 45.0] degrees.
     void ProcessMouseScroll(float yoffset)
     {
         Zoom -= (float)yoffset;

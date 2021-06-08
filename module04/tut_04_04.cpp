@@ -21,36 +21,36 @@ using namespace std; // Standard namespace
 // Unnamed namespace
 namespace
 {
-const char* const WINDOW_TITLE = "Katie'S Assignment"; // Macro for window title
+    const char* const WINDOW_TITLE = "Katie'S Assignment"; // Macro for window title
 
-// Variables for window width and height
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+    // Variables for window width and height
+    const int WINDOW_WIDTH = 800;
+    const int WINDOW_HEIGHT = 600;
 
-// Stores the GL data relative to a given mesh
-struct GLMesh
-{
-    GLuint vao;         // Handle for the vertex array object
-    GLuint vbos[2];     // Handles for the vertex buffer objects
-    GLuint nIndices;    // Number of indices of the mesh
-};
+    // Stores the GL data relative to a given mesh
+    struct GLMesh
+    {
+        GLuint vao;         // Handle for the vertex array object
+        GLuint vbos[2];     // Handles for the vertex buffer objects
+        GLuint nIndices;    // Number of indices of the mesh
+    };
 
-// Main GLFW window
-GLFWwindow* gWindow = nullptr;
-// Triangle mesh data
-GLMesh gMesh;
-// Shader program
-GLuint gProgramId;
+    // Main GLFW window
+    GLFWwindow* gWindow = nullptr;
+    // Triangle mesh data
+    GLMesh gMesh;
+    // Shader program
+    GLuint gProgramId;
 
-// camera
-Camera gCamera(glm::vec3(0.0f, 0.0f, 3.0f));
-float gLastX = WINDOW_WIDTH / 2.0f;
-float gLastY = WINDOW_HEIGHT / 2.0f;
-bool gFirstMouse = true;
+    // camera
+    Camera gCamera(glm::vec3(0.0f, 0.0f, 7.0f));
+    float gLastX = WINDOW_WIDTH / 2.0f;
+    float gLastY = WINDOW_HEIGHT / 2.0f;
+    bool gFirstMouse = true;
 
-// timing
-float gDeltaTime = 0.0f; // time between current frame and last frame
-float gLastFrame = 0.0f;
+    // timing
+    float gDeltaTime = 0.0f; // time between current frame and last frame
+    float gLastFrame = 0.0f;
 
 }
 
@@ -61,12 +61,14 @@ float gLastFrame = 0.0f;
  */
 bool UInitialize(int, char*[], GLFWwindow** window);
 void UResizeWindow(GLFWwindow* window, int width, int height);
-void UProcessInput(GLFWwindow* window);
+void UProcessKeyboard(GLFWwindow* window);
+void switchOrthoPerspective(GLFWwindow* window, int key, int scancode, int action, int mods);
 void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos);
 void UMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void UCreateMesh(GLMesh &mesh);
 void UDestroyMesh(GLMesh &mesh);
+void enableView(GLFWwindow* window);
 void URender();
 bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId);
 void UDestroyShaderProgram(GLuint programId);
@@ -118,7 +120,12 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
 
     // Sets the background color of the window to black (it will be implicitely used by glClear)
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    // Converts standard RGB decimal colors (r, g, b, a) into floats.
+    // RGB = (1.0f/255.0) * decimalCode; It doesn't hurt to add .0 to the end
+    float red = (1.0f / 255.0) * 55.0;
+    float grn = (1.0f / 255.0) * 55.0;
+    float blu = (1.0f / 255.0) * 255.0;
+    glClearColor(red, grn, blu, 1.0f);
 
     // render loop
     // -----------
@@ -132,9 +139,12 @@ int main(int argc, char* argv[])
 
         // input
         // -----
-        UProcessInput(gWindow);
+        UProcessKeyboard(gWindow);
+        //changeProjection(gWindow);
 
         // Render this frame
+        enableView(gWindow);
+
         URender();
 
         glfwPollEvents();
@@ -179,7 +189,8 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
     glfwSetScrollCallback(*window, UMouseScrollCallback);
     glfwSetMouseButtonCallback(*window, UMouseButtonCallback);
 
-    // tell GLFW to capture our mouse
+
+    // tell GLFW to capture mouse
     glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // GLEW: initialize
@@ -201,8 +212,9 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
 }
 
 
+
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-void UProcessInput(GLFWwindow* window)
+void UProcessKeyboard(GLFWwindow* window)
 {
     static const float cameraSpeed = 2.5f;
 
@@ -226,12 +238,6 @@ void UProcessInput(GLFWwindow* window)
         gCamera.ProcessKeyboard(DOWN, gDeltaTime);
 }
 
-
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-void UResizeWindow(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
 
 
 // glfw: whenever the mouse moves, this callback is called
@@ -301,57 +307,117 @@ void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
     }
 }
 
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+void UResizeWindow(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+
+
+void switchOrthoPerspective(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    // Creates a perspective projection
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+    // Creates a orthographic projection
+   // glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    GLint projLoc = glGetUniformLocation(gProgramId, "projection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+
+void enableView(GLFWwindow* window)
+{    // Enable z-depth
+    glEnable(GL_DEPTH_TEST);
+
+    // Clear the frame and z buffers
+    // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Transforms the camera: move the camera
+    // stationary glm::mat4 view = glm::translate(glm::vec3(0.0f, 0.0f, -5.0f));
+    // camera/view transformation
+    glm::mat4 view = gCamera.GetViewMatrix();
+    GLint viewLoc = glGetUniformLocation(gProgramId, "view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    GLint projLoc = glGetUniformLocation(gProgramId, "projection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glfwSetKeyCallback(window, switchOrthoPerspective);
+
+    // Set the shader to be used
+    glUseProgram(gProgramId);
+};
+
 
 // Function called to render a frame
 void URender()
 {
-    // Enable z-depth
-    glEnable(GL_DEPTH_TEST);
-    
-    // Clear the frame and z buffers
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // 1. Scales the object by 2
-    glm::mat4 scale = glm::scale(glm::vec3(2.0f, 2.0f, 2.0f));
-    // 2. Rotates shape by 15 degrees in the x axis
-    glm::mat4 rotation = glm::rotate(45.0f, glm::vec3(1.0, 1.0f, 1.0f));
-    // 3. Place object at the origin
-    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
+    // declare objects
+    glm::mat4 scale;
+    glm::mat4 rotation;
+    glm::mat4 translation;
+    glm::mat4 model = translation * rotation * scale;;
+    GLint modelLoc;
+
+     // **********************************
+    // dresser cuboid
+    // create model view: scale, rotate, translate
+    scale = glm::scale(glm::vec3(0.8f, 1.2f, 1.0f));
+    rotation = glm::rotate(15.0f, glm::vec3(0.0f, 0.5f, 0.0f));
+    translation = glm::translate(glm::vec3(-4.0f, -1.5f, 0.0f));
+
     // Model matrix: transformations are applied right-to-left order
-    glm::mat4 model = translation * rotation * scale;
-
-    // camera/view transformation
-    glm::mat4 view = gCamera.GetViewMatrix();
-/*
-    // camera/view transformation - stationary
-    //glm::mat4 view = glm::lookAt(gCameraPos, gCameraPos + gCameraFront, gCameraUp);
-
-
-    // Creates a orthographic projection
-    //glm::mat4 projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);
- */
-    // Creates a perspective projection
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-
-    // Set the shader to be used
-    glUseProgram(gProgramId);
-
+    model = translation * rotation * scale;
     // Retrieves and passes transform matrices to the Shader program
-    GLint modelLoc = glGetUniformLocation(gProgramId, "model");
-    GLint viewLoc = glGetUniformLocation(gProgramId, "view");
-    GLint projLoc = glGetUniformLocation(gProgramId, "projection");
-
+    modelLoc = glGetUniformLocation(gProgramId, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    // Activate the VBOs contained within the mesh's VAO
+    // Activate the VBOs contained within the mesh's VA
     glBindVertexArray(gMesh.vao);
+    // draws primary dresser cube
+    glDrawElements(GL_TRIANGLE_STRIP, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 
-    // Draws the triangles
-    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 
+    // **********************************
+    // small legs (4) cuboid
+    // uses same rotation as dresser cuboid. does not need to be redefined
+   
+    // scale for legs (uniform size for all 4 legs)
+    scale = glm::scale(glm::vec3(0.15f, 0.4f, 0.2f));
+
+    // each leg has a unique position
+    glm::vec3 legPosition[] = {
+    glm::vec3(-3.5f, -1.8f, -0.6f), // right front leg
+    glm::vec3(-4.5f, -1.8f, -0.6f), // left front leg
+    glm::vec3(-3.5f, -1.8f, -1.6f), // right back leg
+    glm::vec3(-4.5f, -1.8f, -1.6f) // left back leg
+    };
+
+    // counts the number of objects
+    int legCount = sizeof(legPosition) / sizeof(legPosition[0]);
+
+    // draws each leg
+    for (unsigned int i = 0; i < legCount; i++)
+    {
+        // recalculates model matrix with new position
+        translation = glm::translate(glm::vec3(legPosition[i]));
+        model = translation * rotation * scale;
+
+        // Retrieves and passes transform matrices to the Shader program
+        modelLoc = glGetUniformLocation(gProgramId, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+        glBindVertexArray(gMesh.vao);
+
+        // draws each leg
+        glDrawElements(GL_TRIANGLE_STRIP, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+    }
+
+    //----------------------------------------------------------------
     // Deactivate the Vertex Array Object
     glBindVertexArray(0);
 
@@ -363,26 +429,33 @@ void URender()
 // Implements the UCreateMesh function
 void UCreateMesh(GLMesh &mesh)
 {
-    // Using indexed drawing- store only the unique vertices and then specify the order at which we want to draw these vertices in.
-    // Position and Color data of pyramid
-    GLfloat verts[] = {
-        // Vertex Positions    // Colors (r,g,b,a)
-         0.0f,  0.5f, 0.0f,   1.0f, 0.5f, 0.0f, 1.0f, // V0 Top center vertex
-         0.5f, -0.5f, 0.5f,   0.0f, 1.0f, 0.5f, 1.0f, // V1 Front Bottom-Right
-        -0.5f, -0.5f, 0.5f,   0.5f, 0.0f, 1.0f, 1.0f, // V2 Front Bottom-Left
+    // color conversion formula
+    //converts RGB decimal colors into floats.
+    // Colors(r, g, b, a) enter as decimal code 0.0 - 255.0 (make sure to include the .0 at the end)
+    float dec = (1.0f / 255.0);
 
-         0.5f,  -0.5f, -0.5f,  1.0f, 0.0f, 1.0f, 1.0f, // V3 Back bottom-right
-         -0.5f, -0.5f, -0.5f,  0.5f, 0.5f, 1.0f, 1.0f, // V4 Back bottom-left
+
+    // Position and Color data
+    GLfloat verts[] = {
+        // CUBE/cuboid  
+        // SOURCE: Triangle strips https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
+        // Vertex Positions    // Colors (r,g,b,a) enter as decimal code 0-255
+        1.0f,  1.0f, 1.0f,   0 * dec, 1 * dec, 73 * dec, 1.0f, // 0 right top front 
+        0.0f,  1.0f, 1.0f,   152 * dec, 116 * dec, 0 * dec, 1.0f, // 1 left top front
+        1.0f,  1.0f, 0.0f,   60 * dec, 116 * dec, 250 * dec, 1.0f, // 2 right top back
+        0.0f,  1.0f, 0.0f,   250 * dec, 0 * dec, 73 * dec, 1.0f, // 3 left top back
+
+         1.0f, 0.0f,  1.0f,  (120 * dec), (255 * dec), (173 * dec), 1.0f, // 4 right bottom front
+         0.0f, 0.0f,  1.0f,  (75 * dec), (0 * dec), (255 * dec), 1.0f, // 5 left bottom front
+         0.0f, 0.0f,  0.0f,  (0 * dec), (116 * dec), (73 * dec), 1.0f, // 6 right bottom back
+         1.0f, 0.0f,  0.0f,  (164 * dec), (116 * dec), (93 * dec), 1.0f,  // 7 left bottom back
+
     };
 
-    // Index data to share position data of pyramid
+    // Index data to share position data
     GLushort indices[] = {
-        0, 1, 2,  // Triangle 1 - front
-        0, 1, 3,  // Triangle 2 - right
-        0, 3, 4,  // Triangle 3 - back
-        0, 2, 4,  // Triangle 4 - left
-        1, 2, 4,  // Triangle 5 - bottom/front
-        1, 3, 4,   // Triangle 6 - bottom/back
+         3, 2, 6, 7, 4, 2, 0,
+         3, 1, 6, 5, 4, 1, 0
     };
 
     const GLuint floatsPerVertex = 3;
