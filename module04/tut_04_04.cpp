@@ -140,11 +140,10 @@ int main(int argc, char* argv[])
         // input
         // -----
         UProcessKeyboard(gWindow);
-        //changeProjection(gWindow);
 
-        // Render this frame
+        // enable and adjust view
         enableView(gWindow);
-
+        // Render this frame
         URender();
 
         glfwPollEvents();
@@ -314,17 +313,25 @@ void UResizeWindow(GLFWwindow* window, int width, int height)
 }
 
 
-
+// switch to Ortho project upon keyboard input
 void switchOrthoPerspective(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    // Creates a perspective projection
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-    // Creates a orthographic projection
-   // glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-    GLint projLoc = glGetUniformLocation(gProgramId, "projection");
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-}
+    
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+    {
+        std::cout << "Space Key Pressed" << std::endl;
+    }
 
+    // source: https://www.glfw.org/docs/3.3/input_guide.html#input_key
+    // Creates a ortho projection
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+    // if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+    {
+        //gCamera.ProcessKeyboard(DOWN, gDeltaTime);
+        //glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    }
+}
 
 void enableView(GLFWwindow* window)
 {    // Enable z-depth
@@ -341,11 +348,37 @@ void enableView(GLFWwindow* window)
     GLint viewLoc = glGetUniformLocation(gProgramId, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    // defaulted to perspective projection
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+
+    // switched between Ortho and Perspective projection via key callback
+    // source: https://www.glfw.org/docs/latest/input_guide.html#input_keyboard
+    /* -----FIX ME----- "switches between Ortho and Perspective projection via key callback" 
+     * ISSUE: CALLBACK IS NOT RESPONDING PROPERLY.     
+     * calls on OrthoPerspective - testing by pressing "space" and looking at the log 
+     * however, does not response to key press "p" to change and save view
+     * key press "P" works in Enable function, but only when P is held. 
+     * this issue was supposed to resolved by using a callback.
+     * switched between Ortho and Perspective projection via key callback
+     * ATTEMPTED: tried switching views - no changes tried if/else loop - invalid method
+     * RESEARCH: Stackoverflow, OpenGL documents, GLFW documents, how-tos.
+     * unable to find materials that matches situation. some material too complex for me at this time
+     */
+     // switches between Ortho and Perspective projection via key callback
+    glfwSetKeyCallback(window, switchOrthoPerspective);
+
+    /* code does responsed, but only when holding key P. Uncomment to test
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+    {
+        glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    }
+    */
+
+
+
+
     GLint projLoc = glGetUniformLocation(gProgramId, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    glfwSetKeyCallback(window, switchOrthoPerspective);
 
     // Set the shader to be used
     glUseProgram(gProgramId);
@@ -366,9 +399,9 @@ void URender()
      // **********************************
     // dresser cuboid
     // create model view: scale, rotate, translate
-    scale = glm::scale(glm::vec3(0.8f, 1.2f, 1.0f));
-    rotation = glm::rotate(15.0f, glm::vec3(0.0f, 0.5f, 0.0f));
-    translation = glm::translate(glm::vec3(-4.0f, -1.5f, 0.0f));
+    scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
+    rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.5f, 0.0f));
+    translation = glm::translate(glm::vec3(-4.6f, -1.5f, -1.6f));
 
     // Model matrix: transformations are applied right-to-left order
     model = translation * rotation * scale;
