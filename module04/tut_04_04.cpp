@@ -32,6 +32,7 @@ namespace
     {
         GLuint vao;         // Handle for the vertex array object
         GLuint vbos[2];     // Handles for the vertex buffer objects
+        GLuint vbo;
         GLuint nIndices;    // Number of indices of the mesh
     };
 
@@ -66,12 +67,15 @@ void switchOrthoPerspective(GLFWwindow* window, int key, int scancode, int actio
 void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos);
 void UMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-void UCreateMesh(GLMesh& mesh);
 void UDestroyMesh(GLMesh& mesh);
-void enableView(GLFWwindow* window);
-void URender();
 bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
 void UDestroyShaderProgram(GLuint programId);
+
+void enableView(GLFWwindow* window);
+void URender_SideTable();
+void URender_Background();
+void UCreateMesh_SideTable(GLMesh& mesh);
+void UCreateMesh_Background(GLMesh& mesh);
 
 
 /* Vertex Shader Source Code*/
@@ -113,7 +117,10 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
 
     // Create the mesh
-    UCreateMesh(gMesh); // Calls the function to create the Vertex Buffer Object
+   // UCreateMesh(gMesh); // Calls the function to create the Vertex Buffer Object
+    UCreateMesh_SideTable(gMesh);
+    UCreateMesh_Background(gMesh);
+
 
     // Create the shader program
     if (!UCreateShaderProgram(vertexShaderSource, fragmentShaderSource, gProgramId))
@@ -144,8 +151,9 @@ int main(int argc, char* argv[])
         // enable and adjust view
         enableView(gWindow);
         // Render this frame
-        URender();
-
+        //URender();
+        URender_SideTable();
+        URender_Background();
         glfwPollEvents();
     }
 
@@ -386,7 +394,7 @@ void enableView(GLFWwindow* window)
 
 
 // Function called to render a frame
-void URender()
+void URender_SideTable()
 {
 
     // declare objects
@@ -446,7 +454,7 @@ void URender()
 
         glBindVertexArray(gMesh.vao);
 
-        // draws each leg
+        // draws each legasdfasdf
         glDrawElements(GL_TRIANGLE_STRIP, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
     }
 
@@ -459,8 +467,13 @@ void URender()
 }
 
 
+void URender_Background()
+{
+
+}
+
 // Implements the UCreateMesh function
-void UCreateMesh(GLMesh& mesh)
+void UCreateMesh_SideTable(GLMesh& mesh)
 {
     // color conversion formula
     //converts RGB decimal colors into floats.
@@ -517,6 +530,10 @@ void UCreateMesh(GLMesh& mesh)
     glEnableVertexAttribArray(1);
 }
 
+
+void UCreateMesh_Background(GLMesh& mesh) {
+
+}
 
 void UDestroyMesh(GLMesh& mesh)
 {
