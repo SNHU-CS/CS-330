@@ -59,51 +59,51 @@ namespace
  * redraw graphics on the window when resized,
  * and render graphics on the screen
  */
-bool UInitialize(int, char*[], GLFWwindow** window);
+bool UInitialize(int, char* [], GLFWwindow** window);
 void UResizeWindow(GLFWwindow* window, int width, int height);
 void UProcessKeyboard(GLFWwindow* window);
 void switchOrthoPerspective(GLFWwindow* window, int key, int scancode, int action, int mods);
 void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos);
 void UMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-void UCreateMesh(GLMesh &mesh);
-void UDestroyMesh(GLMesh &mesh);
+void UCreateMesh(GLMesh& mesh);
+void UDestroyMesh(GLMesh& mesh);
 void enableView(GLFWwindow* window);
 void URender();
-bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId);
+bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
 void UDestroyShaderProgram(GLuint programId);
 
 
 /* Vertex Shader Source Code*/
-const GLchar * vertexShaderSource = GLSL(440,
-    layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
-    layout (location = 1) in vec4 color;  // Color data from Vertex Attrib Pointer 1
+const GLchar* vertexShaderSource = GLSL(440,
+    layout(location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
+layout(location = 1) in vec4 color;  // Color data from Vertex Attrib Pointer 1
 
-    out vec4 vertexColor; // variable to transfer color data to the fragment shader
+out vec4 vertexColor; // variable to transfer color data to the fragment shader
 
-    //Global variables for the  transform matrices
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
+//Global variables for the  transform matrices
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-    void main()
-    {
-        gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices to clip coordinates
-        vertexColor = color; // references incoming color data
-    }
+void main()
+{
+    gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices to clip coordinates
+    vertexColor = color; // references incoming color data
+}
 );
 
 
 /* Fragment Shader Source Code*/
-const GLchar * fragmentShaderSource = GLSL(440,
+const GLchar* fragmentShaderSource = GLSL(440,
     in vec4 vertexColor; // Variable to hold incoming color data from vertex shader
 
-    out vec4 fragmentColor;
+out vec4 fragmentColor;
 
-    void main()
-    {
-        fragmentColor = vec4(vertexColor);
-    }
+void main()
+{
+    fragmentColor = vec4(vertexColor);
+}
 );
 
 
@@ -140,11 +140,10 @@ int main(int argc, char* argv[])
         // input
         // -----
         UProcessKeyboard(gWindow);
-        //changeProjection(gWindow);
 
-        // Render this frame
+        // enable and adjust view
         enableView(gWindow);
-
+        // Render this frame
         URender();
 
         glfwPollEvents();
@@ -176,7 +175,7 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
 
     // GLFW: window creation
     // ---------------------
-    *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
+    * window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
     if (*window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -274,36 +273,36 @@ void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
     switch (button)
     {
-        case GLFW_MOUSE_BUTTON_LEFT:
- {
-            if (action == GLFW_PRESS)
-                cout << "Left mouse button pressed" << endl;
-            else
-                cout << "Left mouse button released" << endl;
-        }
-        break;
+    case GLFW_MOUSE_BUTTON_LEFT:
+    {
+        if (action == GLFW_PRESS)
+            cout << "Left mouse button pressed" << endl;
+        else
+            cout << "Left mouse button released" << endl;
+    }
+    break;
 
-        case GLFW_MOUSE_BUTTON_MIDDLE:
-        {
-            if (action == GLFW_PRESS)
-                cout << "Middle mouse button pressed" << endl;
-            else
-                cout << "Middle mouse button released" << endl;
-        }
-        break;
+    case GLFW_MOUSE_BUTTON_MIDDLE:
+    {
+        if (action == GLFW_PRESS)
+            cout << "Middle mouse button pressed" << endl;
+        else
+            cout << "Middle mouse button released" << endl;
+    }
+    break;
 
-        case GLFW_MOUSE_BUTTON_RIGHT:
-        {
-            if (action == GLFW_PRESS)
-                cout << "Right mouse button pressed" << endl;
-            else
-                cout << "Right mouse button released" << endl;
-        }
-        break;
+    case GLFW_MOUSE_BUTTON_RIGHT:
+    {
+        if (action == GLFW_PRESS)
+            cout << "Right mouse button pressed" << endl;
+        else
+            cout << "Right mouse button released" << endl;
+    }
+    break;
 
-        default:
-            cout << "Unhandled mouse button event" << endl;
-            break;
+    default:
+        cout << "Unhandled mouse button event" << endl;
+        break;
     }
 }
 
@@ -314,17 +313,25 @@ void UResizeWindow(GLFWwindow* window, int width, int height)
 }
 
 
-
+// switch to Ortho project upon keyboard input
 void switchOrthoPerspective(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    // Creates a perspective projection
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-    // Creates a orthographic projection
-   // glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-    GLint projLoc = glGetUniformLocation(gProgramId, "projection");
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-}
 
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+    {
+        std::cout << "Space Key Pressed" << std::endl;
+    }
+
+    // source: https://www.glfw.org/docs/3.3/input_guide.html#input_key
+    // Creates a ortho projection
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+        // if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+    {
+        //gCamera.ProcessKeyboard(DOWN, gDeltaTime);
+        //glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    }
+}
 
 void enableView(GLFWwindow* window)
 {    // Enable z-depth
@@ -341,11 +348,37 @@ void enableView(GLFWwindow* window)
     GLint viewLoc = glGetUniformLocation(gProgramId, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    // defaulted to perspective projection
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+
+    // switched between Ortho and Perspective projection via key callback
+    // source: https://www.glfw.org/docs/latest/input_guide.html#input_keyboard
+    /* -----FIX ME----- "switches between Ortho and Perspective projection via key callback"
+     * ISSUE: CALLBACK IS NOT RESPONDING PROPERLY.
+     * calls on OrthoPerspective - testing by pressing "space" and looking at the log
+     * however, does not response to key press "p" to change and save view
+     * key press "P" works in Enable function, but only when P is held.
+     * this issue was supposed to resolved by using a callback.
+     * switched between Ortho and Perspective projection via key callback
+     * ATTEMPTED: tried switching views - no changes tried if/else loop - invalid method
+     * RESEARCH: Stackoverflow, OpenGL documents, GLFW documents, how-tos.
+     * unable to find materials that matches situation. some material too complex for me at this time
+     */
+     // switches between Ortho and Perspective projection via key callback
+    glfwSetKeyCallback(window, switchOrthoPerspective);
+
+    /* code does responsed, but only when holding key P. Uncomment to test
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+    {
+        glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    }
+    */
+
+
+
+
     GLint projLoc = glGetUniformLocation(gProgramId, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    glfwSetKeyCallback(window, switchOrthoPerspective);
 
     // Set the shader to be used
     glUseProgram(gProgramId);
@@ -363,12 +396,12 @@ void URender()
     glm::mat4 model = translation * rotation * scale;;
     GLint modelLoc;
 
-     // **********************************
-    // dresser cuboid
-    // create model view: scale, rotate, translate
-    scale = glm::scale(glm::vec3(0.8f, 1.2f, 1.0f));
-    rotation = glm::rotate(15.0f, glm::vec3(0.0f, 0.5f, 0.0f));
-    translation = glm::translate(glm::vec3(-4.0f, -1.5f, 0.0f));
+    // **********************************
+   // dresser cuboid
+   // create model view: scale, rotate, translate
+    scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
+    rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.5f, 0.0f));
+    translation = glm::translate(glm::vec3(-4.6f, -1.5f, -1.6f));
 
     // Model matrix: transformations are applied right-to-left order
     model = translation * rotation * scale;
@@ -385,7 +418,7 @@ void URender()
     // **********************************
     // small legs (4) cuboid
     // uses same rotation as dresser cuboid. does not need to be redefined
-   
+
     // scale for legs (uniform size for all 4 legs)
     scale = glm::scale(glm::vec3(0.15f, 0.4f, 0.2f));
 
@@ -427,7 +460,7 @@ void URender()
 
 
 // Implements the UCreateMesh function
-void UCreateMesh(GLMesh &mesh)
+void UCreateMesh(GLMesh& mesh)
 {
     // color conversion formula
     //converts RGB decimal colors into floats.
@@ -485,7 +518,7 @@ void UCreateMesh(GLMesh &mesh)
 }
 
 
-void UDestroyMesh(GLMesh &mesh)
+void UDestroyMesh(GLMesh& mesh)
 {
     glDeleteVertexArrays(1, &mesh.vao);
     glDeleteBuffers(1, mesh.vbos);
@@ -493,7 +526,7 @@ void UDestroyMesh(GLMesh &mesh)
 
 
 // Implements the UCreateShaders function
-bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId)
+bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId)
 {
     // Compilation and linkage error reporting
     int success = 0;
