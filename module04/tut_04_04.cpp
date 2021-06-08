@@ -34,6 +34,7 @@ namespace
         GLuint vbos[2];     // Handles for the vertex buffer objects
         GLuint vbo;
         GLuint nIndices;    // Number of indices of the mesh
+        GLuint nVertices;
     };
 
     // Main GLFW window
@@ -119,7 +120,7 @@ int main(int argc, char* argv[])
     // Create the mesh
    // UCreateMesh(gMesh); // Calls the function to create the Vertex Buffer Object
     UCreateMesh_SideTable(gMesh);
-    UCreateMesh_Background(gMesh);
+    //UCreateMesh_Background(gMesh);
 
 
     // Create the shader program
@@ -150,10 +151,12 @@ int main(int argc, char* argv[])
 
         // enable and adjust view
         enableView(gWindow);
+
         // Render this frame
-        //URender();
         URender_SideTable();
-        URender_Background();
+        //URender_Background();
+
+
         glfwPollEvents();
     }
 
@@ -466,11 +469,35 @@ void URender_SideTable()
     glfwSwapBuffers(gWindow);    // Flips the the back buffer with the front buffer every frame.
 }
 
-
+/*
 void URender_Background()
 {
+    // 1. Scales the object by 2
+    glm::mat4 scale = glm::scale(glm::vec3(2.0f, 2.0f, 2.0f));
+    // 2. Rotates shape by 15 degrees in the x axis
+    glm::mat4 rotation = glm::rotate(45.0f, glm::vec3(1.0, 1.0f, 1.0f));
+    // 3. Place object at the origin
+    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = translation * rotation * scale;
 
+
+    // Set the shader to be used
+    glUseProgram(gProgramId);
+
+    // Activate the VBOs contained within the mesh's VAO
+    glBindVertexArray(gMesh.vao);
+
+    // Draws the triangles
+    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+
+    // Deactivate the Vertex Array Object
+    glBindVertexArray(0);
+
+    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+    glfwSwapBuffers(gWindow);    // Flips the the back buffer with the front buffer every frame.
 }
+*/
 
 // Implements the UCreateMesh function
 void UCreateMesh_SideTable(GLMesh& mesh)
@@ -528,12 +555,82 @@ void UCreateMesh_SideTable(GLMesh& mesh)
 
     glVertexAttribPointer(1, floatsPerColor, GL_FLOAT, GL_FALSE, stride, (char*)(sizeof(float) * floatsPerVertex));
     glEnableVertexAttribArray(1);
-}
-
-
-void UCreateMesh_Background(GLMesh& mesh) {
 
 }
+
+/*
+void UCreateMesh_Background(GLMesh& mesh) 
+{
+     // Vertex data
+    GLfloat verts[] = {
+        // Vertex Positions    // Colors (r,g,b,a)
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
+
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f
+    };
+
+    const GLuint floatsPerVertex = 3;
+    const GLuint floatsPerColor = 4;
+
+    mesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerColor));
+
+    glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(mesh.vao);
+
+    // Create VBO
+    glGenBuffers(1, &mesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // Activates the buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+
+    // Strides between vertex coordinates
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerColor);
+
+    // Create Vertex Attribute Pointers
+    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, floatsPerColor, GL_FLOAT, GL_FALSE, stride, (char*)(sizeof(float) * floatsPerVertex));
+    glEnableVertexAttribArray(1);
+    }
+ */
 
 void UDestroyMesh(GLMesh& mesh)
 {
@@ -602,7 +699,6 @@ bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSou
 
     return true;
 }
-
 
 void UDestroyShaderProgram(GLuint programId)
 {
