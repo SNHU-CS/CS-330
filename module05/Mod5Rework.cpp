@@ -123,19 +123,19 @@ void destroyShaderProgram(GLuint programId);
 // GLuint gLampProgramId;
 
 // draw objects
-void draw(floor);
-void draw(wall);
-void draw(door);
-void draw(sideTable);
-void draw(sideTable);
-void draw(coffeeTable);
-void draw(reef);
-void draw(lamp);
-void draw(couch);
-
+void drawFloor();
+void drawWall();
+void drawDoor();
+void drawSideTableA();
+void drawSideTableB();
+void drawCoffeeTable();
+void drawReef();
+void draWLamp();
+void drawCouch();
 
 
 /*
+// REMAINING UNDECLARED FUNCTIONS
 bool initializeScene(int, char*[], GLFWwindow** window);
 
 // render
@@ -146,16 +146,11 @@ void createMesh(GLMesh& mesh);
 void destroyMesh(GLMesh& mesh);
 
 // user view + projection
-x void resizeWindow(GLFWwindow* window, int width, int height);
 void enableView(GLFWwindow* window);
-void switchMVProjection(GLFWwindow* window, int key, int scancode, int action, int mods);
-void toOrtho();
-void toPerspective();
-
 */
 
 /*
-
+// VERTEX ARRAY PROJECT
 // GLUT CALLBACK functions
 void displayCB();
 void reshapeCB(int w, int h);
