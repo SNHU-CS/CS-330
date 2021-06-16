@@ -1,3 +1,6 @@
+// !! Shaders will be replaced with calls from shader.h !!
+// !! However, DO NOT replace shaders until shader.h is compatible with the program !!
+
 // ***** IMPORTS/INCLUDE ******
 #include <iostream>         // cout, cerr
 #include <cstdlib>          // EXIT_FAILURE
@@ -16,11 +19,6 @@
 #include <learnOpengl/shaders.h>
 
 using namespace std; // Standard namespace
-
-/*Shader program Macro*/
-#ifndef GLSL
-#define GLSL(Version, Source) "#version " #Version " core \n" #Source
-#endif
 
 // ***** NAMESPACE ******
 namespace
@@ -138,35 +136,23 @@ void draw(lamp);
 void draw(couch);
 
 
-/*Shader program Macro*/
-#ifndef GLSL
-#define GLSL(Version, Source) "#version " #Version " core \n" #Source
-#endif
+
 /*
 bool initializeScene(int, char*[], GLFWwindow** window);
 
 // render
 void render();
 
-// shaders
-bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
-void destroyShaderProgram(GLuint programId);
-
 // mesh
 void createMesh(GLMesh& mesh);
 void destroyMesh(GLMesh& mesh);
 
-// navigation input & output
-void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
-void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-void keyboardNavigation(GLFWwindow* window);
-
-// user view
-void resizeWindow(GLFWwindow* window, int width, int height);
+// user view + projection
+x void resizeWindow(GLFWwindow* window, int width, int height);
 void enableView(GLFWwindow* window);
 void switchMVProjection(GLFWwindow* window, int key, int scancode, int action, int mods);
-
+void toOrtho();
+void toPerspective();
 
 */
 
@@ -195,6 +181,15 @@ void draw5();
 
 
 */
+
+// camera
+
+
+// adjusts window when screen size changed is changed (by OS or user)
+void resizeWindow(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
 
 // ***** INPUT DEVICES *****
 // input: mouse movement (inversed)
@@ -296,13 +291,19 @@ void keyboardNavigation(GLFWwindow* window)
 
 //  input: keyboard controls (non-navigation)
 void keyboardControl(GLFWwindow* window) {
-
+    // add projection change here instead??
 }
 
 
 // ***** SHADERS *****
 // !! Shaders will be replaced with calls from shader.h !!
 // !! However, DO NOT replace until shader.h is fully compatible with the program !!
+
+
+/*Shader program Macro*/
+#ifndef GLSL
+#define GLSL(Version, Source) "#version " #Version " core \n" #Source
+#endif
 
 /* Vertex Shader Source Code*/
 // TODO: !!IMPORTANT MESSAGE AT START OF SHADER SECTION!!
@@ -351,6 +352,8 @@ const GLchar* fragmentShaderSource = GLSL(440,
 
 
 // Implements the CreateShaders function
+//  TODO: !!IMPORTANT MESSAGE AT START OF SHADER SECTION!!
+//        update accordingly when shader program moves to shader.h
 bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId)
 {
     // Compilation and linkage error reporting
