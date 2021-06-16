@@ -89,8 +89,36 @@ namespace
 #endif
 
 // ****** USER-DEFINED FUNCTIONS *****
+inital
 
 
+/*
+bool initializeScene(int, char*[], GLFWwindow** window);
+
+// render
+void render();
+
+// shaders
+bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
+void destroyShaderProgram(GLuint programId);
+
+// mesh
+void createMesh(GLMesh& mesh);
+void destroyMesh(GLMesh& mesh);
+
+// navigation input & output
+void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+void keyboardNavigation(GLFWwindow* window);
+
+// user view
+void resizeWindow(GLFWwindow* window, int width, int height);
+void enableView(GLFWwindow* window);
+void switchMVProjection(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+
+*/
 
 // shaders
 bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
