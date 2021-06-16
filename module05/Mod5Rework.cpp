@@ -13,6 +13,7 @@
 
 // imported classes
 #include <learnOpengl/camera.h> // Camera class
+#include <learnOpengl/shaders.h>
 
 using namespace std; // Standard namespace
 
@@ -42,17 +43,6 @@ namespace
 
     // Main GLFW window
     GLFWwindow* gWindow = nullptr;
-    // Triangle mesh data
-    GLMesh gMesh;
-    // Texture
-    GLuint gTextureId;
-    glm::vec2 gUVScale(10.0f, 10.0f);
-    GLint gTexWrapMode = GL_REPEAT;
-
-    // Shader programs
-    GLuint gProgramId;
-    GLuint gCubeProgramId;
-    GLuint gLampProgramId;
 
     // camera
     Camera gCamera(glm::vec3(0.2f, 5.6f, 9.9f));
@@ -63,6 +53,20 @@ namespace
     // frame rate (time between each frame)
     float gDeltaTime = 0.0f; // time between current frame and last frame
     float gLastFrame = 0.0f;
+
+    // Triangle mesh data
+    GLMesh gMesh;
+
+    // Texture
+    GLuint gTextureId;
+    glm::vec2 gUVScale(10.0f, 10.0f);
+    GLint gTexWrapMode = GL_REPEAT;
+
+    // Shader programs
+    GLuint gProgramId;
+    GLuint gCubeProgramId;
+    GLuint gLampProgramId;
+
 
     /*
     // Subject position and scale
@@ -83,15 +87,57 @@ namespace
     */
 }
 
+
+// ****** USER-DEFINED FUNCTIONS *****
+// intialize OpenGL
+bool initializeOGL(int, char* [], GLFWwindow** window);
+
+
+// camera
+
+
+// projection
+void changeProjection();
+void toOrtho();
+void toPerspective();
+
+// navigation
+void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+void keyboardNavigation(GLFWwindow* window);
+void keyboardControl(GLFWwindow* window);
+
+// textures
+
+
+//
+
+
+// shaders
+// generic shader
+bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
+void destroyShaderProgram(GLuint programId);
+// GLuint gCubeProgramId;
+// GLuint gLampProgramId;
+
+
+// draw objects
+void draw(floor);
+void draw(wall);
+void draw(door);
+void draw(sideTable);
+void draw(sideTable);
+void draw(coffeeTable);
+void draw(reef);
+void draw(lamp);
+void draw(couch);
+
+
 /*Shader program Macro*/
 #ifndef GLSL
 #define GLSL(Version, Source) "#version " #Version " core \n" #Source
 #endif
-
-// ****** USER-DEFINED FUNCTIONS *****
-inital
-
-
 /*
 bool initializeScene(int, char*[], GLFWwindow** window);
 
@@ -120,11 +166,34 @@ void switchMVProjection(GLFWwindow* window, int key, int scancode, int action, i
 
 */
 
-// shaders
-bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
-void destroyShaderProgram(GLuint programId);
+/*
+
+// GLUT CALLBACK functions
+void displayCB();
+void reshapeCB(int w, int h);
+void timerCB(int millisec);
+void keyboardCB(unsigned char key, int x, int y);
+void mouseCB(int button, int stat, int x, int y);
+void mouseMotionCB(int x, int y);
+
+void initGL();
+int  initGLUT(int argc, char **argv);
+bool initSharedMem();
+void clearSharedMem();
+void initLights();
+void setCamera(float posX, float posY, float posZ, float targetX, float targetY, float targetZ);
+void drawString(const char *str, int x, int y, float color[4], void *font);
+void drawString3D(const char *str, float pos[3], float color[4], void *font);
+void toOrtho();
+void toPerspective();
+void draw1();
+void draw2();
+void draw3();
+void draw4();
+void draw5();
 
 
+*/
 
 
 
