@@ -20,6 +20,7 @@
 
 using namespace std; // Standard namespace
 
+
 // ***** NAMESPACE ******
 namespace
 {
@@ -86,21 +87,16 @@ namespace
 }
 
 
-
-
-
 // ****** USER-DEFINED FUNCTIONS *****
 // intialize OpenGL
 bool initializeOGL(int, char* [], GLFWwindow** window);
 //bool initializeWindow?Inout?Callback?(int, char* [], GLFWwindow** window);
 
-
-// view and projection
+// window resize and projection
 void resizeWindow(GLFWwindow* window, int width, int height);
 void toOrtho();
 void toPerspective();
-// use keyboard to change projection (event)
-void changeProjectionCallback();
+void changeProjectionCallback(); // use keyboard to change projection (event)
 
 // user Inputs
 void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
@@ -122,7 +118,8 @@ void destroyShaderProgram(GLuint programId);
 // GLuint gCubeProgramId;
 // GLuint gLampProgramId;
 
-// draw objects
+// rendering, draw objects
+// void rendering(); // <--generic for 1 object
 void drawFloor();
 void drawWall();
 void drawDoor();
@@ -136,11 +133,6 @@ void drawCouch();
 
 /*
 // REMAINING UNDECLARED FUNCTIONS
-bool initializeScene(int, char*[], GLFWwindow** window);
-
-// render
-void render();
-
 // mesh
 void createMesh(GLMesh& mesh);
 void destroyMesh(GLMesh& mesh);
@@ -229,9 +221,7 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
 }
 
 
-// ***** view/camera - ADJUST THIS LATER*****
-// camera
-
+// ***** WINDOW RESIZE AND PROJECTION SETTINGS*****
 // adjusts window when screen size changed is changed (by OS or user)
 void resizeWindow(GLFWwindow* window, int width, int height)
 {
@@ -239,7 +229,6 @@ void resizeWindow(GLFWwindow* window, int width, int height)
 }
 
 
-// ***** PROJECTION SETTINGS *****
 void toOrtho()
 {
     glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
@@ -253,6 +242,12 @@ void toPerspective()
     glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
     GLint projLoc = glGetUniformLocation(gProgramId, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void changeProjectionCallback()
+{
+    // ADD: change to ortho
+    // ADD: reset to original
 }
 
 
