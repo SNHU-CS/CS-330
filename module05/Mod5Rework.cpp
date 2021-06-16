@@ -37,14 +37,14 @@ namespace
         GLuint vao;         // Handle for the vertex array object
         GLuint vbo;         // Handle for the vertex buffer object
         GLuint nVertices;    // Number of indices of the mesh
-        // GLuint nIndices;    // Number of indices of the mesh
+        GLuint nIndices;    // Number of indices of the mesh
     };
 
     // Main GLFW window
     GLFWwindow* gWindow = nullptr;
 
     // camera
-    Camera gCamera(glm::vec3(0.2f, 5.6f, 9.9f));
+    Camera gCamera(glm::vec3(0.2f, 5.6f, 9.9f)); // do not change. precalcated to fit scene
     float gLastX = WINDOW_WIDTH / 2.0f;
     float gLastY = WINDOW_HEIGHT / 2.0f;
     bool gFirstMouse = true;
@@ -107,8 +107,9 @@ void keyboardControl(GLFWwindow* window);
 
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
-bool TextureSettings(const char* filename, GLuint& textureId);
+bool textureSettings(const char* filename, GLuint& textureId);
 void destroyTexture(GLuint textureId);
+bool textureNameLocation(); //unsure what input may be needed
 
 // shaders
 // generic shader
@@ -165,6 +166,68 @@ void draw4();
 void draw5();
 
 
+*/
+
+/*
+// ***** MAIN CLASS ******
+int main(int argc, char* argv[])
+{
+    if (initializeOGL(argc, argv, &gWindow))
+        return EXIT_FAILURE;
+
+    // Create the mesh
+    UCreateMesh(gMesh); // Calls the function to create the Vertex Buffer Object
+
+    // Create the shader program
+    // TODO: call from shader.h
+    if (!createShaderProgram((vertexShaderSource, fragmentShaderSource, gProgramId))
+        return EXIT_FAILURE;
+
+    // TODO: UPDATE METHOD FOR MULTIPLE TEXTURES. SEE M5.5 (make sure to check all texture areas throughly)
+    // Load texture (relative to project's directory)
+    const char* texFilename = "../resources/textures/graybrick.jpg";
+
+    if (!textureSettings(texFilename, gTextureId))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    glUseProgram(gProgramId);
+    // We set the texture as texture unit 0
+    glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 0);
+
+    // Sets the background color of the window to black (it will be implicitely used by glClear)
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    /* TODO: REVAMP ALL OF RENDER LOOP TO FIX NEW LAYOUT
+    // render loop
+    while (!glfwWindowShouldClose(gWindow))
+    {
+        // in its own function or here??
+        // per-frame timing
+        float currentFrame = glfwGetTime();
+        gDeltaTime = currentFrame - gLastFrame;
+        gLastFrame = currentFrame;
+
+        // input
+        processInput(gWindow);
+
+        // Render this frame
+        rendering();
+
+        glfwPollEvents();
+    }
+
+    TODO: CHECK ON DESTROYING- WHERE AND IF NEEDED - NEW AREAS INCLUDING TEXTURES
+    // Release mesh data... unsure if needed here anymore
+    destroyMesh(gMesh);
+
+    // Release shader program... unsure if needed here anymore
+    destroyShaderProgram(gProgramId);
+
+    exit(EXIT_SUCCESS); // Terminates the program successfully
+}
 */
 
 
@@ -496,6 +559,10 @@ void destroyShaderProgram(GLuint programId)
 // flips images vertically to match OpenGl's y-axis
 // (the y-axis of OpenGL and standard images are inverted when compared).
 // CHECK ON HOW THIS AFFECTS THE DOOR, SUNSET PAINTING, AND POSSIBLY WREATH
+bool textureNameLocation() {
+
+};
+
 void flipImageVertical(unsigned char* image, int width, int height, int channels)
 {
     for (int j = 0; j < height / 2; ++j)
@@ -516,7 +583,7 @@ void flipImageVertical(unsigned char* image, int width, int height, int channels
 
 
 // generates settings for texture or image
-bool TextureSettings(const char* filename, GLuint& textureId)
+bool textureSettings(const char* filename, GLuint& textureId)
 {
     int width, height, channels;
     unsigned char* image = stbi_load(filename, &width, &height, &channels, 0);
