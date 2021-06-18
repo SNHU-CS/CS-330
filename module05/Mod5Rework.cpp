@@ -1,6 +1,9 @@
 // !! Shaders will be replaced with calls from shader.h !!
 // !! However, DO NOT replace shaders until shader.h is compatible with the program !!
 
+// as skills advance, consider changing into content pipeline
+// add missing debug error callbacks
+
 // ***** IMPORTS/INCLUDE ******
 #include <iostream>         // cout, cerr
 #include <cstdlib>          // EXIT_FAILURE
@@ -105,9 +108,10 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void keyboardNavigation(GLFWwindow* window);
 void keyboardControl(GLFWwindow* window);
 
+
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
-bool textureSettings(const char* filename, GLuint& textureId);
+bool createTexture(const char* filename, GLuint& textureId);
 void destroyTexture(GLuint textureId);
 bool textureNameLocation(); //unsure what input may be needed
 
@@ -119,17 +123,24 @@ void destroyShaderProgram(GLuint programId);
 // GLuint gCubeProgramId;
 // GLuint gLampProgramId;
 
+//void UCreateMesh(GLMesh& mesh);
+//void UDestroyMesh(GLMesh& mesh);
+
 // rendering, draw objects
 // void rendering(); // <--generic for 1 object
-void drawFloor();
-void drawWall();
-void drawDoor();
-void drawSideTableA();
-void drawSideTableB();
-void drawCoffeeTable();
-void drawReef();
-void draWLamp();
-void drawCouch();
+
+// mesh
+
+void meshFloor();
+void meshWall();
+void meshDoor();
+void meshSideTableA();
+void meshSideTableB();
+void meshCoffeeTable();
+void meshReef();
+void meshLamp();
+void meshCouch();
+
 
 
 /*
@@ -558,10 +569,6 @@ void destroyShaderProgram(GLuint programId)
 // ***** TEXTURES AND IMAGES *****
 // flips images vertically to match OpenGl's y-axis
 // (the y-axis of OpenGL and standard images are inverted when compared).
-// CHECK ON HOW THIS AFFECTS THE DOOR, SUNSET PAINTING, AND POSSIBLY WREATH
-bool textureNameLocation() {
-
-};
 
 void flipImageVertical(unsigned char* image, int width, int height, int channels)
 {
@@ -581,15 +588,19 @@ void flipImageVertical(unsigned char* image, int width, int height, int channels
     }
 }
 
+// CHECK ON HOW THIS AFFECTS THE DOOR, SUNSET PAINTING, AND POSSIBLY WREATH
+bool textureNameLocation() {
+
+};
 
 // generates settings for texture or image
-bool textureSettings(const char* filename, GLuint& textureId)
+bool createTexture(const char* filename, GLuint& textureId)
 {
     int width, height, channels;
     unsigned char* image = stbi_load(filename, &width, &height, &channels, 0);
     if (image)
     {
-        flipImageVertically(image, width, height, channels);
+        flipImageVertical(image, width, height, channels);
 
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
@@ -630,6 +641,74 @@ void destroyTexture(GLuint textureId)
 }
 
 
+void meshFloor()
+{
+    // plane
+    // texture - wood floor
+}
+
+void meshWalls()
+{
+    // plane
+    // light gray-blue texture
+    // add sunset pic image
+}
+
+void meshDoor()
+{
+    // apply as texture to wall instead??
+    // plane
+    // door image
+}
+
+void meshSideTableA()
+{
+
+
+    //consider combined into 1 class for BOTH side tables by using offsets
+    // small cuboid
+    // wood texture with special front texture for drawers
+    // 4 legs
+    // wood texture
+}
+
+void meshSideTableB()
+{
+    //consider combined into 1 class for BOTH side tables by using offsets
+    // small cuboid
+    // wood texture with special front texture for drawers
+    // 4 legs
+    // wood texture
+}
+
+void meshCoffeeTable()
+{
+    // elongated cuboid
+    // 4 legs
+    // metal texture
+}
+
+void meshReef()
+{
+    // torus
+    // alphine/green tree texture
+    // ??add ornaments??
+}
+
+void meshLamp()
+{
+    // cylinder
+    // cylinder
+    // cone
+    // marble texture, cloth texture
+
+}
+
+void meshCouch()
+{
+    // red fabric texture
+    // metal legs texture
+}
 
 
 

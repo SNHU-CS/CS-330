@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 // source: https ://github.com/katiestapleton/Learn-OpenGL/blob/master/Chapter02/Shaders/Shader.h
 /* This file originated from website LearnOpenGL.com, which distributes the code
 with the following information regarding licensing:
