@@ -1,10 +1,39 @@
 // !! Shaders will be replaced with calls from shader.h !!
 // !! However, DO NOT replace shaders until shader.h is compatible with the program !!
 
+
+
+
+
+
+
+
+
+GLuint textureIdAll[] = {
+    texDoorClassic, // 1
+    texDoorRustic, // 2
+    texSunsetPic, // 3
+    texRug, // 4
+    texWallpaper, // 5
+    texGrassAlphine, // 6 
+    texMarbleCream, // 7
+    texCottonCream, // 8
+    texFabricRed, // 9
+    texMetalBlack, // 10
+    texWoodHerring, // 11
+    texWoodSolidDark, // 12
+    texWoodRustic //13
+};
+
+
+
+
+
+
 // as skills advance, consider changing into content pipeline
 // add missing debug error callbacks
 
-// ***** IMPORTS/INCLUDE ******
+// ********** IMPORTS/INCLUDE ***********
 #include <iostream>         // cout, cerr
 #include <cstdlib>          // EXIT_FAILURE
 #include <GL/glew.h>        // GLEW library
@@ -24,7 +53,7 @@
 using namespace std; // Standard namespace
 
 
-// ***** NAMESPACE ******
+// ********** NAMESPACE ***********
 namespace
 {
 
@@ -60,12 +89,31 @@ namespace
     GLMesh gMesh;
 
     // Texture
-    GLuint gTextureId;
     glm::vec2 gUVScale(10.0f, 10.0f);
     GLint gTexWrapMode = GL_REPEAT;
+    GLint gTexFilterMode = GL_LINEAR;
+    const char* texFilename;
+    GLuint textureId;
+    GLuint textureIdAll[] = {
+        texDoorClassic, // 0
+        texDoorRustic, // 1
+        texSunsetPic, // 2
+        texRug, // 3
+        texWallpaper, // 4
+        texGrassAlphine, // 5
+        texMarbleCream, // 6
+        texCottonCream, // 7
+        texFabricRed, // 8
+        texMetalBlack, // 9
+        texWoodHerring, // 10
+        texWoodSolidDark, // 11
+        texWoodRustic // 12
+    };
+    int texCount = size(textureIdAll);
+
 
     // Shader programs
-    GLuint gProgramId;
+    GLuint shaderProgramID; // formally gProgramID
     GLuint gCubeProgramId;
     GLuint gLampProgramId;
 
@@ -90,7 +138,7 @@ namespace
 }
 
 
-// ****** USER-DEFINED FUNCTIONS *****
+// *********** USER-DEFINED FUNCTIONS **********
 // intialize OpenGL
 bool initializeOGL(int, char* [], GLFWwindow** window);
 //bool initializeWindow?Inout?Callback?(int, char* [], GLFWwindow** window);
@@ -111,14 +159,15 @@ void keyboardControl(GLFWwindow* window);
 
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
-bool createTexture(const char* filename, GLuint& textureId);
-void destroyTexture(GLuint textureId);
-bool textureNameLocation(); //unsure what input may be needed
+void createAllTexture(GLuint& textureIdAll, int texCount);
+bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
+void deleteTexture(GLuint& textureIdAll, int texCount);
+
 
 // shaders
 // generic shader
-bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
-void destroyShaderProgram(GLuint programId);
+bool createshaderProgramID(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
+void destroyshaderProgramID(GLuint programIdAll);
 // unique shaders for lighting.
 // GLuint gCubeProgramId;
 // GLuint gLampProgramId;
@@ -179,10 +228,11 @@ void draw5();
 
 */
 
-/*
-// ***** MAIN CLASS ******
+
+// ********** MAIN CLASS ***********
 int main(int argc, char* argv[])
 {
+
     if (initializeOGL(argc, argv, &gWindow))
         return EXIT_FAILURE;
 
@@ -190,26 +240,24 @@ int main(int argc, char* argv[])
     UCreateMesh(gMesh); // Calls the function to create the Vertex Buffer Object
 
     // Create the shader program
-    // TODO: call from shader.h
-    if (!createShaderProgram((vertexShaderSource, fragmentShaderSource, gProgramId))
+    if (!createshaderProgramID((vertexShaderSource, fragmentShaderSource, shaderProgramID))
         return EXIT_FAILURE;
 
-    // TODO: UPDATE METHOD FOR MULTIPLE TEXTURES. SEE M5.5 (make sure to check all texture areas throughly)
-    // Load texture (relative to project's directory)
-    const char* texFilename = "../resources/textures/graybrick.jpg";
+    glUseProgram(shaderProgramID);
 
-    if (!textureSettings(texFilename, gTextureId))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
+    createAllTexture(GLuint textureIdAll, int texCount);
+    //  return EXIT_FAILURE;
+
+    for (int t = 0, t < texCount, t++) {
+        glUniform1i(glGetUniformLocation(shaderProgramID, textureIdAll[t]), t);      
     }
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    glUseProgram(gProgramId);
-    // We set the texture as texture unit 0
-    glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 0);
+
+
+}
+
 
     // Sets the background color of the window to black (it will be implicitely used by glClear)
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     /* TODO: REVAMP ALL OF RENDER LOOP TO FIX NEW LAYOUT
     // render loop
@@ -235,19 +283,18 @@ int main(int argc, char* argv[])
     destroyMesh(gMesh);
 
     // Release shader program... unsure if needed here anymore
-    destroyShaderProgram(gProgramId);
+    destroyshaderProgramID(shaderProgramID);
 
     exit(EXIT_SUCCESS); // Terminates the program successfully
 }
-*/
 
 
-// ***** INTIALIZE OPENGL AND EVENTS *****
+
+// ********** INTIALIZE OPENGL AND EVENTS **********
 // Initialize GLFW, GLEW, and user window
 bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
 {
     // GLFW: initialize and configure
-    // ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -258,7 +305,6 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
 #endif
 
     // GLFW: window creation
-    // ---------------------
     * window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
     if (*window == NULL)
     {
@@ -277,7 +323,6 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
     glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // GLEW: initialize
-    // ----------------
     // Note: if using GLEW version 1.13 or earlier
     glewExperimental = GL_TRUE;
     GLenum GlewInitResult = glewInit();
@@ -294,8 +339,56 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
     return true;
 }
 
+for (int t = 0, t < texCount, t++) {
 
-// ***** WINDOW RESIZE AND PROJECTION SETTINGS*****
+    //glUniform1i(glGetUniformLocation(shaderProgramID, textureIdAll[t]), t);
+}
+
+// ********** RENDERING **********
+/*
+void URender()
+{
+
+    // Sends transform information to the Vertex shader
+    GLuint transformLocation = glGetUniformLocation(gProgramId, "shaderTransform");
+    glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transformation));
+
+    // Activate the VBOs contained within the mesh's VAO
+    glBindVertexArray(gMesh.vao);
+
+    // bind textures on corresponding texture units (activate and bind)
+    GLuint textureIdAll[] = {
+        texDoorClassic, // 0
+        texDoorRustic, // 1
+        texSunsetPic, // 2
+        texRug, // 3
+        texWallpaper, // 4
+        texGrassAlphine, // 5
+        texMarbleCream, // 6
+        texCottonCream, // 7
+        texFabricRed, // 8
+        texMetalBlack, // 9
+        texWoodHerring, // 10
+        texWoodSolidDark, // 11
+        texWoodRustic // 12
+    };
+
+    int texCount = size(textureIdAll)
+    glBindTextures(0, texCount, textureIdAll);
+
+    // Draws the triangle
+    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+
+    // Deactivate the Vertex Array Object
+    glBindVertexArray(0);
+
+    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+    glfwSwapBuffers(gWindow);    // Flips the the back buffer with the front buffer every frame.
+}
+
+*/
+
+// ********** WINDOW RESIZE AND PROJECTION SETTINGS **********
 // adjusts window when screen size changed is changed (by OS or user)
 void resizeWindow(GLFWwindow* window, int width, int height)
 {
@@ -306,7 +399,7 @@ void resizeWindow(GLFWwindow* window, int width, int height)
 void toOrtho()
 {
     glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-    GLint projLoc = glGetUniformLocation(gProgramId, "projection");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
@@ -314,7 +407,7 @@ void toOrtho()
 void toPerspective()
 {
     glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-    GLint projLoc = glGetUniformLocation(gProgramId, "projection");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
@@ -325,7 +418,7 @@ void changeProjectionCallback()
 }
 
 
-// ***** INPUT DEVICES *****
+// ********** INPUT DEVICES **********
 // input: mouse movement (inversed)
 void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -347,7 +440,6 @@ void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 
 
 //  input: mouse scroll wheel
-// ----------------------------------------------------------------------
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     // adjusts screen movement speed
@@ -436,10 +528,8 @@ void keyboardControl(GLFWwindow* window) {
 }
 
 
-// ***** SHADERS *****
+// ********** SHADERS **********
 // !! Shaders will be replaced with calls from shader.h !!
-// !! However, DO NOT replace until shader.h is fully compatible with the program !!
-
 
 /*Shader program Macro*/
 #ifndef GLSL
@@ -448,55 +538,62 @@ void keyboardControl(GLFWwindow* window) {
 
 
 /* Vertex Shader Source Code*/
-// TODO: !!IMPORTANT MESSAGE AT START OF SHADER SECTION!!
-//       replace code with call from file shader.h (core.vs). 
-//       before replacing, check on declaring the global variables (which is the proper location?)
 const GLchar* vertexShaderSource = GLSL(440,
     layout(location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
     layout(location = 1) in vec4 color;  // Color data from Vertex Attrib Pointer 1
     layout(location = 2) in vec2 textureCoordinate; // texture data
 
-    out vec4 vertexColor; // variable to transfer color data to the fragment shader
-
-    out vec2 vertexTextureCoordinate;
-
-    //Global variables for the  transform matrices
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
+    out vec4 vertexColor;
+    out vec2 vertexTexCoord;
 
     void main()
     {
-        gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices to clip coordinates
-        vertexColor = color; // references incoming color data
-        vertexTextureCoordinate = textureCoordinate;
+        gl_Position = vec4(position.x, position.y, position.z, 1.0);
+        vertexColor = color;
+        vertexTexCoord = textureCoordinate;
     }
 );
 
 
+
+// Interpolated values from the vertex shaders
+in vec2 UV;
+
+// Ouput data
+out vec3 color;
+
+// Values that stay constant for the whole mesh.
+uniform sampler2D myTextureSampler;
+
+void main() {
+
+    // Output color = color of the texture at the specified UV
+    color = texture(myTextureSampler, UV).rgb;
+}
+
+
+// Applying multiple textures http://www.ozone3d.net/tutorials/glsl_texturing_p03.php
 // Fragment Shader Source Code
-//  TODO: !!IMPORTANT MESSAGE AT START OF SHADER SECTION!!
-//         replace code with call from file shader.h (core.frag). 
 const GLchar* fragmentShaderSource = GLSL(440,
     in vec4 vertexColor; // Variable to hold incoming color data from vertex shader
-    in vec2 vertexTextureCoordinate;
+    in vec2 vertexTexCoord; // UV, texture coordinates
 
-    out vec4 fragmentColor;
+    out vec4 fragmentColor; // output
 
-    uniform sampler2D uTexture;
+    // Values that stay constant for the whole mesh.
+    uniform sampler2D texSample;
 
     void main()
     {
+        // Output color = color of the texture at the specified UV
         //fragmentColor = vec4(vertexColor);
-        fragmentColor = texture(uTexture, vertexTextureCoordinate); // Sends texture to the GPU for rendering
+        fragmentColor = texture(texSample, vertexTexCoord); // Sends texture to the GPU for rendering
     }
 );
 
 
 // Implements the default Shader function
-//  TODO: !!IMPORTANT MESSAGE AT START OF SHADER SECTION!!
-//        update accordingly when shader program moves to shader.h
-bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId)
+bool createshaderProgramID(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId)
 {
     // Compilation and linkage error reporting
     int success = 0;
@@ -558,18 +655,16 @@ bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSour
 
 
 // destroys generic shader program
-//  TODO: !!IMPORTANT MESSAGE AT START OF SHADER SECTION!!
-//        update accordingly when shader program moves to shader.h
-void destroyShaderProgram(GLuint programId)
+void destroyshaderProgramID(GLuint programId)
 {
     glDeleteProgram(programId);
 }
 
 
-// ***** TEXTURES AND IMAGES *****
+
+// ********** TEXTURES AND IMAGES **********
 // flips images vertically to match OpenGl's y-axis
 // (the y-axis of OpenGL and standard images are inverted when compared).
-
 void flipImageVertical(unsigned char* image, int width, int height, int channels)
 {
     for (int j = 0; j < height / 2; ++j)
@@ -588,16 +683,16 @@ void flipImageVertical(unsigned char* image, int width, int height, int channels
     }
 }
 
-// CHECK ON HOW THIS AFFECTS THE DOOR, SUNSET PAINTING, AND POSSIBLY WREATH
-bool textureNameLocation() {
 
-};
-
-// generates settings for texture or image
-bool createTexture(const char* filename, GLuint& textureId)
+// generates settings for individual texture 
+// assumes all images are declared and processed as GL_TEXTURE_2D
+// FOLLOWUP: is & needed in front of GLint gTExtWrapMode or FilterMode?
+bool createEachTexture(const char* filename, GLuint &textureId, GLint gTexWrapMode, GLint gTexFilterMode)
 {
     int width, height, channels;
+
     unsigned char* image = stbi_load(filename, &width, &height, &channels, 0);
+
     if (image)
     {
         flipImageVertical(image, width, height, channels);
@@ -606,11 +701,11 @@ bool createTexture(const char* filename, GLuint& textureId)
         glBindTexture(GL_TEXTURE_2D, textureId);
 
         // set the texture wrapping parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gTexWrapMode;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gTexWrapMode);
         // set texture filtering parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gTexFilterMode;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gTexFilterMode);
 
         if (channels == 3)
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
@@ -635,11 +730,149 @@ bool createTexture(const char* filename, GLuint& textureId)
 }
 
 
-void destroyTexture(GLuint textureId)
+// load all textures
+/* IMPORTANT: By default, assumes all images are declared and processed as GL_TEXTURE_2D.
+ *    Specify location, textureID, Wrap Parameter and Filter Parameter
+ *    To make S or T different from each other, a custom loop needs to be made, based on the createEachTexture
+ */
+void createAllTexture(GLuint& textureIdAll, int texCount)
 {
-    glGenTextures(1, &textureId);
+    // specify location, textureID, Wrap Parameter and Filter Parameter
+
+    // image: classic door
+    texFilename = "../../resources/images/door-classic.png";
+    if (!createTexture(texFilename, texDoorClassic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // image: rustic door (dark wood by default)
+    // texFilename = "../../resources/images/door-light-wood.png";
+    texFilename = "../../resources/images/door-dark-wood.png";
+    if (!createTexture(texFilename, texDoorRustic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // image: frame sunset picture (large by default. small available)
+    texFilename = "../../resources/images/framed-sunset-lrg.png";
+    //texFilename = "../../resources/images/frame-sunset-sml.png";
+    if (!createTexture(texFilename, texSunsetPic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // image: vintage door rug
+    texFilename = "../../resources/images/rug-vintage.png";
+    if (!createTexture(texFilename, texRug, GL_CLAMP_TO_BORDER, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: textured wallpaper/creamy brown-gray, wall
+    // dark, mid, light shades
+    // texFilename = "../../resources/textures/wallpaper-uni-dark.jpg";
+    // texFilename = "../../resources/textures/wallpaper-uni-light.jpg";
+    texFilename = "../../resources/textures/wallpaper-uni-med.jpg";
+    if (!createTexture(texFilename, texWallpaper, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: grass/alphine, wreath
+    texFilename = "../../resources/textures/grass-alphine.jpg";
+    if (!createTexture(texFilename, texGrassAlphine, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: marble ceramic/cream, lamp base
+    texFilename = "../../resources/textures/marble-cream.jpg";
+    if (!createTexture(texFilename, texMarbleCream, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: cotton/cream, lamp cover
+    texFilename = "../../resources/textures/cotton-seamless.jpg";
+    if (!createTexture(texFilename, texCottonCream, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: cotton/red, couch fabric
+    texFilename = "../../resources/textures/fabric-red-seamless.png";
+    if (!createTexture(texFilename, texFabricRed, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+
+    // texture: metal brused/black, long table, couch legs
+    texFilename = "../../resources/textures/metal-black-brush.jpg";
+    if (!createTexture(texFilename, texMetalBlack, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: wood (herring pattern)/dark, floor
+    texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
+    if (!createTexture(texFilename, texWoodHerring, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: wood (solid natural)/dark, table/alternative
+    texFilename = "../../resources/textures/solid-dark-wood.jpg";
+    if (!createTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: wood (straigtened rustic), side tables
+    texFilename = "../../resources/textures/wood-floor-scrateched.jpg";
+    if (!createTexture(texFilename, texWoodRustic, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    glUseProgram(shaderProgramID);
+    // We set the texture as texture unit 0
+    glUniform1i(glGetUniformLocation(shaderProgramID, "uTextureBase"), 0);
+    // We set the texture as texture unit 1
+    glUniform1i(glGetUniformLocation(shaderProgramID, "uTextureExtra"), 1);
+
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+// -------------------------------------------------------------------------------------------
+    ourShader.use(); // don't forget to activate/use the shader before setting uniforms!
+    // either set it manually like so:
+    glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);
+    // or set it via the texture class
+    ourShader.setInt("texture2", 1);
 }
 
+// delete textures
+void deleteTexture(GLuint &textureIdAll, int texCount)
+{
+    // uses glDeleteTextures
+    // source: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDeleteTextures.xhtml
+    int n = size(textureIdAll)
+    glDeleteTextures(texCount, textureIdAll);
+}
 
 void meshFloor()
 {
