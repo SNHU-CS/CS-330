@@ -9,8 +9,6 @@ the License, or (at your option) any later version. You can find a human-readabl
    and the full license  https://creativecommons.org/licenses/by-nc/4.0/legalcode
 */
 
-#ifndef SHADER_H
-#define SHADER_H
 
 #include <string>
 #include <fstream>

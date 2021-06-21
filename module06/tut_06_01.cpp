@@ -73,7 +73,7 @@ glm::vec3 gLightScale(0.3f);
  * redraw graphics on the window when resized,
  * and render graphics on the screen
  */
-bool UInitialize(int, char*[], GLFWwindow** window);
+bool UInitialize(int, char*[], GLFWwindow* window);
 void UResizeWindow(GLFWwindow* window, int width, int height);
 void UProcessInput(GLFWwindow* window);
 void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos);
