@@ -919,33 +919,101 @@ void meshCouch(GLMesh& mesh)
     const GLuint floatsPerNormal = 3;
     const GLuint floatsPerUV = 2;
 
-    mesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
-
     glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
     glBindVertexArray(mesh.vao);
 
-    // Create 2 buffers: first one for the vertex data; second one for the indices
+    // buffer for vertex data (no indices buffer needed)
+    mesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
     glGenBuffers(1, &mesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // Activates the buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
+
+    // calculate strides between vertex coordinates
     GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
 
     // Create Vertex Attribute Pointers
+    // position pointer
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
     glEnableVertexAttribArray(0);
-
+    // normal pointer
     glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
     glEnableVertexAttribArray(1);
-
+    // texture pointer
     glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
     glEnableVertexAttribArray(2);
-
 
 */
 
 /*  DRAW ELEMENT TEMPLATE
+    // Using indexed drawing- store only the unique vertices and then specify the order at which we want to draw these vertices in.
+    // Position and Color data of pyramid
+    GLfloat verts[] = {
+        // Vertex Positions    // Normal            //texture coordinates
+        // peek of pyramid
+         0.0f,  0.5f,  0.0f,   0.0f,  1.0f,  0.0f,  0.5f, 0.5f, // V0 Top: center vertex
+        // sides of pyramid
+         0.5f, -0.5f,  0.5f,  -1.0f, -1.0f,  1.0f,  1.0f, 0.0f, // V1: Side: Front Bottom-Right
+        -0.5f, -0.5f,  0.5f,  -1.0f, -1.0f,  1.0f,  0.0f, 0.0f, // V2 Side: Front Bottom-Left
+         0.5f, -0.5f, -0.5f,  -1.0f, -1.0f, -1.0f,  0.0f, 0.0f, // V3 Side: Back bottom-right
+        -0.5f, -0.5f, -0.5f,  -1.0f, -1.0f, -1.0f,  1.0f, 0.0f, // V4 Side: Back bottom-left
+
+        // Base of pyramid. (Texture coordinates are different than sides)
+         0.5f, -0.5f,  0.5f,  -1.0f, -1.0f,  1.0f,  1.0f, 1.0f, // V5 Base: Front-Right
+        -0.5f, -0.5f,  0.5f,  -1.0f, -1.0f,  1.0f,  0.0f, 1.0f, // V6 Base: Front-Left
+         0.5f, -0.5f, -0.5f,  -1.0f, -1.0f, -1.0f,  1.0f, 0.0f, // V7 Base: Back-right
+        -0.5f, -0.5f, -0.5f,  -1.0f, -1.0f, -1.0f,  0.0f, 0.0f  // V8 Base: Back-left
+    };
+
+    // Index data to share position data of pyramid
+    GLushort indices[] = {
+        0, 1, 2,  // Triangle 1 - front
+        0, 1, 3,  // Triangle 2 - right
+        0, 3, 4,  // Triangle 3 - back
+        0, 2, 4,  // Triangle 4 - left
+        7, 8, 5,  // Triangle 5 - bottom/front
+        5, 8, 6   // Triangle 6 - bottom/back
+    };
+
+                        //multi-light how-to
+                        glm::vec3 pointLightPositions[] = {
+                            glm::vec3(0.7f,  0.2f,  2.0f),
+                            glm::vec3(2.3f, -3.3f, -4.0f),
+                            //glm::vec3(-4.0f,  2.0f, -12.0f),
+                            //glm::vec3(0.0f,  0.0f, -3.0f)
+                        };
+                        
+
+    const GLuint floatsPerVertex = 3;
+    const GLuint floatsPerNormal = 3;
+    const GLuint floatsPerUV = 2;
+
+    glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(mesh.vao);
+
+    // buffer for vertex data
+    glGenBuffers(2, mesh.vbos);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbos[0]); // Activates the buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+
+    // buffer for indices data
+    mesh.nIndices = sizeof(indices) / sizeof(indices[0]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.vbos[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // calculate strides between vertex coordinates
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+
+    // Create Vertex Attribute Pointers
+    // position pointer
+    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
+    // normal pointer
+    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (char*)(sizeof(float)* floatsPerVertex));
+    glEnableVertexAttribArray(1);
+    // texture pointer
+    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float)* (floatsPerVertex + floatsPerNormal)));
+    glEnableVertexAttribArray(2);
 
 
 
