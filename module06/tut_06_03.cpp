@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <learnOpengl/camera.h> // Camera class
+// #include <learnOpengl/shaders.h>
 
 using namespace std; // Standard namespace
 
@@ -22,11 +23,11 @@ using namespace std; // Standard namespace
 // Unnamed namespace
 namespace
 {
-const char* const WINDOW_TITLE = "Tutorial 6.3"; // Macro for window title
+const char* const WINDOW_TITLE = "Katie's Graphics Project"; // Macro for window title
 
 // Variables for window width and height
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+const int WINDOW_WIDTH = 1200;
+const int WINDOW_HEIGHT = 800;
 
 // Stores the GL data relative to a given mesh
 struct GLMesh
@@ -34,23 +35,45 @@ struct GLMesh
     GLuint vao;         // Handle for the vertex array object
     GLuint vbo;         // Handle for the vertex buffer object
     GLuint nVertices;    // Number of indices of the mesh
+    GLuint nIndices;    // Number of indices of the mesh
 };
 
 // Main GLFW window
 GLFWwindow* gWindow = nullptr;
-// Triangle mesh data
-GLMesh gMesh;
-// Texture
-GLuint gTextureId;
-glm::vec2 gUVScale(5.0f, 5.0f);
-GLint gTexWrapMode = GL_REPEAT;
 
 // Shader programs
 GLuint gCubeProgramId;
 GLuint gLampProgramId;
 
+// Triangle mesh data
+GLMesh gMesh;
+
+// Texture
+GLuint gTextureId;
+glm::vec2 gUVScale(10.0f, 10.0f);
+GLint gTexWrapMode = GL_REPEAT;
+GLint gTexFilterMode = GL_LINEAR;
+/*
+    GLuint textureIdAll[] = {
+        texDoorClassic, // 0
+        texDoorRustic, // 1
+        texSunsetPic, // 2
+        texRug, // 3
+        texWallpaper, // 4
+        texGrassAlphine, // 5
+        texMarbleCream, // 6
+        texCottonCream, // 7
+        texFabricRed, // 8
+        texMetalBlack, // 9
+        texWoodHerring, // 10
+        texWoodSolidDark, // 11
+        texWoodRustic // 12
+    };
+    int texCount = size(textureIdAll);
+*/
+
 // camera
-Camera gCamera(glm::vec3(0.0f, 0.0f, 7.0f));
+Camera gCamera(glm::vec3(0.2f, 5.6f, 9.9f)); // do not change. precalcated to fit scene
 float gLastX = WINDOW_WIDTH / 2.0f;
 float gLastY = WINDOW_HEIGHT / 2.0f;
 bool gFirstMouse = true;
@@ -59,6 +82,7 @@ bool gFirstMouse = true;
 float gDeltaTime = 0.0f; // time between current frame and last frame
 float gLastFrame = 0.0f;
 
+// CUBE
 // Subject position and scale
 glm::vec3 gCubePosition(0.0f, 0.0f, 0.0f);
 glm::vec3 gCubeScale(2.0f);
@@ -68,12 +92,11 @@ glm::vec3 gCubeScale(2.0f);
 glm::vec3 gObjectColor(1.f, 0.2f, 0.0f);
 glm::vec3 gLightColor(1.0f, 1.0f, 1.0f);
 
+// PROJECTING CUBE LIGHT
 // Light position and scale
 glm::vec3 gLightPosition(1.5f, 0.5f, 3.0f);
 glm::vec3 gLightScale(0.3f);
 
-// Lamp animation
-bool gIsLampOrbiting = true;
 }
 
 /* User-defined Function prototypes to:
@@ -81,12 +104,28 @@ bool gIsLampOrbiting = true;
  * redraw graphics on the window when resized,
  * and render graphics on the screen
  */
-bool UInitialize(int, char*[], GLFWwindow** window);
-void UResizeWindow(GLFWwindow* window, int width, int height);
-void UProcessInput(GLFWwindow* window);
-void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos);
-void UMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+bool initializeOGL(int argc, char* argv[], GLFWwindow* window);
+
+// window resize and projection
+void resizeWindow(GLFWwindow* window, int width, int height);
+void toOrtho();
+void toPerspective();
+void changeProjectionCallback(); // use keyboard to change projection (event)
+
+// user Inputs
+void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+void keyboardNavigation(GLFWwindow* window);
+// event
+void keyboardControl(GLFWwindow* window);
+
+// textures
+void flipImageVertical(unsigned char* image, int width, int height, int channels);
+void createAllTexture(GLuint& textureIdAll, int texCount);
+bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
+void deleteTexture(GLuint& textureIdAll, int texCount);
+
 void UCreateMesh(GLMesh &mesh);
 void UDestroyMesh(GLMesh &mesh);
 bool UCreateTexture(const char* filename, GLuint &textureId);
@@ -226,7 +265,7 @@ void flipImageVertically(unsigned char *image, int width, int height, int channe
 
 int main(int argc, char* argv[])
 {
-    if (!UInitialize(argc, argv, &gWindow))
+    if (initializeOGL(argc, argv, &gWindow))
         return EXIT_FAILURE;
 
     // Create the mesh
@@ -246,6 +285,8 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
+
+
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     glUseProgram(gCubeProgramId);
     // We set the texture as texture unit 0
@@ -266,7 +307,7 @@ int main(int argc, char* argv[])
 
         // input
         // -----
-        UProcessInput(gWindow);
+        keyboardNavigation(gWindow);
 
         // Render this frame
         URender();
@@ -312,10 +353,10 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
         return false;
     }
     glfwMakeContextCurrent(*window);
-    glfwSetFramebufferSizeCallback(*window, UResizeWindow);
-    glfwSetCursorPosCallback(*window, UMousePositionCallback);
-    glfwSetScrollCallback(*window, UMouseScrollCallback);
-    glfwSetMouseButtonCallback(*window, UMouseButtonCallback);
+    glfwSetFramebufferSizeCallback(*window, resizeWindow);
+    glfwSetCursorPosCallback(*window, mousePositionCallback);
+    glfwSetScrollCallback(*window, mouseScrollCallback);
+    glfwSetMouseButtonCallback(*window, mouseButtonCallback);
 
     // tell GLFW to capture our mouse
     glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -338,103 +379,42 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
     return true;
 }
 
+void resizeWindow(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
 
+// ********** KEYBOARD-BASED NAVIGATION **********
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-void UProcessInput(GLFWwindow* window)
+void keyboardNavigation(GLFWwindow* window)
 {
     static const float cameraSpeed = 2.5f;
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        gCamera.ProcessKeyboard(FORWARD, gDeltaTime);
+    // move scene backward, forward
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         gCamera.ProcessKeyboard(BACKWARD, gDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(FORWARD, gDeltaTime);
+    // move scene left, right
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         gCamera.ProcessKeyboard(LEFT, gDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         gCamera.ProcessKeyboard(RIGHT, gDeltaTime);
-
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && gTexWrapMode != GL_REPEAT)
-    {
-        glBindTexture(GL_TEXTURE_2D, gTextureId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        gTexWrapMode = GL_REPEAT;
-
-        cout << "Current Texture Wrapping Mode: REPEAT" << endl;
-    }
-    else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && gTexWrapMode != GL_MIRRORED_REPEAT)
-    {
-        glBindTexture(GL_TEXTURE_2D, gTextureId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        gTexWrapMode = GL_MIRRORED_REPEAT;
-
-        cout << "Current Texture Wrapping Mode: MIRRORED REPEAT" << endl;
-    }
-    else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && gTexWrapMode != GL_CLAMP_TO_EDGE)
-    {
-        glBindTexture(GL_TEXTURE_2D, gTextureId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        gTexWrapMode = GL_CLAMP_TO_EDGE;
-
-        cout << "Current Texture Wrapping Mode: CLAMP TO EDGE" << endl;
-    }
-    else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && gTexWrapMode != GL_CLAMP_TO_BORDER)
-    {
-        float color[] = {1.0f, 0.0f, 1.0f, 1.0f};
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-
-        glBindTexture(GL_TEXTURE_2D, gTextureId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        gTexWrapMode = GL_CLAMP_TO_BORDER;
-
-        cout << "Current Texture Wrapping Mode: CLAMP TO BORDER" << endl;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
-    {
-        gUVScale += 0.1f;
-        cout << "Current scale (" << gUVScale[0] << ", " << gUVScale[1] << ")" << endl;
-    }
-    else if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
-    {
-        gUVScale -= 0.1f;
-        cout << "Current scale (" << gUVScale[0] << ", " << gUVScale[1] << ")" << endl;
-    }
-
-    // Pause and resume lamp orbiting
-    static bool isLKeyDown = false;
-    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && !gIsLampOrbiting)
-        gIsLampOrbiting = true;
-    else if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS && gIsLampOrbiting)
-        gIsLampOrbiting = false;
-
+    //move scene down, up
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(UP, gDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(DOWN, gDeltaTime);
 }
 
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-void UResizeWindow(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
-
+// ********** MOUSE-BASED NAVIGATION **********
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
-void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos)
+void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
     if (gFirstMouse)
     {
@@ -455,64 +435,55 @@ void UMousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
-void UMouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     gCamera.ProcessMouseScroll(yoffset);
 }
 
 // glfw: handle mouse button events
 // --------------------------------
-void UMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
     switch (button)
     {
-        case GLFW_MOUSE_BUTTON_LEFT:
-        {
-            if (action == GLFW_PRESS)
-                cout << "Left mouse button pressed" << endl;
-            else
-                cout << "Left mouse button released" << endl;
-        }
-        break;
+    case GLFW_MOUSE_BUTTON_LEFT:
+    {
+        if (action == GLFW_PRESS)
+            cout << "Left mouse button pressed" << endl;
+        else
+            cout << "Left mouse button released" << endl;
+    }
+    break;
 
-        case GLFW_MOUSE_BUTTON_MIDDLE:
-        {
-            if (action == GLFW_PRESS)
-                cout << "Middle mouse button pressed" << endl;
-            else
-                cout << "Middle mouse button released" << endl;
-        }
-        break;
+    case GLFW_MOUSE_BUTTON_MIDDLE:
+    {
+        if (action == GLFW_PRESS)
+            cout << "Middle mouse button pressed" << endl;
+        else
+            cout << "Middle mouse button released" << endl;
+    }
+    break;
 
-        case GLFW_MOUSE_BUTTON_RIGHT:
-        {
-            if (action == GLFW_PRESS)
-                cout << "Right mouse button pressed" << endl;
-            else
-                cout << "Right mouse button released" << endl;
-        }
-        break;
+    case GLFW_MOUSE_BUTTON_RIGHT:
+    {
+        if (action == GLFW_PRESS)
+            cout << "Right mouse button pressed" << endl;
+        else
+            cout << "Right mouse button released" << endl;
+    }
+    break;
 
-        default:
-            cout << "Unhandled mouse button event" << endl;
-            break;
+    default:
+        cout << "Unhandled mouse button event" << endl;
+        break;
     }
 }
+
 
 
 // Functioned called to render a frame
 void URender()
 {
-    // Lamp orbits around the origin
-    const float angularVelocity = glm::radians(45.0f);
-    if (gIsLampOrbiting)
-    {
-        glm::vec4 newPosition = glm::rotate(angularVelocity * gDeltaTime, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(gLightPosition, 1.0f);
-        gLightPosition.x = newPosition.x;
-        gLightPosition.y = newPosition.y;
-        gLightPosition.z = newPosition.z;
-    }
-
     // Enable z-depth
     glEnable(GL_DEPTH_TEST);
     

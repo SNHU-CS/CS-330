@@ -5,31 +5,6 @@
 
 
 
-
-
-
-
-GLuint textureIdAll[] = {
-    texDoorClassic, // 1
-    texDoorRustic, // 2
-    texSunsetPic, // 3
-    texRug, // 4
-    texWallpaper, // 5
-    texGrassAlphine, // 6 
-    texMarbleCream, // 7
-    texCottonCream, // 8
-    texFabricRed, // 9
-    texMetalBlack, // 10
-    texWoodHerring, // 11
-    texWoodSolidDark, // 12
-    texWoodRustic //13
-};
-
-
-
-
-
-
 // as skills advance, consider changing into content pipeline
 // add missing debug error callbacks
 
@@ -140,7 +115,7 @@ namespace
 
 // *********** USER-DEFINED FUNCTIONS **********
 // intialize OpenGL
-bool initializeOGL(int, char* [], GLFWwindow** window);
+bool initializeOGL(int argc, char* argv[], GLFWwindow** window);
 //bool initializeWindow?Inout?Callback?(int, char* [], GLFWwindow** window);
 
 // window resize and projection

@@ -1,3 +1,4 @@
+// ********** IMPORTS/INCLUDE ***********
 #include <iostream>         // cout, cerr
 #include <cstdlib>          // EXIT_FAILURE
 #include <GL/glew.h>        // GLEW library
@@ -10,6 +11,9 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <learnOpengl/camera.h> // Camera class
+// #include <learnOpengl/shaders.h>
+
 using namespace std; // Standard namespace
 
 /*Shader program Macro*/
@@ -17,82 +21,259 @@ using namespace std; // Standard namespace
 #define GLSL(Version, Source) "#version " #Version " core \n" #Source
 #endif
 
+// ********** NAMESPACE ***********
 // Unnamed namespace
 namespace
 {
-const char* const WINDOW_TITLE = "Tutorial 5.2"; // Macro for window title
+    const char* const WINDOW_TITLE = "Katie's Graphics Project"; // Macro for window title
 
-// Variables for window width and height
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+    // Variables for window width and height
+    const int WINDOW_WIDTH = 1200;
+    const int WINDOW_HEIGHT = 800;
 
-// Stores the GL data relative to a given mesh
-struct GLMesh
-{
-    GLuint vao;         // Handle for the vertex array object
-    GLuint vbos[2];     // Handles for the vertex buffer objects
-    GLuint nIndices;    // Number of indices of the mesh
-};
+    // Stores the GL data relative to a given mesh
+    struct GLMesh
+    {
+        GLuint vao;         // Handle for the vertex array object
+        GLuint vbo;         // Handle for the vertex buffer object
+        GLuint nVertices;    // Number of indices of the mesh
+        GLuint nIndices;    // Number of indices of the mesh
+    };
 
-// Main GLFW window
-GLFWwindow* gWindow = nullptr;
-// Triangle mesh data
-GLMesh gMesh;
-// Texture id
-GLuint gTextureId;
-// Shader program
-GLuint gProgramId;
+    // Main GLFW window
+    GLFWwindow* gWindow = nullptr;
+
+    // Shader programs
+    GLuint gCubeProgramId;
+    GLuint gLampProgramId;
+
+    // Triangle mesh data
+    GLMesh gMesh;
+
+    // Texture
+    GLuint gTextureId;
+    glm::vec2 gUVScale(10.0f, 10.0f);
+    GLint gTexWrapMode = GL_REPEAT;
+    GLint gTexFilterMode = GL_LINEAR;
+    /*
+        GLuint textureIdAll[] = {
+            texDoorClassic, // 0
+            texDoorRustic, // 1
+            texSunsetPic, // 2
+            texRug, // 3
+            texWallpaper, // 4
+            texGrassAlphine, // 5
+            texMarbleCream, // 6
+            texCottonCream, // 7
+            texFabricRed, // 8
+            texMetalBlack, // 9
+            texWoodHerring, // 10
+            texWoodSolidDark, // 11
+            texWoodRustic // 12
+        };
+        int texCount = size(textureIdAll);
+    */
+
+    // camera
+    Camera gCamera(glm::vec3(0.2f, 5.6f, 9.9f)); // do not change. precalcated to fit scene
+    float gLastX = WINDOW_WIDTH / 2.0f;
+    float gLastY = WINDOW_HEIGHT / 2.0f;
+    bool gFirstMouse = true;
+
+    // timing
+    float gDeltaTime = 0.0f; // time between current frame and last frame
+    float gLastFrame = 0.0f;
+
+    // CUBE
+    // Subject position and scale
+    glm::vec3 gCubePosition(0.0f, 0.0f, 0.0f);
+    glm::vec3 gCubeScale(2.0f);
+
+    // Cube and light color
+    //m::vec3 gObjectColor(0.6f, 0.5f, 0.75f);
+    glm::vec3 gObjectColor(1.f, 0.2f, 0.0f);
+    glm::vec3 gLightColor(1.0f, 1.0f, 1.0f);
+
+    // PROJECTING CUBE LIGHT
+    // Light position and scale
+    glm::vec3 gLightPosition(1.5f, 0.5f, 3.0f);
+    glm::vec3 gLightScale(0.3f);
+
 }
 
-/* User-defined Function prototypes to:
- * initialize the program, set the window size,
- * redraw graphics on the window when resized,
- * and render graphics on the screen
- */
-bool UInitialize(int, char*[], GLFWwindow** window);
-void UResizeWindow(GLFWwindow* window, int width, int height);
-void UProcessInput(GLFWwindow* window);
-void UCreateMesh(GLMesh &mesh);
-void UDestroyMesh(GLMesh &mesh);
-bool UCreateTexture(const char* filename, GLuint &textureId);
-void UDestroyTexture(GLuint textureId);
-void URender();
-bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId);
+// *********** USER-DEFINED FUNCTIONS **********
+bool initializeOGL(int, char* [], GLFWwindow** window);
+void rendering();
+
+// window resize and projection
+void resizeWindow(GLFWwindow* window, int width, int height);
+void toOrtho();
+void toPerspective();
+void changeProjectionCallback(); // use keyboard to change projection (event)
+
+// shaders
+bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
 void UDestroyShaderProgram(GLuint programId);
 
+// user Inputs
+void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+void keyboardNavigation(GLFWwindow* window);
+// event
+void keyboardControl(GLFWwindow* window);
 
-/* Vertex Shader Source Code*/
-const GLchar * vertexShaderSource = GLSL(440,
-    layout (location = 0) in vec3 position;
-    layout (location = 2) in vec2 textureCoordinate;
+// textures
+void flipImageVertical(unsigned char* image, int width, int height, int channels);
+void createAllTexture(GLuint& textureIdAll, int texCount);
+bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
+void deleteTexture(GLuint& textureIdAll, int texCount);
 
-    out vec2 vertexTextureCoordinate;
+bool UCreateTexture(const char* filename, GLuint& textureId);
+void UDestroyTexture(GLuint textureId);
 
-    void main()
-    {
-        gl_Position = vec4(position.x, position.y, position.z, 1.0);
-        vertexTextureCoordinate = textureCoordinate;
-    }
+// mesh
+void meshFloor(GLMesh& mesh);
+void meshWall(GLMesh& mesh);
+void meshSideTableA(GLMesh& mesh);
+void meshSideTableB(GLMesh& mesh);
+void meshCoffeeTable(GLMesh& mesh);
+void meshBalloons(GLMesh& mesh);
+void meshWreath(GLMesh& mesh);
+void meshLamp(GLMesh& mesh);
+void meshDoor(GLMesh& mesh);
+void meshCouch(GLMesh& mesh);
+
+void UCreateMesh(GLMesh& mesh);
+void UDestroyMesh(GLMesh& mesh);
+
+// draw
+void drawFloor();
+void drawWall();
+void drawSideTableA();
+void drawSideTableB();
+void drawCoffeeTable();
+void drawBalloons();
+void drawWreath();
+void drawLamp();
+void drawDoor();
+void drawCouch();
+
+void DrawLight();
+void DrawCube();
+
+
+// *********** SHADERS: DEFINE **********
+/* Cube Vertex Shader Source Code*/
+const GLchar* cubeVertexShaderSource = GLSL(440,
+
+    layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
+layout(location = 1) in vec3 normal; // VAP position 1 for normals
+layout(location = 2) in vec2 textureCoordinate;
+
+out vec3 vertexNormal; // For outgoing normals to fragment shader
+out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
+out vec2 vertexTextureCoordinate;
+
+//Uniform / Global variables for the  transform matrices
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
+
+    vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
+
+    vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
+    vertexTextureCoordinate = textureCoordinate;
+}
+);
+
+
+/* Cube Fragment Shader Source Code*/
+const GLchar* cubeFragmentShaderSource = GLSL(440,
+
+    in vec3 vertexNormal; // For incoming normals
+in vec3 vertexFragmentPos; // For incoming fragment position
+in vec2 vertexTextureCoordinate;
+
+out vec4 fragmentColor; // For outgoing cube color to the GPU
+
+// Uniform / Global variables for object color, light color, light position, and camera/view position
+uniform vec3 objectColor;
+uniform vec3 lightColor;
+uniform vec3 lightPos;
+uniform vec3 viewPosition;
+uniform sampler2D uTexture; // Useful when working with multiple textures
+uniform vec2 uvScale;
+
+void main()
+{
+    /*Phong lighting model calculations to generate ambient, diffuse, and specular components*/
+
+    //Calculate Ambient lighting*/
+    float ambientStrength = 0.1f; // Set ambient or global lighting strength
+    vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+    //Calculate Diffuse lighting*/
+    vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+    vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+    float impact = max(dot(norm, lightDirection), 0.0);// Calculate diffuse impact by generating dot product of normal and light
+    vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+    //Calculate Specular lighting*/
+    float specularIntensity = 0.8f; // Set specular light strength
+    float highlightSize = 16.0f; // Set specular highlight size
+    vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+    vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+    //Calculate specular component
+    float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+    vec3 specular = specularIntensity * specularComponent * lightColor;
+
+    // Texture holds the color to be used for all three components
+    vec4 textureColor = texture(uTexture, vertexTextureCoordinate * uvScale);
+
+    // Calculate phong result
+    vec3 phong = (ambient + diffuse + specular) * textureColor.xyz;
+
+    fragmentColor = vec4(phong, 1.0); // Send lighting results to GPU
+}
+);
+
+
+/* Lamp Shader Source Code*/
+const GLchar* lampVertexShaderSource = GLSL(440,
+
+    layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
+
+        //Uniform / Global variables for the  transform matrices
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
+}
 );
 
 
 /* Fragment Shader Source Code*/
-const GLchar * fragmentShaderSource = GLSL(440,
-    in vec2 vertexTextureCoordinate;
+const GLchar* lampFragmentShaderSource = GLSL(440,
 
-    out vec4 fragmentColor;
+    out vec4 fragmentColor; // For outgoing lamp color (smaller cube) to the GPU
 
-    uniform sampler2D uTexture;
-
-    void main()
-    {
-        fragmentColor = texture(uTexture, vertexTextureCoordinate); // Sends texture to the GPU for rendering
-    }
+void main()
+{
+    fragmentColor = vec4(1.0f); // Set color to white (1.0f,1.0f,1.0f) with alpha 1.0
+}
 );
 
 
 // Images are loaded with Y axis going down, but OpenGL's Y axis goes up, so let's flip it
-void flipImageVertically(unsigned char *image, int width, int height, int channels)
+void flipImageVertically(unsigned char* image, int width, int height, int channels)
 {
     for (int j = 0; j < height / 2; ++j)
     {
@@ -110,44 +291,53 @@ void flipImageVertically(unsigned char *image, int width, int height, int channe
     }
 }
 
-
+// ********** MAIN CLASS ***********
 int main(int argc, char* argv[])
 {
-    if (!UInitialize(argc, argv, &gWindow))
+    if (!initializeOGL(argc, argv, &gWindow))
         return EXIT_FAILURE;
 
     // Create the mesh
     UCreateMesh(gMesh); // Calls the function to create the Vertex Buffer Object
 
-    // Create the shader program
-    if (!UCreateShaderProgram(vertexShaderSource, fragmentShaderSource, gProgramId))
+    // Create the shader programs
+    if (!UCreateShaderProgram(cubeVertexShaderSource, cubeFragmentShaderSource, gCubeProgramId))
         return EXIT_FAILURE;
 
-    // Load texture (relative to project's directory)
-    const char * texFilename = "../../resources/textures/smiley.png";
+    if (!UCreateShaderProgram(lampVertexShaderSource, lampFragmentShaderSource, gLampProgramId))
+        return EXIT_FAILURE;
+
+    // Load texture
+    const char* texFilename = "../../resources/textures/smiley.png";
     if (!UCreateTexture(texFilename, gTextureId))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
+
+
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    glUseProgram(gProgramId);
+    glUseProgram(gCubeProgramId);
     // We set the texture as texture unit 0
-    glUniform1i(glGetUniformLocation(gProgramId, "uTexture"), 0);
+    glUniform1i(glGetUniformLocation(gCubeProgramId, "uTexture"), 0);
 
     // Sets the background color of the window to black (it will be implicitely used by glClear)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     // render loop
-    // -----------
     while (!glfwWindowShouldClose(gWindow))
     {
+        // per-frame timing
+        float currentFrame = glfwGetTime();
+        gDeltaTime = currentFrame - gLastFrame;
+        gLastFrame = currentFrame;
+
         // input
         // -----
-        UProcessInput(gWindow);
+        keyboardNavigation(gWindow);
 
         // Render this frame
-        URender();
+        rendering();
 
         glfwPollEvents();
     }
@@ -158,15 +348,16 @@ int main(int argc, char* argv[])
     // Release texture
     UDestroyTexture(gTextureId);
 
-    // Release shader program
-    UDestroyShaderProgram(gProgramId);
+    // Release shader programs
+    UDestroyShaderProgram(gCubeProgramId);
+    UDestroyShaderProgram(gLampProgramId);
 
     exit(EXIT_SUCCESS); // Terminates the program successfully
 }
 
-
+// ********** INTIALIZE OPENGL AND EVENTS **********
 // Initialize GLFW, GLEW, and create a window
-bool UInitialize(int argc, char* argv[], GLFWwindow** window)
+bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
 {
     // GLFW: initialize and configure
     // ------------------------------
@@ -181,7 +372,7 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
 
     // GLFW: window creation
     // ---------------------
-    *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
+    * window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
     if (*window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -189,7 +380,13 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
         return false;
     }
     glfwMakeContextCurrent(*window);
-    glfwSetFramebufferSizeCallback(*window, UResizeWindow);
+    glfwSetFramebufferSizeCallback(*window, resizeWindow);
+    glfwSetCursorPosCallback(*window, mousePositionCallback);
+    glfwSetScrollCallback(*window, mouseScrollCallback);
+    glfwSetMouseButtonCallback(*window, mouseButtonCallback);
+
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // GLEW: initialize
     // ----------------
@@ -210,126 +407,180 @@ bool UInitialize(int argc, char* argv[], GLFWwindow** window)
 }
 
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-void UProcessInput(GLFWwindow* window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
-
-
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-void UResizeWindow(GLFWwindow* window, int width, int height)
+// ********** WINDOW RESIZE AND PROJECTION SETTINGS **********
+// adjusts window when screen size changed is changed (by OS or user)
+void resizeWindow(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
-
-// Functioned called to render a frame
-void URender()
+/*
+void toOrtho()
 {
-    // Clear the background
+    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+}
+*/
+
+/*
+void toPerspective()
+{
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+}
+*/
+
+void changeProjectionCallback()
+{
+    // ADD: change to ortho
+    // ADD: reset to original
+}
+
+
+// ********** KEYBOARD-BASED NAVIGATION **********
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+void keyboardNavigation(GLFWwindow* window)
+{
+    static const float cameraSpeed = 2.5f;
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    // move scene backward, forward
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(BACKWARD, gDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(FORWARD, gDeltaTime);
+    // move scene left, right
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(LEFT, gDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(RIGHT, gDeltaTime);
+    //move scene down, up
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(UP, gDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        gCamera.ProcessKeyboard(DOWN, gDeltaTime);
+}
+
+
+// ********** MOUSE-BASED NAVIGATION **********
+// glfw: whenever the mouse moves, this callback is called
+// -------------------------------------------------------
+void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (gFirstMouse)
+    {
+        gLastX = xpos;
+        gLastY = ypos;
+        gFirstMouse = false;
+    }
+
+    float xoffset = xpos - gLastX;
+    float yoffset = gLastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    gLastX = xpos;
+    gLastY = ypos;
+
+    gCamera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    gCamera.ProcessMouseScroll(yoffset);
+}
+
+
+// glfw: handle mouse button events
+// --------------------------------
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    switch (button)
+    {
+    case GLFW_MOUSE_BUTTON_LEFT:
+    {
+        if (action == GLFW_PRESS)
+            cout << "Left mouse button pressed" << endl;
+        else
+            cout << "Left mouse button released" << endl;
+    }
+    break;
+
+    case GLFW_MOUSE_BUTTON_MIDDLE:
+    {
+        if (action == GLFW_PRESS)
+            cout << "Middle mouse button pressed" << endl;
+        else
+            cout << "Middle mouse button released" << endl;
+    }
+    break;
+
+    case GLFW_MOUSE_BUTTON_RIGHT:
+    {
+        if (action == GLFW_PRESS)
+            cout << "Right mouse button pressed" << endl;
+        else
+            cout << "Right mouse button released" << endl;
+    }
+    break;
+
+    default:
+        cout << "Unhandled mouse button event" << endl;
+        break;
+    }
+}
+
+
+// ********** RENDERING **********
+// Functioned called to render a frame
+void rendering()
+{
+    // Enable z-depth
+    glEnable(GL_DEPTH_TEST);
+
+    // Clear the frame and z buffers
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // 1. Scales the shape down by half of its original size in all 3 dimensions
-    glm::mat4 scale = glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));
-
-    // 2. Rotates shape by 45 degrees on the z axis
-    glm::mat4 rotation = glm::rotate(45.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-
-    // 3. Translates by 0.5 in the y axis
-    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.5f, 0.0f));
-
-    // Transformations are applied right-to-left order
-    //glm::mat4 transformation = translation * rotation * scale;
-    glm::mat4 transformation(1.0f);
-
-    // Set the shader to be used
-    glUseProgram(gProgramId);
-
-    // Sends transform information to the Vertex shader
-    GLuint transformLocation = glGetUniformLocation(gProgramId, "shaderTransform");
-    glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transformation));
-
-    // Activate the VBOs contained within the mesh's VAO
+    // Activate the cube VAO (used by cube and lamp)
     glBindVertexArray(gMesh.vao);
 
-    // bind textures on corresponding texture units
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gTextureId);
+    DrawCube();
+    DrawLight();
 
-    // Draws the triangle
-    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+    drawFloor();
+    drawWall();
+    drawSideTableA();
+    drawSideTableB();
+    drawCoffeeTable();
+    drawBalloons();
+    drawWreath();
+    drawLamp();
+    drawDoor();
+    drawCouch();
 
-    // Deactivate the Vertex Array Object
+    // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
+    glUseProgram(0);
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     glfwSwapBuffers(gWindow);    // Flips the the back buffer with the front buffer every frame.
 }
 
 
-// Implements the UCreateMesh function
-void UCreateMesh(GLMesh &mesh)
-{
-    // Vertex data
-    GLfloat verts[]=
-    {
-        // Positions          // Color                  // Texture Coordinates
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,   1.0f, 1.0f, // Top Right Vertex 0
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,   1.0f, 0.0f, // Bottom Right Vertex 1
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f,   0.0f, 0.0f, // Bottom Left Vertex 2
-        -0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f, 1.0f,   0.0f, 1.0f  // Top Left Vertex 3
-    };
-
-    const GLuint floatsPerVertex = 3;
-    const GLuint floatsPerColor = 4;
-    const GLuint floatsPerUV = 2;
-
-    glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
-    glBindVertexArray(mesh.vao);
-
-    // Create 2 buffers: first one for the vertex data; second one for the indices
-    glGenBuffers(2, mesh.vbos);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbos[0]); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
-
-    // Data for the indices
-    GLushort indices[] = { 0, 1, 3,  // Triangle 1
-                           1, 2, 3   // Triangle 2
-                        };
-    mesh.nIndices = sizeof(indices) / sizeof(indices[0]);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.vbos[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // Strides between vertex coordinates
-    GLint stride =  sizeof(float) * (floatsPerVertex + floatsPerColor + floatsPerUV);
-
-    // Create Vertex Attribute Pointers
-    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, floatsPerColor, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerColor)));
-    glEnableVertexAttribArray(2);
-}
 
 
-void UDestroyMesh(GLMesh &mesh)
-{
-    glDeleteVertexArrays(1, &mesh.vao);
-    glDeleteBuffers(2, mesh.vbos);
-}
-
-
+// ********** TEXTURES AND IMAGES **********
 /*Generate and load the texture*/
-bool UCreateTexture(const char* filename, GLuint &textureId)
+bool UCreateTexture(const char* filename, GLuint& textureId)
 {
     int width, height, channels;
-    unsigned char *image = stbi_load(filename, &width, &height, &channels, 0);
+    unsigned char* image = stbi_load(filename, &width, &height, &channels, 0);
     if (image)
     {
         flipImageVertically(image, width, height, channels);
@@ -345,16 +596,16 @@ bool UCreateTexture(const char* filename, GLuint &textureId)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         if (channels == 3)
-        	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
         else if (channels == 4)
-        	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
         else
         {
-        	cout << "Not implemented to handle image with " << channels << " channels" << endl;
-        	return false;
+            cout << "Not implemented to handle image with " << channels << " channels" << endl;
+            return false;
         }
 
-		glGenerateMipmap(GL_TEXTURE_2D);
+        glGenerateMipmap(GL_TEXTURE_2D);
 
         stbi_image_free(image);
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind the texture
@@ -366,7 +617,7 @@ bool UCreateTexture(const char* filename, GLuint &textureId)
     return false;
 }
 
-
+// ********** SHADERS: CREATE AND DESTROY **********
 void UDestroyTexture(GLuint textureId)
 {
     glGenTextures(1, &textureId);
@@ -374,7 +625,7 @@ void UDestroyTexture(GLuint textureId)
 
 
 // Implements the UCreateShaders function
-bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint &programId)
+bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId)
 {
     // Compilation and linkage error reporting
     int success = 0;
@@ -440,3 +691,391 @@ void UDestroyShaderProgram(GLuint programId)
     glDeleteProgram(programId);
 }
 
+// ********** OBJECT MESH **********
+// Implements the UCreateMesh function
+void UCreateMesh(GLMesh& mesh)
+{
+    // Position and Color data
+    GLfloat verts[] = {
+        //Positions          //Normals
+        // ------------------------------------------------------
+        //Back Face          //Negative Z Normal  Texture Coords.
+       -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+       -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+       -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+
+       //Front Face         //Positive Z Normal
+      -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+       0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+       0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+       0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+      -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
+      -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+
+      //Left Face          //Negative X Normal
+     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+     -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+     //Right Face         //Positive X Normal
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+     //Bottom Face        //Negative Y Normal
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+    //Top Face           //Positive Y Normal
+   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+   -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+    };
+
+    const GLuint floatsPerVertex = 3;
+    const GLuint floatsPerNormal = 3;
+    const GLuint floatsPerUV = 2;
+
+    mesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
+
+    glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(mesh.vao);
+
+    // Create 2 buffers: first one for the vertex data; second one for the indices
+    glGenBuffers(1, &mesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // Activates the buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+
+    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+
+    // Create Vertex Attribute Pointers
+    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
+    glEnableVertexAttribArray(2);
+}
+
+
+void UDestroyMesh(GLMesh& mesh)
+{
+    glDeleteVertexArrays(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.vbo);
+}
+
+
+// mesh
+void meshFloor(GLMesh& mesh)
+{
+    // plane
+    // texture - wood floor
+// Position and Color data
+
+}
+
+void meshWalls(GLMesh& mesh)
+{
+    // plane
+    // light gray-blue texture
+    // add sunset pic image
+}
+
+void meshDoor(GLMesh& mesh)
+{
+    // apply as texture to wall instead??
+    // plane
+    // door image
+}
+
+void meshSideTableA(GLMesh& mesh)
+{
+
+
+    //consider combined into 1 class for BOTH side tables by using offsets
+    // small cuboid
+    // wood texture with special front texture for drawers
+    // 4 legs
+    // wood texture
+}
+
+void meshSideTableB(GLMesh& mesh)
+{
+    //consider combined into 1 class for BOTH side tables by using offsets
+    // small cuboid
+    // wood texture with special front texture for drawers
+    // 4 legs
+    // wood texture
+}
+
+void meshCoffeeTable(GLMesh& mesh)
+{
+    // elongated cuboid
+    // 4 legs
+    // metal texture
+}
+
+void meshWreath(GLMesh& mesh)
+{
+    // torus
+    // alphine/green tree texture
+    // ??add ornaments??
+}
+
+void meshBalloons(GLMesh& mesh)
+{
+    // balloon
+    // solid color texture wit light shine
+}
+
+void meshLamp(GLMesh& mesh)
+{
+    // cylinder
+    // cylinder
+    // cone
+    // marble texture, cloth texture
+
+}
+
+void meshCouch(GLMesh& mesh)
+{
+    // red fabric texture
+    // metal legs texture
+}
+
+
+/*  DRAW ARRAY TEMPLATE
+     GLfloat verts[] = {
+        //Positions          //Normals  // textures
+    //Back Face          //Negative Z Normal  Texture Coords.
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+
+    //Front Face         //Positive Z Normal
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+
+      //Left Face          //Negative X Normal
+     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+     -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+     //Right Face         //Positive X Normal
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+     //Bottom Face        //Negative Y Normal
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+    //Top Face           //Positive Y Normal
+   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+   -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+    };
+
+    const GLuint floatsPerVertex = 3;
+    const GLuint floatsPerNormal = 3;
+    const GLuint floatsPerUV = 2;
+
+    mesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
+
+    glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(mesh.vao);
+
+    // Create 2 buffers: first one for the vertex data; second one for the indices
+    glGenBuffers(1, &mesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // Activates the buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+
+    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+
+    // Create Vertex Attribute Pointers
+    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
+    glEnableVertexAttribArray(2);
+
+
+*/
+
+/*  DRAW ELEMENT TEMPLATE
+
+
+
+*/
+
+
+// ********** DRAW OBJECT **********
+void drawFloor()
+{
+
+}
+
+void drawWall()
+{
+
+}
+
+void drawSideTableA()
+{
+
+}
+
+void drawSideTableB()
+{
+
+}
+
+void drawCoffeeTable()
+{
+
+}
+
+void drawBalloons()
+{
+
+}
+
+void drawWreath()
+{
+
+}
+
+void drawLamp()
+{
+
+}
+
+void drawDoor()
+{
+
+}
+
+void drawCouch()
+{
+
+}
+
+void DrawCube()
+{
+    // CUBE: draw cube
+    //----------------
+    // Set the shader to be used
+    glUseProgram(gCubeProgramId);
+
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = glm::translate(gCubePosition) * glm::scale(gCubeScale);
+
+    // camera/view transformation
+    glm::mat4 view = gCamera.GetViewMatrix();
+
+    // Creates a perspective projection
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+
+    // Retrieves and passes transform matrices to the Shader program
+    GLint modelLoc = glGetUniformLocation(gCubeProgramId, "model");
+    GLint viewLoc = glGetUniformLocation(gCubeProgramId, "view");
+    GLint projLoc = glGetUniformLocation(gCubeProgramId, "projection");
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    // Reference matrix uniforms from the Cube Shader program for the cub color, light color, light position, and camera position
+    GLint objectColorLoc = glGetUniformLocation(gCubeProgramId, "objectColor");
+    GLint lightColorLoc = glGetUniformLocation(gCubeProgramId, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(gCubeProgramId, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(gCubeProgramId, "viewPosition");
+
+    // Pass color, light, and camera data to the Cube Shader program's corresponding uniforms
+    glUniform3f(objectColorLoc, gObjectColor.r, gObjectColor.g, gObjectColor.b);
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+    GLint UVScaleLoc = glGetUniformLocation(gCubeProgramId, "uvScale");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // bind textures on corresponding texture units
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gTextureId);
+
+    // Draws the triangles
+    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+}
+
+void DrawLight() {
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = glm::translate(gCubePosition) * glm::scale(gCubeScale);
+
+    // camera/view transformation
+    glm::mat4 view = gCamera.GetViewMatrix();
+    // LAMP: draw lamp
+//----------------
+    glUseProgram(gLampProgramId);
+
+    //Transform the smaller cube used as a visual que for the light source
+    model = glm::translate(gLightPosition) * glm::scale(gLightScale);
+
+    // Reference matrix uniforms from the Lamp Shader program
+    GLint modelLoc = glGetUniformLocation(gLampProgramId, "model");
+    GLint viewLoc = glGetUniformLocation(gLampProgramId, "view");
+    GLint projLoc = glGetUniformLocation(gLampProgramId, "projection");
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+
+    // Pass matrix data to the Lamp Shader program's matrix uniforms
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+
+}
