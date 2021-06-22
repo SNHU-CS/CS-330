@@ -246,29 +246,37 @@ void main()
 /* Lamp Shader Source Code*/
 const GLchar* lampVertexShaderSource = GLSL(440,
 
-    layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
+    layout(location = 0) in vec3 position;
+    layout(location = 2) in vec2 textureCoordinate;
+
+    out vec2 vertexTextureCoordinate;
 
         //Uniform / Global variables for the  transform matrices
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
 
 void main()
 {
     gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
+    vertexTextureCoordinate = textureCoordinate;
 }
 );
 
 
 /* Fragment Shader Source Code*/
 const GLchar* lampFragmentShaderSource = GLSL(440,
+    in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor; // For outgoing lamp color (smaller cube) to the GPU
 
-void main()
-{
-    fragmentColor = vec4(1.0f); // Set color to white (1.0f,1.0f,1.0f) with alpha 1.0
-}
+    uniform sampler2D uTexture;
+    uniform vec2 uvScale;
+
+    void main()
+    {
+        fragmentColor = texture(uTexture, vertexTextureCoordinate * uvScale);
+    }
 );
 
 
@@ -318,8 +326,10 @@ int main(int argc, char* argv[])
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     glUseProgram(gCubeProgramId);
+    glUseProgram(gLampProgramId);
     // We set the texture as texture unit 0
     glUniform1i(glGetUniformLocation(gCubeProgramId, "uTexture"), 0);
+    glUniform1i(glGetUniformLocation(gLampProgramId, "uTexture"), 0);
 
     // Sets the background color of the window to black (it will be implicitely used by glClear)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -547,7 +557,7 @@ void rendering()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 scale;
+    glm::mat4 scale;
     glm::mat4 rotation;
     glm::mat4 translation;
     glm::mat4 model = translation * rotation * scale;
@@ -556,7 +566,7 @@ void rendering()
     glBindVertexArray(gMesh.vao);
 
     DrawCube();
-    DrawLight();
+//    DrawLight();
 
     drawFloor();
     drawWall();
@@ -1160,19 +1170,47 @@ void drawSideTableA()
     rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     translation = glm::translate(glm::vec3(-4.0f, 0.8f, 1.5f));
 
+    // camera/view transformation
+    glm::mat4 view = gCamera.GetViewMatrix();
+
+    // Creates a perspective projection
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+
+
     // Model matrix: transformations are applied right-to-left order
     model = translation * rotation * scale;
+    // Set the shader to be used
+    glUseProgram(gLampProgramId);
+
     // Retrieves and passes transform matrices to the Shader program
     modelLoc = glGetUniformLocation(gLampProgramId, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    GLint viewLoc = glGetUniformLocation(gLampProgramId, "view");
+    GLint projLoc = glGetUniformLocation(gLampProgramId, "projection");
 
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScale");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // Activate the VBOs contained within the mesh's VAO
+    glBindVertexArray(gMesh.vao);
+
+    // bind textures on corresponding texture units
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gTextureId);
     // Activate the VBOs contained within the mesh's VA
     glBindVertexArray(gMesh.vao);
     // draws primary dresser cube
     // Draws the triangles
+
+
+
+
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 
-
+    
     // **********************************
     // small legs (4) cuboid
     // uses same rotation as dresser cuboid. does not need to be redefined
@@ -1205,9 +1243,14 @@ void drawSideTableA()
         // Activate the VBOs contained within the mesh's VAO
         glBindVertexArray(gMesh.vao);
 
+            // bind textures on corresponding texture units
+  //  glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, gTextureId);
+
         // Draws the triangles
         glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
     }
+    
 
 }
 
@@ -1295,7 +1338,7 @@ void DrawCube()
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 }
 
-
+/*
 void DrawLight() {
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = glm::translate(gCubePosition) * glm::scale(gCubeScale);
@@ -1323,3 +1366,4 @@ void DrawLight() {
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 
 }
+*/
