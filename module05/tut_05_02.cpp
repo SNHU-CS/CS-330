@@ -142,9 +142,9 @@ void keyboardControl(GLFWwindow* window);
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
 bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
-void createAllTextures(GLuint& textureIdAll, int texCount);
+bool createAllTexture(GLuint& textureIdAll, int texCount);
 /*TEST: switch values in glDeleteTextures(1, texarrayORlist) match real function*/
-void deleteTextures(GLuint& textureIdAll, int texCount);
+void deleteTexture(GLuint& textureIdAll, int texCount);
 /*TEST: switch values in glDeleteTextures(1, texarrayORlist) to match real function*/
 
 bool UCreateTexture(const char* filename, GLuint& textureId);
@@ -300,7 +300,7 @@ const GLchar* lampFragmentShaderSource = GLSL(440,
 
 
 // Images are loaded with Y axis going down, but OpenGL's Y axis goes up, so let's flip it
-void flipImageVertically(unsigned char* image, int width, int height, int channels)
+void flipImageVertical(unsigned char* image, int width, int height, int channels)
 {
     for (int j = 0; j < height / 2; ++j)
     {
@@ -630,7 +630,7 @@ bool UCreateTexture(const char* filename, GLuint& textureId)
     unsigned char* image = stbi_load(filename, &width, &height, &channels, 0);
     if (image)
     {
-        flipImageVertically(image, width, height, channels);
+        flipImageVertical(image, width, height, channels);
 
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
@@ -664,7 +664,54 @@ bool UCreateTexture(const char* filename, GLuint& textureId)
     return false;
 }
 
-// ********** SHADERS: CREATE AND DESTROY **********
+
+// generates settings for individual texture 
+// assumes all images are declared and processed as GL_TEXTURE_2D
+// FOLLOWUP: is & needed in front of GLint gTExtWrapMode or FilterMode?
+bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode)
+{
+    int width, height, channels;
+
+    unsigned char* image = stbi_load(filename, &width, &height, &channels, 0);
+
+    if (image)
+    {
+        flipImageVertical(image, width, height, channels);
+
+        glGenTextures(1, &textureId);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gTexWrapMode);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gTexWrapMode);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gTexFilterMode);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gTexFilterMode);
+
+        if (channels == 3)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+        else if (channels == 4)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        else
+        {
+            cout << "Not implemented to handle image with " << channels << " channels" << endl;
+            return false;
+        }
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        stbi_image_free(image);
+        glBindTexture(GL_TEXTURE_2D, 0); // Unbind the texture
+
+        return true;
+    }
+
+    // Error loading the image
+    return false;
+}
+
+
+
 //update later
 void UDestroyTexture(GLuint textureId)
 {
@@ -673,8 +720,138 @@ void UDestroyTexture(GLuint textureId)
     //glGenTexture(texWoodRustic);
 }
 
+// load all textures
+/* IMPORTANT: By default, assumes all images are declared and processed as GL_TEXTURE_2D.
+ *    Specify location, textureID, Wrap Parameter and Filter Parameter
+ *    To make S or T different from each other, a custom loop needs to be made, based on the createEachTexture
+ */
+bool createAllTexture(GLuint& textureIdAll, int texCount)
+{
+    // specify location, textureID, Wrap Parameter and Filter Parameter
+    
+    // image: classic door
+    const char* texFilename = "../../resources/images/door-classic.png";
+    if (!createEachTexture(texFilename, texDoorClassic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // image: rustic door (dark wood by default)
+    // texFilename = "../../resources/images/door-light-wood.png";
+    texFilename = "../../resources/images/door-dark-wood.png";
+    if (!createEachTexture(texFilename, texDoorRustic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // image: frame sunset picture (large by default. small available)
+    texFilename = "../../resources/images/framed-sunset-lrg.png";
+    //texFilename = "../../resources/images/frame-sunset-sml.png";
+    if (!createEachTexture(texFilename, texSunsetPic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // image: vintage door rug
+    texFilename = "../../resources/images/rug-vintage.png";
+    if (!createEachTexture(texFilename, texRug, GL_CLAMP_TO_BORDER, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: textured wallpaper/creamy brown-gray, wall
+    // dark, mid, light shades
+    // texFilename = "../../resources/textures/wallpaper-uni-dark.jpg";
+    // texFilename = "../../resources/textures/wallpaper-uni-light.jpg";
+    texFilename = "../../resources/textures/wallpaper-uni-med.jpg";
+    if (!createEachTexture(texFilename, texWallpaper, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: grass/alphine, wreath
+    texFilename = "../../resources/textures/grass-alphine.jpg";
+    if (!createEachTexture(texFilename, texGrassAlphine, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: marble ceramic/cream, lamp base
+    texFilename = "../../resources/textures/marble-cream.jpg";
+    if (!createEachTexture(texFilename, texMarbleCream, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: cotton/cream, lamp cover
+    texFilename = "../../resources/textures/cotton-seamless.jpg";
+    if (!createEachTexture(texFilename, texCottonCream, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: cotton/red, couch fabric
+    texFilename = "../../resources/textures/fabric-red-seamless.png";
+    if (!createEachTexture(texFilename, texFabricRed, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
 
 
+    // texture: metal brused/black, long table, couch legs
+    texFilename = "../../resources/textures/metal-black-brush.jpg";
+    if (!createEachTexture(texFilename, texMetalBlack, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: wood (herring pattern)/dark, floor
+    texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
+    if (!createEachTexture(texFilename, texWoodHerring, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: wood (solid natural)/dark, table/alternative
+    texFilename = "../../resources/textures/solid-dark-wood.jpg";
+    if (!createEachTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+
+    // texture: wood (straigtened rustic), side tables
+    texFilename = "../../resources/textures/wood-floor-scratched.jpg";
+    if (!createEachTexture(texFilename, texWoodRustic, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+    
+    return true;
+}
+
+// delete textures
+void deleteTexture(GLuint& textureIdAll, int texCount)
+{
+    // uses glDeleteTextures
+    // source: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDeleteTextures.xhtml
+    glDeleteTextures(texCount, &textureIdAll);
+}
+
+
+// ********** SHADERS: CREATE AND DESTROY **********
 // Implements the UCreateShaders function
 bool UCreateShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId)
 {
