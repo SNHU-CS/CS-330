@@ -326,9 +326,21 @@ int main(int argc, char* argv[])
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     glUseProgram(gCubeProgramId);
-    glUseProgram(gLampProgramId);
+    //glUseProgram(gLampProgramId);
     // We set the texture as texture unit 0
     glUniform1i(glGetUniformLocation(gCubeProgramId, "uTexture"), 0);
+    //glUniform1i(glGetUniformLocation(gLampProgramId, "uTexture"), 0);
+
+
+
+        // Load texture
+    //texFilename = "../../resources/textures/wood-floor-scratched.jpg";
+    if (!UCreateTexture(texFilename, gTextureId))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+    glUseProgram(gLampProgramId);
     glUniform1i(glGetUniformLocation(gLampProgramId, "uTexture"), 0);
 
     // Sets the background color of the window to black (it will be implicitely used by glClear)
@@ -1204,9 +1216,6 @@ void drawSideTableA()
     glBindVertexArray(gMesh.vao);
     // draws primary dresser cube
     // Draws the triangles
-
-
-
 
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 

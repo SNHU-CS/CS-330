@@ -817,7 +817,7 @@ void createAllTexture(GLuint& textureIdAll, int texCount)
     }
 
     // texture: wood (straigtened rustic), side tables
-    texFilename = "../../resources/textures/wood-floor-scrateched.jpg";
+    texFilename = "../../resources/textures/wood-floor-scratched.jpg";
     if (!createTexture(texFilename, texWoodRustic, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
