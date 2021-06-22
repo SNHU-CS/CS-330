@@ -547,7 +547,10 @@ void rendering()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+        glm::mat4 scale;
+    glm::mat4 rotation;
+    glm::mat4 translation;
+    glm::mat4 model = translation * rotation * scale;
 
     // Activate the cube VAO (used by cube and lamp)
     glBindVertexArray(gMesh.vao);
@@ -792,22 +795,7 @@ void meshFloor(GLMesh& mesh)
     // plane
     // texture - wood floor
 // Position and Color data
-
-}
-
-void meshWall(GLMesh& mesh)
-{
-    // plane
-    // light gray-blue texture
-    // add sunset pic image
-}
-
-void meshDoor(GLMesh& mesh)
-{
-    // apply as texture to wall instead??
-    // plane
-    // door image
-            // Plane vertex data
+                // Plane vertex data
     GLfloat verts[] = {
         // Vertex Positions    // normals        // textures
         // bottom
@@ -845,6 +833,21 @@ void meshDoor(GLMesh& mesh)
 
     glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
     glEnableVertexAttribArray(2);
+}
+
+void meshWalls(GLMesh& mesh)
+{
+    // plane
+    // light gray-blue texture
+    // add sunset pic image
+}
+
+void meshDoor(GLMesh& mesh)
+{
+    // apply as texture to wall instead??
+    // plane
+    // door image
+
 }
 
 void meshSideTableA(GLMesh& mesh)
@@ -1143,17 +1146,24 @@ void drawWall()
 
 void drawSideTableA()
 {
+    // declare objects
+    glm::mat4 scale;
+    glm::mat4 rotation;
+    glm::mat4 translation;
+    glm::mat4 model = translation * rotation * scale;;
+    GLint modelLoc;
 
-    // dresser cuboid
-    // create model view: scale, rotate, translate
-    glm::mat4 scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
-    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(-4.0f, 0.8f, 1.5f));
+    // **********************************
+   // dresser cuboid
+   // create model view: scale, rotate, translate
+    scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
+    rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    translation = glm::translate(glm::vec3(-4.0f, 0.8f, 1.5f));
 
     // Model matrix: transformations are applied right-to-left order
-    glm::mat4 model = translation * rotation * scale;
+    model = translation * rotation * scale;
     // Retrieves and passes transform matrices to the Shader program
-    GLint modelLoc = glGetUniformLocation(gProgramId, "model");
+    modelLoc = glGetUniformLocation(gLampProgramId, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
     // Activate the VBOs contained within the mesh's VA
@@ -1172,8 +1182,8 @@ void drawSideTableA()
 
     // each leg has a unique position
     glm::vec3 legPosition[] = {
-    glm::vec3(-3.5f, 0.1f, 2.0f), // right front leg
-    glm::vec3(-4.5f, 0.1f, 2.0f), // left front leg
+    glm::vec3(-3.5f, 0.1f, 1.0f), // right front leg
+    glm::vec3(-4.5f, 0.1f, 1.0f), // left front leg
     glm::vec3(-3.5f, 0.1f, 2.0f), // right back leg
     glm::vec3(-4.5f, 0.1f, 2.0f) // left back leg
     };
@@ -1189,7 +1199,7 @@ void drawSideTableA()
         model = translation * rotation * scale;
 
         // Retrieves and passes transform matrices to the Shader program
-        modelLoc = glGetUniformLocation(gProgramId, "model");
+        modelLoc = glGetUniformLocation(gLampProgramId, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         // Activate the VBOs contained within the mesh's VAO
@@ -1198,6 +1208,7 @@ void drawSideTableA()
         // Draws the triangles
         glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
     }
+
 }
 
 void drawSideTableB()
@@ -1283,6 +1294,7 @@ void DrawCube()
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 }
+
 
 void DrawLight() {
     // Model matrix: transformations are applied right-to-left order
