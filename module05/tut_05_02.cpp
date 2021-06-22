@@ -334,7 +334,7 @@ int main(int argc, char* argv[])
 
 
         // Load texture
-    //texFilename = "../../resources/textures/wood-floor-scratched.jpg";
+    texFilename = "../../resources/textures/wood-scratched.jpg";
     if (!UCreateTexture(texFilename, gTextureId))
     {
         cout << "Failed to load texture " << texFilename << endl;
