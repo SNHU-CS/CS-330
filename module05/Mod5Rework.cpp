@@ -134,9 +134,9 @@ void keyboardControl(GLFWwindow* window);
 
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
-void createAllTexture(GLuint& textureIdAll, int texCount);
+void createAllTextures(GLuint& textureIdAll, int texCount);
 bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
-void deleteTexture(GLuint& textureIdAll, int texCount);
+void deleteTextures(GLuint& textureIdAll, int texCount);
 
 
 // shaders
@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
 
     glUseProgram(shaderProgramID);
 
-    createAllTexture(GLuint textureIdAll, int texCount);
+    createAllTextures(textureIdAll, texCount);
     //  return EXIT_FAILURE;
 
     for (int t = 0, t < texCount, t++) {

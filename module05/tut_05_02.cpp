@@ -51,28 +51,44 @@ namespace
     GLMesh gMesh;
 
     // Texture
-    GLuint gTextureId;
     glm::vec2 gUVScale(10.0f, 10.0f);
     GLint gTexWrapMode = GL_REPEAT;
     GLint gTexFilterMode = GL_LINEAR;
-    /*
-        GLuint textureIdAll[] = {
-            texDoorClassic, // 0
-            texDoorRustic, // 1
-            texSunsetPic, // 2
-            texRug, // 3
-            texWallpaper, // 4
-            texGrassAlphine, // 5
-            texMarbleCream, // 6
-            texCottonCream, // 7
-            texFabricRed, // 8
-            texMetalBlack, // 9
-            texWoodHerring, // 10
-            texWoodSolidDark, // 11
-            texWoodRustic // 12
-        };
-        int texCount = size(textureIdAll);
-    */
+    GLuint gTextureId; // original
+
+    GLuint texDoorClassic; // 0
+    GLuint texDoorRustic; // 1
+    GLuint texSunsetPic; // 2
+    GLuint texRug; // 3
+    GLuint texWallpaper; // 4
+    GLuint texGrassAlphine; // 5
+    GLuint texMarbleCream; // 6
+    GLuint texCottonCream; // 7
+    GLuint texFabricRed; // 8
+    GLuint texMetalBlack; // 9
+    GLuint texWoodHerring; // 10
+    GLuint texWoodSolidDark; // 11
+    GLuint texWoodRustic; // 12
+
+    GLuint textureIdAll[13] = {
+        texDoorClassic, // 0
+        texDoorRustic, // 1
+        texSunsetPic, // 2
+        texRug, // 3
+        texWallpaper, // 4
+        texGrassAlphine, // 5
+        texMarbleCream, // 6
+        texCottonCream, // 7
+        texFabricRed, // 8
+        texMetalBlack, // 9
+        texWoodHerring, // 10
+        texWoodSolidDark, // 11
+        texWoodRustic // 12
+    };
+    int texCount = size(textureIdAll);
+    //int texCount = textureIdAll.length;
+    //int texCount = 13;
+
 
     // camera
     Camera gCamera(glm::vec3(0.2f, 5.6f, 9.9f)); // do not change. precalcated to fit scene
@@ -125,9 +141,11 @@ void keyboardControl(GLFWwindow* window);
 
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
-void createAllTexture(GLuint& textureIdAll, int texCount);
 bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
-void deleteTexture(GLuint& textureIdAll, int texCount);
+void createAllTextures(GLuint& textureIdAll, int texCount);
+/*TEST: switch values in glDeleteTextures(1, texarrayORlist) match real function*/
+void deleteTextures(GLuint& textureIdAll, int texCount);
+/*TEST: switch values in glDeleteTextures(1, texarrayORlist) to match real function*/
 
 bool UCreateTexture(const char* filename, GLuint& textureId);
 void UDestroyTexture(GLuint textureId);
@@ -207,6 +225,7 @@ uniform vec3 lightColor;
 uniform vec3 lightPos;
 uniform vec3 viewPosition;
 uniform sampler2D uTexture; // Useful when working with multiple textures
+//uniform sampler2D textureIdAll[12];
 uniform vec2 uvScale;
 
 void main()
@@ -270,12 +289,12 @@ const GLchar* lampFragmentShaderSource = GLSL(440,
 
     out vec4 fragmentColor; // For outgoing lamp color (smaller cube) to the GPU
 
-    uniform sampler2D uTexture;
+    uniform sampler2D uniTexRustic;
     uniform vec2 uvScale;
 
     void main()
     {
-        fragmentColor = texture(uTexture, vertexTextureCoordinate * uvScale);
+        fragmentColor = texture(uniTexRustic, vertexTextureCoordinate * uvScale);
     }
 );
 
@@ -315,6 +334,7 @@ int main(int argc, char* argv[])
     if (!UCreateShaderProgram(lampVertexShaderSource, lampFragmentShaderSource, gLampProgramId))
         return EXIT_FAILURE;
 
+    // TEXTURE 0
     // Load texture
     const char* texFilename = "../../resources/textures/smiley.png";
     if (!UCreateTexture(texFilename, gTextureId))
@@ -322,26 +342,26 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-
-
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     glUseProgram(gCubeProgramId);
     //glUseProgram(gLampProgramId);
     // We set the texture as texture unit 0
-    glUniform1i(glGetUniformLocation(gCubeProgramId, "uTexture"), 0);
+    glUniform1i(glGetUniformLocation(gCubeProgramId, "texSmiley"), 0);
     //glUniform1i(glGetUniformLocation(gLampProgramId, "uTexture"), 0);
 
 
-
+   // TEXTURE 1
         // Load texture
     texFilename = "../../resources/textures/wood-scratched.jpg";
-    if (!UCreateTexture(texFilename, gTextureId))
+    if (!UCreateTexture(texFilename, texWoodRustic))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
     glUseProgram(gLampProgramId);
-    glUniform1i(glGetUniformLocation(gLampProgramId, "uTexture"), 0);
+    glUniform1i(glGetUniformLocation(gLampProgramId, "uniTexRustic"), 1);
+
+
 
     // Sets the background color of the window to black (it will be implicitely used by glClear)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -355,7 +375,6 @@ int main(int argc, char* argv[])
         gLastFrame = currentFrame;
 
         // input
-        // -----
         keyboardNavigation(gWindow);
 
         // Render this frame
@@ -369,6 +388,7 @@ int main(int argc, char* argv[])
 
     // Release texture
     UDestroyTexture(gTextureId);
+    UDestroyTexture(texWoodRustic);
 
     // Release shader programs
     UDestroyShaderProgram(gCubeProgramId);
@@ -645,10 +665,14 @@ bool UCreateTexture(const char* filename, GLuint& textureId)
 }
 
 // ********** SHADERS: CREATE AND DESTROY **********
+//update later
 void UDestroyTexture(GLuint textureId)
 {
     glGenTextures(1, &textureId);
+    //glGenTexture(texWoodSolidDark);
+    //glGenTexture(texWoodRustic);
 }
+
 
 
 // Implements the UCreateShaders function
@@ -857,7 +881,7 @@ void meshFloor(GLMesh& mesh)
     glEnableVertexAttribArray(2);
 }
 
-void meshWalls(GLMesh& mesh)
+void meshWall(GLMesh& mesh)
 {
     // plane
     // light gray-blue texture
@@ -1210,8 +1234,11 @@ void drawSideTableA()
     glBindVertexArray(gMesh.vao);
 
     // bind textures on corresponding texture units
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gTextureId);
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, gTextureId);
+    glActiveTexture(GL_TEXTURE1); //12
+    glBindTexture(GL_TEXTURE_2D, texWoodRustic);
+    
     // Activate the VBOs contained within the mesh's VA
     glBindVertexArray(gMesh.vao);
     // draws primary dresser cube
