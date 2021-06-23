@@ -69,8 +69,14 @@ namespace
     GLuint texWoodHerring; // 10
     GLuint texWoodSolidDark; // 11
     GLuint texRusticWood; // 12
+    GLuint texWoodOakFine; // 13
+    GLuint texWalnutMed; // 14
+    GLuint texDresserDrawer; //15
 
-    GLuint textureIdAll[13] = {
+    // also check into bindless textures later
+    // remember to update array size as textures and images are added
+    // GLuint textureIdAll[] = {
+    GLuint textureIdAll[16] = {
         texDoorClassic, // 0
         texDoorRustic, // 1
         texSunsetPic, // 2
@@ -83,14 +89,21 @@ namespace
         texMetalBlack, // 9
         texWoodHerring, // 10
         texWoodSolidDark, // 11
-        texRusticWood // 12
+        texRusticWood, // 12
+        texWoodOakFine, // 13
+        texWalnutMed, // 14
+        texDresserDrawer, //15
     };
     int texCount = size(textureIdAll);
     //int texCount = textureIdAll.length;
-    //int texCount = 13;
+    //int texCount = 16;
 
+    // texture images: uv
+    // check if can define values within shader, draw or mesh later
     glm::vec2 gUVScale(0.5f, 10.0f);
     glm::vec2 gUVScaleSideDresser(0.25f, 0.25f);
+    glm::vec2 gUVScaleDresserLegs(0.1f, 0.1f);
+    glm::vec2 gUVScaleDresserDrawer(1.0f, 1.0f);
 
 
     // camera
@@ -145,6 +158,7 @@ void keyboardControl(GLFWwindow* window);
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
 bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
+//check into implementing instead of createEachTexture crowding main
 bool createAllTexture();
 void deleteTexture(GLuint& textureIdAll, int texCount);
 
@@ -214,18 +228,18 @@ void main()
 const GLchar* cubeFragmentShaderSource = GLSL(440,
 
     in vec3 vertexNormal; // For incoming normals
-in vec3 vertexFragmentPos; // For incoming fragment position
-in vec2 vertexTextureCoordinate;
+    in vec3 vertexFragmentPos; // For incoming fragment position
+    in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing cube color to the GPU
+    out vec4 fragmentColor; // For outgoing cube color to the GPU
 
-// Uniform / Global variables for object color, light color, light position, and camera/view position
-uniform vec3 objectColor;
-uniform vec3 lightColor;
-uniform vec3 lightPos;
-uniform vec3 viewPosition;
-uniform sampler2D uTexture; // Useful when working with multiple textures
-uniform vec2 uvScale;
+    // Uniform / Global variables for object color, light color, light position, and camera/view position
+    uniform vec3 objectColor;
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
+    uniform sampler2D uTexture; // Useful when working with multiple textures
+    uniform vec2 uvScale;
 
 
 void main()
@@ -266,20 +280,20 @@ void main()
 const GLchar* lampVertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position;
-layout(location = 2) in vec2 textureCoordinate;
+    layout(location = 2) in vec2 textureCoordinate;
 
-out vec2 vertexTextureCoordinate;
+    out vec2 vertexTextureCoordinate;
 
-//Uniform / Global variables for the  transform matrices
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+    //Uniform / Global variables for the  transform matrices
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
 
-void main()
-{
-    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
-    vertexTextureCoordinate = textureCoordinate;
-}
+    void main()
+    {
+        gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
+        vertexTextureCoordinate = textureCoordinate;
+    }
 );
 
 
@@ -287,16 +301,36 @@ void main()
 const GLchar* lampFragmentShaderSource = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing lamp color (smaller cube) to the GPU
+    out vec4 fragmentColor; // For outgoing lamp color (smaller cube) to the GPU
 
-uniform sampler2D uTexRusticWood;
-uniform vec2 uvScaleSideDresser;
+    uniform sampler2D uTexRusticWood;
+    uniform sampler2D uTexDresserDrawer;
+    uniform vec2 uvScaleSideDresser;
+    uniform vec2 UVScaleDresserLegs;
+    uniform vec2 uvScaleDresserDrawer;
 
-void main()
-{
-    fragmentColor = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser);
-    //fragmentColor = mix(texture(uTexRusticWood, vertexTextureCoordinate), texture(texture2, TexCoord), 0.2);
-}
+
+    void main()
+    {   
+        //unsure of correct method. ALTERNATIVE IDEAS TO TEST OUT
+        // https://open.gl/textures
+        //vec4 fragTexRusticWood = texture(uTexRusticWood, vertexTextureCoordinate);
+        //vec4 fragTexRusticWood = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser);
+        //vec4 fragTexRusticWoodLegs = texture(uTexRusticWood, vertexTextureCoordinate, vertexTextureCoordinate);
+        //vec4 fragTexRusticWoodLegs = texture(uTexRusticWood, vertexTextureCoordinate, vertexTextureCoordinate * UVScaleDresserLegs);
+        //vec4 fragImgDresserDrawer = texture(uTexDresserDrawer, vertexTextureCoordinate);
+        //vec4 fragImgDresserDrawer = texture(uTexDresserDrawer, vertexTextureCoordinate * UVScaleDresserDrawer);
+
+        // ideas to test for fragment color/output
+        // FragColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);
+        //         // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs;
+        // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs * fragImgDresserDrawer;
+        // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs + fragImgDresserDrawer;
+        // fragmentColor = mix(texture(uTexRusticWood, vertexTextureCoordinate), texture(texture2, TexCoord), 0.2);
+
+        // original:
+        fragmentColor = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser);
+    }
 );
 
 
@@ -351,7 +385,7 @@ int main(int argc, char* argv[])
 
     // texture: wood (straigtened rustic), side tables
     texFilename = "../../resources/textures/wood-scratched.jpg";
-    //texFilename = "../../resources/textures/wood-oak-fine.jpg";
+    //texFilename = "../../resources/textures/dresserDrawer.png";
     if (!createEachTexture(texFilename, texRusticWood, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
@@ -359,6 +393,16 @@ int main(int argc, char* argv[])
     }
     glUseProgram(gLampProgramId);
     glUniform1i(glGetUniformLocation(gLampProgramId, "uTexRusticWood"), 1);
+
+    // image: dresser drawer), side tables
+    texFilename = "../../resources/images/dresserDrawer.png";
+    if (!createEachTexture(texFilename, texDresserDrawer, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+    glUseProgram(gLampProgramId);
+    glUniform1i(glGetUniformLocation(gLampProgramId, "uTexDresserDrawer"), 2);
 
 
     // Sets the background color of the window to black (it will be implicitely used by glClear)
@@ -387,8 +431,10 @@ int main(int argc, char* argv[])
     UDestroyMesh(gMeshTable);
 
     // Release texture
+    // use destroy textures function later instead
     UDestroyTexture(gTextureId);
     UDestroyTexture(texRusticWood);
+    UDestroyTexture(texDresserDrawer);
 
     // Release shader programs
     UDestroyShaderProgram(gCubeProgramId);
@@ -594,13 +640,13 @@ void rendering()
     glm::mat4 translation;
     glm::mat4 model = translation * rotation * scale;
 
-    // Activate the cube VAO (used by cube and lamp)
+    // move to cube (or remove if cube is deleted)
+    // Activate the cube VAO (used by cube)
     glBindVertexArray(gMesh.vao);
 
 
     DrawCube();
-    //    DrawLight();
-
+    // DrawLight();
     drawFloor();
     drawWall();
     drawSideTableA();
@@ -669,15 +715,6 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
     return false;
 }
 
-
-
-//update later
-void UDestroyTexture(GLuint textureId)
-{
-    glGenTextures(1, &textureId);
-    //glGenTexture(texWoodSolidDark);
-    //glGenTexture(texRusticWood);
-}
 
 // load all textures
 /* IMPORTANT: By default, assumes all images are declared and processed as GL_TEXTURE_2D.
@@ -804,16 +841,24 @@ void UDestroyTexture(GLuint textureId)
          return EXIT_FAILURE;
      }
 
+     // CONTINUE ADDED IMAGES FROM 14+
+
      return true;
  }
  */
 
- // delete textures
+// delete textures. change this to default later
 void deleteTexture(GLuint& textureIdAll, int texCount)
 {
     // uses glDeleteTextures
     // source: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDeleteTextures.xhtml
     glDeleteTextures(texCount, &textureIdAll);
+}
+
+// remove once deleteTexture properly functions/enabled
+void UDestroyTexture(GLuint textureId)
+{
+    glGenTextures(1, &textureId);
 }
 
 
@@ -894,21 +939,21 @@ void UCreateMesh(GLMesh& mesh)
     GLfloat verts[] = {
         //Positions          //Normals
         // ------------------------------------------------------
-        //Back Face          //Negative Z Normal  Texture Coords.
-       -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-       -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-       -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+    //Back Face          //Negative Z Normal  Texture Coords.
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-       //Front Face         //Positive Z Normal
-      -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-       0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-       0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-       0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-      -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-      -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+    //Front Face         //Positive Z Normal
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
 
       //Left Face          //Negative X Normal
      -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
@@ -972,11 +1017,7 @@ void UCreateMesh(GLMesh& mesh)
 }
 
 
-void UDestroyMesh(GLMesh& mesh)
-{
-    glDeleteVertexArrays(1, &mesh.vao);
-    glDeleteBuffers(1, &mesh.vbo);
-}
+
 
 
 // mesh
@@ -1324,6 +1365,12 @@ void meshCouch(GLMesh& mesh)
 */
 
 
+void UDestroyMesh(GLMesh& mesh)
+{
+    glDeleteVertexArrays(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.vbo);
+}
+
 // ********** DRAW OBJECT **********
 void drawFloor()
 {
@@ -1375,14 +1422,22 @@ void drawSideTableA()
     GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleSideDresser");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleSideDresser));
 
+    /* TODO: check if need to repeat for dresser drawer
+    GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleDresserDrawer");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleDresserDrawer));
+    */
+
     // Activate the VBOs contained within the mesh's VAO
     glBindVertexArray(gMeshTable.vao);
 
     // bind textures on corresponding texture units
     //glActiveTexture(GL_TEXTURE0);
     //glBindTexture(GL_TEXTURE_2D, gTextureId);
-    glActiveTexture(GL_TEXTURE1); //12
+    glActiveTexture(GL_TEXTURE1); // 12
     glBindTexture(GL_TEXTURE_2D, texRusticWood);
+    glActiveTexture(GL_TEXTURE2); // 15
+    glBindTexture(GL_TEXTURE_2D, texDresserDrawer);
+
 
     // Activate the VBOs contained within the mesh's VA
     glBindVertexArray(gMeshTable.vao);
@@ -1420,6 +1475,11 @@ void drawSideTableA()
         // Retrieves and passes transform matrices to the Shader program
         modelLoc = glGetUniformLocation(gLampProgramId, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+        /* TODO: check if can added and change for legs
+        GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleDresserLegs");
+        glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleDresserLegs));
+        */
 
         // Activate the VBOs contained within the mesh's VAO
         glBindVertexArray(gMeshTable.vao);
