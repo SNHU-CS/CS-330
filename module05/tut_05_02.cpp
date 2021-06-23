@@ -50,6 +50,7 @@ namespace
     // Triangle mesh data
     GLMesh gMesh;
     GLMesh gMeshTable;
+    GLMesh gMeshDresserDrawer;
 
     // Texture
     GLint gTexWrapMode = GL_REPEAT;
@@ -102,8 +103,8 @@ namespace
     // check if can define values within shader, draw or mesh later
     glm::vec2 gUVScale(0.5f, 10.0f);
     glm::vec2 gUVScaleSideDresser(0.25f, 0.25f);
-    glm::vec2 gUVScaleDresserLegs(0.1f, 0.1f);
-    glm::vec2 gUVScaleDresserDrawer(1.0f, 1.0f);
+    glm::vec2 gUVScaleDresserLegs(5.25f, 5.25f);
+    glm::vec2 gUVScaleDresserDrawer(5.25f, 5.25f);
 
 
     // camera
@@ -167,8 +168,8 @@ void UDestroyTexture(GLuint textureId);
 // mesh
 void meshFloor(GLMesh& mesh);
 void meshWall(GLMesh& mesh);
-void meshSideTableA(GLMesh& mesh);
-void meshSideTableB(GLMesh& mesh);
+void meshSideTables(GLMesh& mesh);
+void meshDresserDrawer(GLMesh& mesh);
 void meshCoffeeTable(GLMesh& mesh);
 void meshBalloons(GLMesh& mesh);
 void meshWreath(GLMesh& mesh);
@@ -182,8 +183,8 @@ void UDestroyMesh(GLMesh& mesh);
 // draw
 void drawFloor();
 void drawWall();
-void drawSideTableA();
-void drawSideTableB();
+void drawSideTables();
+void drawDresserDrawer();
 void drawCoffeeTable();
 void drawBalloons();
 void drawWreath();
@@ -200,17 +201,17 @@ void DrawCube();
 const GLchar* cubeVertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
-layout(location = 1) in vec3 normal; // VAP position 1 for normals
-layout(location = 2) in vec2 textureCoordinate;
+    layout(location = 1) in vec3 normal; // VAP position 1 for normals
+    layout(location = 2) in vec2 textureCoordinate;
 
-out vec3 vertexNormal; // For outgoing normals to fragment shader
-out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
-out vec2 vertexTextureCoordinate;
+    out vec3 vertexNormal; // For outgoing normals to fragment shader
+    out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
+    out vec2 vertexTextureCoordinate;
 
-//Uniform / Global variables for the  transform matrices
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+    //Uniform / Global variables for the  transform matrices
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
 
 void main()
 {
@@ -276,7 +277,7 @@ void main()
 );
 
 
-/* Lamp Shader Source Code*/
+/* Lamp Vertex Shader Source Code*/
 const GLchar* lampVertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position;
@@ -306,7 +307,7 @@ const GLchar* lampFragmentShaderSource = GLSL(440,
     uniform sampler2D uTexRusticWood;
     uniform sampler2D uTexDresserDrawer;
     uniform vec2 uvScaleSideDresser;
-    uniform vec2 UVScaleDresserLegs;
+    uniform vec2 uvScaleDresserLegs;
     uniform vec2 uvScaleDresserDrawer;
 
 
@@ -315,21 +316,26 @@ const GLchar* lampFragmentShaderSource = GLSL(440,
         //unsure of correct method. ALTERNATIVE IDEAS TO TEST OUT
         // https://open.gl/textures
         //vec4 fragTexRusticWood = texture(uTexRusticWood, vertexTextureCoordinate);
-        //vec4 fragTexRusticWood = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser);
-        //vec4 fragTexRusticWoodLegs = texture(uTexRusticWood, vertexTextureCoordinate, vertexTextureCoordinate);
-        //vec4 fragTexRusticWoodLegs = texture(uTexRusticWood, vertexTextureCoordinate, vertexTextureCoordinate * UVScaleDresserLegs);
+        vec4 fragTexRusticWood = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser);
+        //vec4 fragTexRusticWoodLegs = texture(uTexRusticWood, vertexTextureCoordinate);
+        vec4 fragTexRusticWoodLegs = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleDresserLegs);
         //vec4 fragImgDresserDrawer = texture(uTexDresserDrawer, vertexTextureCoordinate);
-        //vec4 fragImgDresserDrawer = texture(uTexDresserDrawer, vertexTextureCoordinate * UVScaleDresserDrawer);
+        vec4 fragImgDresserDrawer = texture(uTexDresserDrawer, vertexTextureCoordinate * uvScaleDresserDrawer);
 
         // ideas to test for fragment color/output
-        // FragColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);
-        //         // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs;
+        // fragmentColor = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser); // original
+        fragmentColor = fragTexRusticWood;
+        // fragmentColor = fragTexRusticWoodLegs;
+        // fragmentColor = fragImgDresserDrawer;
+        // fragmentColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);
+        // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs;
+        // fragmentColor = fragTexRusticWood + fragTexRusticWoodLegs;
         // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs * fragImgDresserDrawer;
         // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs + fragImgDresserDrawer;
+        // fragmentColor = fragTexRusticWood + fragTexRusticWoodLegs + fragImgDresserDrawer;
         // fragmentColor = mix(texture(uTexRusticWood, vertexTextureCoordinate), texture(texture2, TexCoord), 0.2);
 
-        // original:
-        fragmentColor = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser);
+
     }
 );
 
@@ -361,7 +367,8 @@ int main(int argc, char* argv[])
 
     // Create the mesh
     UCreateMesh(gMesh); // Calls the function to create the Vertex Buffer Object
-    meshSideTableA(gMeshTable);
+    meshSideTables(gMeshTable);
+    meshDresserDrawer(gMeshDresserDrawer);
 
 
     // Create the shader programs
@@ -371,8 +378,11 @@ int main(int argc, char* argv[])
     if (!UCreateShaderProgram(lampVertexShaderSource, lampFragmentShaderSource, gLampProgramId))
         return EXIT_FAILURE;
 
-    //createAllTexture();
 
+    // TODO: MINIMIZE INTO FUNCTION(S) LATER
+    // type (image/texture): texture, object that uses textur
+    // createAllTexture();
+    
     // texture: wood (solid natural)/dark, table/alternative
     const char* texFilename = "../../resources/textures/solid-dark-wood.jpg";
     if (!createEachTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
@@ -393,8 +403,8 @@ int main(int argc, char* argv[])
     }
     glUseProgram(gLampProgramId);
     glUniform1i(glGetUniformLocation(gLampProgramId, "uTexRusticWood"), 1);
-
-    // image: dresser drawer), side tables
+    
+    // image: dresser drawer, side tables
     texFilename = "../../resources/images/dresserDrawer.png";
     if (!createEachTexture(texFilename, texDresserDrawer, GL_REPEAT, GL_LINEAR))
     {
@@ -403,6 +413,7 @@ int main(int argc, char* argv[])
     }
     glUseProgram(gLampProgramId);
     glUniform1i(glGetUniformLocation(gLampProgramId, "uTexDresserDrawer"), 2);
+    
 
 
     // Sets the background color of the window to black (it will be implicitely used by glClear)
@@ -429,12 +440,13 @@ int main(int argc, char* argv[])
     
     UDestroyMesh(gMesh);
     UDestroyMesh(gMeshTable);
+    //UDestroyMesh(gMeshDresserDrawer);
 
     // Release texture
     // use destroy textures function later instead
     UDestroyTexture(gTextureId);
     UDestroyTexture(texRusticWood);
-    UDestroyTexture(texDresserDrawer);
+    //UDestroyTexture(texDresserDrawer);
 
     // Release shader programs
     UDestroyShaderProgram(gCubeProgramId);
@@ -649,8 +661,8 @@ void rendering()
     // DrawLight();
     drawFloor();
     drawWall();
-    drawSideTableA();
-    drawSideTableB();
+    drawSideTables();
+    drawDresserDrawer();
     drawCoffeeTable();
     drawBalloons();
     drawWreath();
@@ -1017,16 +1029,11 @@ void UCreateMesh(GLMesh& mesh)
 }
 
 
-
-
-
 // mesh
 void meshFloor(GLMesh& mesh)
 {
-    // plane
     // texture - wood floor
-// Position and Color data
-                // Plane vertex data
+
     GLfloat verts[] = {
         // Vertex Positions    // normals        // textures
         // bottom
@@ -1082,13 +1089,8 @@ void meshDoor(GLMesh& mesh)
 
 }
 
-void meshSideTableA(GLMesh& gMeshTable)
+void meshSideTables(GLMesh& gMeshTable)
 {
-    //consider combined into 1 class for BOTH side tables by using offsets
-// small cuboid
-// wood texture with special front texture for drawers
-// 4 legs
-// wood texture
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
@@ -1163,14 +1165,49 @@ void meshSideTableA(GLMesh& gMeshTable)
     glEnableVertexAttribArray(2);
 }
 
-void meshSideTableB(GLMesh& mesh)
+
+void meshDresserDrawer(GLMesh& gMeshDresserDrawer)
 {
-    //consider combined into 1 class for BOTH side tables by using offsets
-    // small cuboid
-    // wood texture with special front texture for drawers
-    // 4 legs
-    // wood texture
+    GLfloat verts[] = {
+        // Vertex Positions    // normals  // textures
+        // place at front of side table dresser cube
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+    };
+
+    const GLuint floatsPerVertex = 3;
+    const GLuint floatsPerNormal = 3;
+    const GLuint floatsPerUV = 2;
+
+    gMeshDresserDrawer.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
+
+    glGenVertexArrays(1, &gMeshDresserDrawer.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(gMeshDresserDrawer.vao);
+
+    // buffer for vertex data
+    glGenBuffers(1, &gMeshDresserDrawer.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, gMeshDresserDrawer.vbo); // Activates the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, gMeshDresserDrawer.vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+
+    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+
+    // Create Vertex Attribute Pointers
+    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
+    glEnableVertexAttribArray(2);
 }
+
 
 void meshCoffeeTable(GLMesh& mesh)
 {
@@ -1179,12 +1216,14 @@ void meshCoffeeTable(GLMesh& mesh)
     // metal texture
 }
 
+
 void meshWreath(GLMesh& mesh)
 {
     // torus
     // alphine/green tree texture
     // ??add ornaments??
 }
+
 
 void meshBalloons(GLMesh& mesh)
 {
@@ -1201,6 +1240,7 @@ void meshLamp(GLMesh& mesh)
 
 }
 
+
 void meshCouch(GLMesh& mesh)
 {
     // red fabric texture
@@ -1208,87 +1248,12 @@ void meshCouch(GLMesh& mesh)
 }
 
 
-/*  DRAW ARRAY TEMPLATE
-     GLfloat verts[] = {
-        //Positions          //Normals  // textures
-    //Back Face          //Negative Z Normal  Texture Coords.
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+void UDestroyMesh(GLMesh& mesh)
+{
+    glDeleteVertexArrays(1, &mesh.vao);
+    glDeleteBuffers(1, &mesh.vbo);
+}
 
-    //Front Face         //Positive Z Normal
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-
-      //Left Face          //Negative X Normal
-     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-     -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-     //Right Face         //Positive X Normal
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-     //Bottom Face        //Negative Y Normal
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-    //Top Face           //Positive Y Normal
-   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-   -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-    };
-
-    const GLuint floatsPerVertex = 3;
-    const GLuint floatsPerNormal = 3;
-    const GLuint floatsPerUV = 2;
-
-    glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
-    glBindVertexArray(mesh.vao);
-
-    // buffer for vertex data (no indices buffer needed)
-    mesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
-    glGenBuffers(1, &mesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
-
-
-    // calculate strides between vertex coordinates
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
-
-    // Create Vertex Attribute Pointers
-    // position pointer
-    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
-    glEnableVertexAttribArray(0);
-    // normal pointer
-    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
-    glEnableVertexAttribArray(1);
-    // texture pointer
-    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
-    glEnableVertexAttribArray(2);
-
-*/
 
 /*  DRAW ELEMENT TEMPLATE
     // Using indexed drawing- store only the unique vertices and then specify the order at which we want to draw these vertices in.
@@ -1320,13 +1285,13 @@ void meshCouch(GLMesh& mesh)
         5, 8, 6   // Triangle 6 - bottom/back
     };
 
-                        //multi-light how-to
-                        glm::vec3 pointLightPositions[] = {
-                            glm::vec3(0.7f,  0.2f,  2.0f),
-                            glm::vec3(2.3f, -3.3f, -4.0f),
-                            //glm::vec3(-4.0f,  2.0f, -12.0f),
-                            //glm::vec3(0.0f,  0.0f, -3.0f)
-                        };
+    //multi-light how-to
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3(0.7f,  0.2f,  2.0f),
+        glm::vec3(2.3f, -3.3f, -4.0f),
+        //glm::vec3(-4.0f,  2.0f, -12.0f),
+        //glm::vec3(0.0f,  0.0f, -3.0f)
+    };
 
 
     const GLuint floatsPerVertex = 3;
@@ -1360,18 +1325,14 @@ void meshCouch(GLMesh& mesh)
     glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
     glEnableVertexAttribArray(2);
 
-
+    //NEED TO ADD IN UV SCALE
 
 */
 
 
-void UDestroyMesh(GLMesh& mesh)
-{
-    glDeleteVertexArrays(1, &mesh.vao);
-    glDeleteBuffers(1, &mesh.vbo);
-}
 
-// ********** DRAW OBJECT **********
+
+// ********** DRAW OBJECTS **********
 void drawFloor()
 {
 
@@ -1382,8 +1343,16 @@ void drawWall()
 
 }
 
-void drawSideTableA()
+/* TO DRAW BOTH SIDE TABLES, ONLY NEED TO ADD ADDITIONAL POSITIONS
+ * for multiple tables, dresser cuboid will need the loop uncomment and positions added
+ * fore more legs, legs wil need extra positiongs added to the array used in the leg loop
+ * ROTATION: legs uses same rotation as dresser cuboid.
+ *            IF needed, add loop for rotation changes
+ */
+//  IMPORTANT: remember to keep in position with drawers (drawDresserDrawer)
+void drawSideTables()
 {
+
     // declare objects
     glm::mat4 scale;
     glm::mat4 rotation;
@@ -1391,8 +1360,8 @@ void drawSideTableA()
     glm::mat4 model = translation * rotation * scale;;
     GLint modelLoc;
 
-    // **********************************
-   // dresser cuboid
+    // ********** dresser main cuboid ************************
+   // dresser cuboid - 1 per table, currently 2 tables
    // create model view: scale, rotate, translate
     scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
     rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
@@ -1404,12 +1373,28 @@ void drawSideTableA()
     // Creates a perspective projection
     glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
-
     // Model matrix: transformations are applied right-to-left order
     model = translation * rotation * scale;
+
     // Set the shader to be used
     glUseProgram(gLampProgramId);
 
+    /* sets up loop for multiple tables. not needed yet
+    // each table has a unique position
+    glm::vec3 tablePosition[] = {
+    glm::vec3(-3.5f, 0.1f, 1.0f), // 1st dresser
+    // position currently unknown for 2nd dresser
+    glm::vec3(-3.5f, 0.1f, 1.0f), // 2nd dresser
+    };
+
+    //counts the number of objects
+    int tableCount = sizeof(tablePosition) / sizeof(tablePosition[0]);
+
+    // draws each dresser cuboid
+    // note: rotation is assumed to be the same. if differs, needs to add/integrate array for rotations for both cuboid and legs
+    // for (unsigned int i = 0; i < tableCount; i++)
+    {
+    */
     // Retrieves and passes transform matrices to the Shader program
     modelLoc = glGetUniformLocation(gLampProgramId, "model");
     GLint viewLoc = glGetUniformLocation(gLampProgramId, "view");
@@ -1422,11 +1407,6 @@ void drawSideTableA()
     GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleSideDresser");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleSideDresser));
 
-    /* TODO: check if need to repeat for dresser drawer
-    GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleDresserDrawer");
-    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleDresserDrawer));
-    */
-
     // Activate the VBOs contained within the mesh's VAO
     glBindVertexArray(gMeshTable.vao);
 
@@ -1435,9 +1415,6 @@ void drawSideTableA()
     //glBindTexture(GL_TEXTURE_2D, gTextureId);
     glActiveTexture(GL_TEXTURE1); // 12
     glBindTexture(GL_TEXTURE_2D, texRusticWood);
-    glActiveTexture(GL_TEXTURE2); // 15
-    glBindTexture(GL_TEXTURE_2D, texDresserDrawer);
-
 
     // Activate the VBOs contained within the mesh's VA
     glBindVertexArray(gMeshTable.vao);
@@ -1445,21 +1422,31 @@ void drawSideTableA()
     // Draws the triangles
 
     glDrawArrays(GL_TRIANGLES, 0, gMeshTable.nVertices);
+    // IMPORTANT: uncomment when loop is integrated. closes for loop
+    //}
 
-
-    // **********************************
-    // small legs (4) cuboid
-    // uses same rotation as dresser cuboid. does not need to be redefined
-
+    // ********** side table legs ************************
+    // small legs: 4 per table, currently 2 tables
+    
+    // ROTATION NOTE: legs uses same rotation as dresser cuboid.
+    //                add rotation loop if rotation varies between tables
     // scale for legs (uniform size for all 4 legs)
     scale = glm::scale(glm::vec3(0.15f, 0.3f, 0.2f));
 
     // each leg has a unique position
     glm::vec3 legPosition[] = {
+    // 1st dresser
     glm::vec3(-3.5f, 0.1f, 1.0f), // right front leg
     glm::vec3(-4.5f, 0.1f, 1.0f), // left front leg
     glm::vec3(-3.5f, 0.1f, 2.0f), // right back leg
     glm::vec3(-4.5f, 0.1f, 2.0f) // left back leg
+    /* needed for 2nd dresser. position currently unknown
+    // 2nd dresser
+    glm::vec3(-3.5f, 0.1f, 1.0f), // right front leg
+    glm::vec3(-4.5f, 0.1f, 1.0f), // left front leg
+    glm::vec3(-3.5f, 0.1f, 2.0f), // right back leg
+    glm::vec3(-4.5f, 0.1f, 2.0f) // left back leg
+    */
     };
 
     // counts the number of objects
@@ -1476,11 +1463,10 @@ void drawSideTableA()
         modelLoc = glGetUniformLocation(gLampProgramId, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-        /* TODO: check if can added and change for legs
+        // UV scale unique to legs
         GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleDresserLegs");
         glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleDresserLegs));
-        */
-
+        
         // Activate the VBOs contained within the mesh's VAO
         glBindVertexArray(gMeshTable.vao);
 
@@ -1491,14 +1477,93 @@ void drawSideTableA()
         // Draws the triangles
         glDrawArrays(GL_TRIANGLES, 0, gMeshTable.nVertices);
     }
-
-
 }
 
-void drawSideTableB()
+
+/* TO DRAW BOTH SIDE TABLES, ONLY NEED TO ADD ADDITIONAL POSITIONS
+ * for multiple tables, dresser cuboid will need the loop uncomment and positions added
+ * fore more legs, legs wil need extra positiongs added to the array used in the leg loop
+ * ROTATION: legs uses same rotation as dresser cuboid.
+ *            IF needed, add loop for rotation changes
+ */
+//IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTables)
+void drawDresserDrawer()
 {
+        // declare objects
+        glm::mat4 scale;
+        glm::mat4 rotation;
+        glm::mat4 translation;
+        glm::mat4 model = translation * rotation * scale;;
+        GLint modelLoc;
 
+        // ********** dresser main cuboid ************************
+       // dresser drawers - 1 per table, currently 2 tables. possible 2 if scaling is off
+       // create model view: scale, rotate, translate
+
+        // TODO: ADJUST SCALE and possible translation. PRE-SET TO DRESSER 
+        scale = glm::scale(glm::vec3(1.8f, 1.8f, 1.8f));
+        rotation = glm::rotate(0.0f, glm::vec3(3.0f, 0.1f, 0.0f));
+        translation = glm::translate(glm::vec3(4.0f, 0.8f, 1.5f));
+
+        // camera/view transformation
+        glm::mat4 view = gCamera.GetViewMatrix();
+
+        // Creates a perspective projection
+        glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+
+        // Model matrix: transformations are applied right-to-left order
+        model = translation * rotation * scale;
+
+        // Set the shader to be used
+        glUseProgram(gLampProgramId);
+
+        /* sets up loop for multiple tables. each to check coordination with legs (below) and drawer function
+         // each drawer has a unique position
+        glm::vec3 drawerPosition[] = {
+        glm::vec3(-3.5f, 0.1f, 1.0f), // 1st dresser
+        // position currently unknown for 2nd dresser
+        glm::vec3(-3.5f, 0.1f, 1.0f), // 2nd dresser
+        };
+
+        // counts the number of objects
+        int drawerCount = sizeof(drawerPosition) / sizeof(drawerPosition[0]);
+
+        // draws dresser draw for each table
+        // note: rotation is assumed to be the same. if differs, needs to add/integrate array for rotations for both cuboid and legs
+        // for (unsigned int i = 0; i < drawerCount; i++)
+        {
+        */
+        // Retrieves and passes transform matrices to the Shader program
+        modelLoc = glGetUniformLocation(gLampProgramId, "model");
+        GLint viewLoc = glGetUniformLocation(gLampProgramId, "view");
+        GLint projLoc = glGetUniformLocation(gLampProgramId, "projection");
+
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+        GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleDresserDrawer");
+        glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleDresserDrawer));
+
+        // Activate the VBOs contained within the mesh's VAO
+        glBindVertexArray(gMeshDresserDrawer.vao);
+
+        // bind textures on corresponding texture units
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, gTextureId);
+        glActiveTexture(GL_TEXTURE2); // 15
+        glBindTexture(GL_TEXTURE_2D, texDresserDrawer);
+        
+        // Activate the VBOs contained within the mesh's VA
+        glBindVertexArray(gMeshDresserDrawer.vao);
+        // draws primary dresser cube
+        // 
+        // Draws the triangles
+        glDrawArrays(GL_TRIANGLES, 0, gMeshDresserDrawer.nVertices);
+        // IMPORTANT: uncomment when loop is integrated. close for loop
+        //}
 }
+
 
 void drawCoffeeTable()
 {
