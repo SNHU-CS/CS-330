@@ -49,9 +49,9 @@ namespace
 
     // Triangle mesh data
     GLMesh gMesh;
+    GLMesh gMeshTable;
 
     // Texture
-    glm::vec2 gUVScale(10.0f, 10.0f);
     GLint gTexWrapMode = GL_REPEAT;
     GLint gTexFilterMode = GL_LINEAR;
     GLuint gTextureId; // original
@@ -68,7 +68,7 @@ namespace
     GLuint texMetalBlack; // 9
     GLuint texWoodHerring; // 10
     GLuint texWoodSolidDark; // 11
-    GLuint texWoodRustic; // 12
+    GLuint texRusticWood; // 12
 
     GLuint textureIdAll[13] = {
         texDoorClassic, // 0
@@ -83,15 +83,18 @@ namespace
         texMetalBlack, // 9
         texWoodHerring, // 10
         texWoodSolidDark, // 11
-        texWoodRustic // 12
+        texRusticWood // 12
     };
     int texCount = size(textureIdAll);
     //int texCount = textureIdAll.length;
     //int texCount = 13;
 
+    glm::vec2 gUVScale(0.5f, 10.0f);
+    glm::vec2 gUVScaleSideDresser(0.25f, 0.25f);
+
 
     // camera
-    Camera gCamera(glm::vec3(0.2f, 5.6f, 9.9f)); // do not change. precalcated to fit scene
+    Camera gCamera(glm::vec3(0.2f, 2.6f, 9.9f)); // do not change. precalcated to fit scene 0.2f, 5.6f, 9.9f
     float gLastX = WINDOW_WIDTH / 2.0f;
     float gLastY = WINDOW_HEIGHT / 2.0f;
     bool gFirstMouse = true;
@@ -145,7 +148,6 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 bool createAllTexture();
 void deleteTexture(GLuint& textureIdAll, int texCount);
 
-bool UCreateTexture(const char* filename, GLuint& textureId);
 void UDestroyTexture(GLuint textureId);
 
 // mesh
@@ -223,8 +225,8 @@ uniform vec3 lightColor;
 uniform vec3 lightPos;
 uniform vec3 viewPosition;
 uniform sampler2D uTexture; // Useful when working with multiple textures
-//uniform sampler2D textureIdAll[12];
 uniform vec2 uvScale;
+
 
 void main()
 {
@@ -264,14 +266,14 @@ void main()
 const GLchar* lampVertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position;
-    layout(location = 2) in vec2 textureCoordinate;
+layout(location = 2) in vec2 textureCoordinate;
 
-    out vec2 vertexTextureCoordinate;
+out vec2 vertexTextureCoordinate;
 
-        //Uniform / Global variables for the  transform matrices
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
+//Uniform / Global variables for the  transform matrices
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 void main()
 {
@@ -285,15 +287,16 @@ void main()
 const GLchar* lampFragmentShaderSource = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing lamp color (smaller cube) to the GPU
+out vec4 fragmentColor; // For outgoing lamp color (smaller cube) to the GPU
 
-    uniform sampler2D uTexRustic;
-    uniform vec2 uvScale;
+uniform sampler2D uTexRusticWood;
+uniform vec2 uvScaleSideDresser;
 
-    void main()
-    {
-        fragmentColor = texture(uTexRustic, vertexTextureCoordinate * uvScale);
-    }
+void main()
+{
+    fragmentColor = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser);
+    //fragmentColor = mix(texture(uTexRusticWood, vertexTextureCoordinate), texture(texture2, TexCoord), 0.2);
+}
 );
 
 
@@ -324,6 +327,8 @@ int main(int argc, char* argv[])
 
     // Create the mesh
     UCreateMesh(gMesh); // Calls the function to create the Vertex Buffer Object
+    meshSideTableA(gMeshTable);
+
 
     // Create the shader programs
     if (!UCreateShaderProgram(cubeVertexShaderSource, cubeFragmentShaderSource, gCubeProgramId))
@@ -332,36 +337,28 @@ int main(int argc, char* argv[])
     if (!UCreateShaderProgram(lampVertexShaderSource, lampFragmentShaderSource, gLampProgramId))
         return EXIT_FAILURE;
 
-    createAllTexture();
+    //createAllTexture();
 
-    /*
-    // TEXTURE 0
-    // Load texture
-    const char* texFilename = "../../resources/textures/smiley.png";
-    if (!UCreateTexture(texFilename, gTextureId))
+    // texture: wood (solid natural)/dark, table/alternative
+    const char* texFilename = "../../resources/textures/solid-dark-wood.jpg";
+    if (!createEachTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     glUseProgram(gCubeProgramId);
-    //glUseProgram(gLampProgramId);
-    // We set the texture as texture unit 0
-    glUniform1i(glGetUniformLocation(gCubeProgramId, "texSmiley"), 0);
-    //glUniform1i(glGetUniformLocation(gLampProgramId, "uTexture"), 0);
+    glUniform1i(glGetUniformLocation(gCubeProgramId, "uTexture"), 0);
 
-
-   // TEXTURE 1
-        // Load texture
+    // texture: wood (straigtened rustic), side tables
     texFilename = "../../resources/textures/wood-scratched.jpg";
-    if (!UCreateTexture(texFilename, texWoodRustic))
+    //texFilename = "../../resources/textures/wood-oak-fine.jpg";
+    if (!createEachTexture(texFilename, texRusticWood, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
     glUseProgram(gLampProgramId);
-    glUniform1i(glGetUniformLocation(gLampProgramId, "uTexRustic"), 1);
-    */
+    glUniform1i(glGetUniformLocation(gLampProgramId, "uTexRusticWood"), 1);
 
 
     // Sets the background color of the window to black (it will be implicitely used by glClear)
@@ -385,11 +382,13 @@ int main(int argc, char* argv[])
     }
 
     // Release mesh data
+    
     UDestroyMesh(gMesh);
+    UDestroyMesh(gMeshTable);
 
     // Release texture
     UDestroyTexture(gTextureId);
-    UDestroyTexture(texWoodRustic);
+    UDestroyTexture(texRusticWood);
 
     // Release shader programs
     UDestroyShaderProgram(gCubeProgramId);
@@ -598,8 +597,9 @@ void rendering()
     // Activate the cube VAO (used by cube and lamp)
     glBindVertexArray(gMesh.vao);
 
+
     DrawCube();
-//    DrawLight();
+    //    DrawLight();
 
     drawFloor();
     drawWall();
@@ -624,53 +624,9 @@ void rendering()
 
 
 // ********** TEXTURES AND IMAGES **********
-/*
-//Generate and load the texture
-bool UCreateTexture(const char* filename, GLuint& textureId)
-{
-    int width, height, channels;
-    unsigned char* image = stbi_load(filename, &width, &height, &channels, 0);
-    if (image)
-    {
-        flipImageVertical(image, width, height, channels);
-
-        glGenTextures(1, &textureId);
-        glBindTexture(GL_TEXTURE_2D, textureId);
-
-        // set the texture wrapping parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        // set texture filtering parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        if (channels == 3)
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-        else if (channels == 4)
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-        else
-        {
-            cout << "Not implemented to handle image with " << channels << " channels" << endl;
-            return false;
-        }
-
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        stbi_image_free(image);
-        glBindTexture(GL_TEXTURE_2D, 0); // Unbind the texture
-
-        return true;
-    }
-
-    // Error loading the image
-    return false;
-}
-*/
-
 
 // generates settings for individual texture 
 // assumes all images are declared and processed as GL_TEXTURE_2D
-// FOLLOWUP: is & needed in front of GLint gTExtWrapMode or FilterMode?
 bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode)
 {
     int width, height, channels;
@@ -720,7 +676,7 @@ void UDestroyTexture(GLuint textureId)
 {
     glGenTextures(1, &textureId);
     //glGenTexture(texWoodSolidDark);
-    //glGenTexture(texWoodRustic);
+    //glGenTexture(texRusticWood);
 }
 
 // load all textures
@@ -728,124 +684,131 @@ void UDestroyTexture(GLuint textureId)
  *    Specify location, textureID, Wrap Parameter and Filter Parameter
  *    To make S or T different from each other, a custom loop needs to be made, based on the createEachTexture
  */
-bool createAllTexture()
-{
-    // specify location, textureID, Wrap Parameter and Filter Parameter
-    
-    // image: classic door
-    const char* texFilename = "../../resources/images/door-classic.jpg";
-    if (!createEachTexture(texFilename, texDoorClassic, GL_CLAMP_TO_BORDER, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
 
-    // image: rustic door (dark wood by default)
-    // texFilename = "../../resources/images/door-light-wood.png";
-    texFilename = "../../resources/images/door-dark-wood.png";
-    if (!createEachTexture(texFilename, texDoorRustic, GL_CLAMP_TO_BORDER, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
+ /*
+ bool createAllTexture()
+ {
+     // specify location, textureID, Wrap Parameter and Filter Parameter
 
-    // image: frame sunset picture (large by default. small available)
-    texFilename = "../../resources/images/framed-sunset-lrg.png";
-    //texFilename = "../../resources/images/frame-sunset-sml.png";
-    if (!createEachTexture(texFilename, texSunsetPic, GL_CLAMP_TO_BORDER, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
-
-    // image: vintage door rug
-    texFilename = "../../resources/images/rug-vintage.png";
-    if (!createEachTexture(texFilename, texRug, GL_CLAMP_TO_BORDER, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
-
-    // texture: textured wallpaper/creamy brown-gray, wall
-    // dark, mid, light shades
-    // texFilename = "../../resources/textures/wallpaper-uni-dark.jpg";
-    // texFilename = "../../resources/textures/wallpaper-uni-light.jpg";
-    texFilename = "../../resources/textures/wallpaper-uni-med.jpg";
-    if (!createEachTexture(texFilename, texWallpaper, GL_REPEAT, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
-
-    // texture: grass/alphine, wreath
-    texFilename = "../../resources/textures/grass-alphine.jpg";
-    if (!createEachTexture(texFilename, texGrassAlphine, GL_REPEAT, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
-
-    // texture: marble ceramic/cream, lamp base
-    texFilename = "../../resources/textures/marble-cream.jpg";
-    if (!createEachTexture(texFilename, texMarbleCream, GL_REPEAT, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
-
-    // texture: cotton/cream, lamp cover
-    texFilename = "../../resources/textures/cotton-seamless.jpg";
-    if (!createEachTexture(texFilename, texCottonCream, GL_REPEAT, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
-
-    // texture: cotton/red, couch fabric
-    texFilename = "../../resources/textures/fabric-red-seamless.png";
-    if (!createEachTexture(texFilename, texFabricRed, GL_REPEAT, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
+     // image: classic door
+     const char* texFilename = "../../resources/images/door-classic.jpg";
+     if (!createEachTexture(texFilename, texDoorClassic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+     glUseProgram(gCubeProgramId);
+     glUniform1i(glGetUniformLocation(gCubeProgramId, "uTexture"), 0);
 
 
-    // texture: metal brused/black, long table, couch legs
-    texFilename = "../../resources/textures/metal-black-brush.jpg";
-    if (!createEachTexture(texFilename, texMetalBlack, GL_REPEAT, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
 
-    // texture: wood (herring pattern)/dark, floor
-    texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
-    if (!createEachTexture(texFilename, texWoodHerring, GL_REPEAT, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
+     // image: rustic door (dark wood by default)
+     // texFilename = "../../resources/images/door-light-wood.png";
+     texFilename = "../../resources/images/door-dark-wood.png";
+     if (!createEachTexture(texFilename, texDoorRustic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
 
-    // texture: wood (solid natural)/dark, table/alternative
-    texFilename = "../../resources/textures/solid-dark-wood.jpg";
-    if (!createEachTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
+     // image: frame sunset picture (large by default. small available)
+     texFilename = "../../resources/images/framed-sunset-lrg.png";
+     //texFilename = "../../resources/images/frame-sunset-sml.png";
+     if (!createEachTexture(texFilename, texSunsetPic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
 
-    // texture: wood (straigtened rustic), side tables
-    texFilename = "../../resources/textures/wood-scratched.jpg";
-    if (!createEachTexture(texFilename, texWoodRustic, GL_REPEAT, GL_LINEAR))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
-    
-    return true;
-}
+     // image: vintage door rug
+     texFilename = "../../resources/images/rug-vintage.png";
+     if (!createEachTexture(texFilename, texRug, GL_CLAMP_TO_BORDER, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
 
-// delete textures
+     // texture: textured wallpaper/creamy brown-gray, wall
+     // dark, mid, light shades
+     // texFilename = "../../resources/textures/wallpaper-uni-dark.jpg";
+     // texFilename = "../../resources/textures/wallpaper-uni-light.jpg";
+     texFilename = "../../resources/textures/wallpaper-uni-med.jpg";
+     if (!createEachTexture(texFilename, texWallpaper, GL_REPEAT, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+
+     // texture: grass/alphine, wreath
+     texFilename = "../../resources/textures/grass-alphine.jpg";
+     if (!createEachTexture(texFilename, texGrassAlphine, GL_REPEAT, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+
+     // texture: marble ceramic/cream, lamp base
+     texFilename = "../../resources/textures/marble-cream.jpg";
+     if (!createEachTexture(texFilename, texMarbleCream, GL_REPEAT, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+
+     // texture: cotton/cream, lamp cover
+     texFilename = "../../resources/textures/cotton-seamless.jpg";
+     if (!createEachTexture(texFilename, texCottonCream, GL_REPEAT, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+
+     // texture: cotton/red, couch fabric
+     texFilename = "../../resources/textures/fabric-red-seamless.png";
+     if (!createEachTexture(texFilename, texFabricRed, GL_REPEAT, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+
+
+     // texture: metal brused/black, long table, couch legs
+     texFilename = "../../resources/textures/metal-black-brush.jpg";
+     if (!createEachTexture(texFilename, texMetalBlack, GL_REPEAT, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+
+     // texture: wood (herring pattern)/dark, floor
+     texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
+     if (!createEachTexture(texFilename, texWoodHerring, GL_REPEAT, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+
+     // texture: wood (solid natural)/dark, table/alternative
+     texFilename = "../../resources/textures/solid-dark-wood.jpg";
+     if (!createEachTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+
+     // texture: wood (straigtened rustic), side tables
+     texFilename = "../../resources/textures/wood-scratched.jpg";
+     if (!createEachTexture(texFilename, texRusticWood, GL_REPEAT, GL_LINEAR))
+     {
+         cout << "Failed to load texture " << texFilename << endl;
+         return EXIT_FAILURE;
+     }
+
+     return true;
+ }
+ */
+
+ // delete textures
 void deleteTexture(GLuint& textureIdAll, int texCount)
 {
     // uses glDeleteTextures
@@ -924,6 +887,7 @@ void UDestroyShaderProgram(GLuint programId)
 
 // ********** OBJECT MESH **********
 // Implements the UCreateMesh function
+
 void UCreateMesh(GLMesh& mesh)
 {
     // Position and Color data
@@ -940,7 +904,7 @@ void UCreateMesh(GLMesh& mesh)
 
        //Front Face         //Positive Z Normal
       -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-       0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+       0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
       -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
@@ -1039,8 +1003,9 @@ void meshFloor(GLMesh& mesh)
 
     mesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
-    glBindVertexArray(mesh.vao);
+
+    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(gMesh.vao);
 
     // buffer for vertex data
     glGenBuffers(1, &mesh.vbo);
@@ -1076,7 +1041,7 @@ void meshDoor(GLMesh& mesh)
 
 }
 
-void meshSideTableA(GLMesh& mesh)
+void meshSideTableA(GLMesh& gMeshTable)
 {
     //consider combined into 1 class for BOTH side tables by using offsets
 // small cuboid
@@ -1086,61 +1051,61 @@ void meshSideTableA(GLMesh& mesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
         // back
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
         // left side
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
         // right side
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
          // bottom
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
          0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
          0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
         -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
         // top
         -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
          0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
     };
-    
+
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
     const GLuint floatsPerUV = 2;
 
-    mesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
+    gMeshTable.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
-    glBindVertexArray(mesh.vao);
+    glGenVertexArrays(1, &gMeshTable.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(gMeshTable.vao);
 
     // buffer for vertex data
-    glGenBuffers(1, &mesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo); // Activates the buffer
+    glGenBuffers(1, &gMeshTable.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, gMeshTable.vbo); // Activates the buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
     // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
@@ -1321,7 +1286,7 @@ void meshCouch(GLMesh& mesh)
                             //glm::vec3(-4.0f,  2.0f, -12.0f),
                             //glm::vec3(0.0f,  0.0f, -3.0f)
                         };
-                        
+
 
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
@@ -1407,26 +1372,26 @@ void drawSideTableA()
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScale");
-    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+    GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleSideDresser");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleSideDresser));
 
     // Activate the VBOs contained within the mesh's VAO
-    glBindVertexArray(gMesh.vao);
+    glBindVertexArray(gMeshTable.vao);
 
     // bind textures on corresponding texture units
     //glActiveTexture(GL_TEXTURE0);
     //glBindTexture(GL_TEXTURE_2D, gTextureId);
     glActiveTexture(GL_TEXTURE1); //12
-    glBindTexture(GL_TEXTURE_2D, texWoodRustic);
-    
+    glBindTexture(GL_TEXTURE_2D, texRusticWood);
+
     // Activate the VBOs contained within the mesh's VA
-    glBindVertexArray(gMesh.vao);
+    glBindVertexArray(gMeshTable.vao);
     // draws primary dresser cube
     // Draws the triangles
 
-    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+    glDrawArrays(GL_TRIANGLES, 0, gMeshTable.nVertices);
 
-    
+
     // **********************************
     // small legs (4) cuboid
     // uses same rotation as dresser cuboid. does not need to be redefined
@@ -1457,16 +1422,16 @@ void drawSideTableA()
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         // Activate the VBOs contained within the mesh's VAO
-        glBindVertexArray(gMesh.vao);
+        glBindVertexArray(gMeshTable.vao);
 
-            // bind textures on corresponding texture units
-  //  glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, gTextureId);
+        // bind textures on corresponding texture units
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texRusticWood);
 
         // Draws the triangles
-        glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+        glDrawArrays(GL_TRIANGLES, 0, gMeshTable.nVertices);
     }
-    
+
 
 }
 
@@ -1507,6 +1472,7 @@ void drawCouch()
 
 void DrawCube()
 {
+        glBindVertexArray(gMesh.vao);
     // CUBE: draw cube
     //----------------
     // Set the shader to be used
@@ -1548,10 +1514,11 @@ void DrawCube()
 
     // bind textures on corresponding texture units
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gTextureId);
+    glBindTexture(GL_TEXTURE_2D, texWoodSolidDark);
 
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+
 }
 
 /*
