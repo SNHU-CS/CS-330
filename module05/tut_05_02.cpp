@@ -45,7 +45,8 @@ namespace
 
     // Shader programs
     GLuint gCubeProgramId;
-    GLuint gLampProgramId;
+    GLuint gSideDresserProgramId;
+    GLuint gDresserDrawerProgramId;
 
     // Triangle mesh data
     GLMesh gMesh;
@@ -53,6 +54,7 @@ namespace
     GLMesh gMeshDresserDrawer;
 
     // Texture
+    // defaults
     GLint gTexWrapMode = GL_REPEAT;
     GLint gTexFilterMode = GL_LINEAR;
     GLuint gTextureId; // original
@@ -103,8 +105,8 @@ namespace
     // check if can define values within shader, draw or mesh later
     glm::vec2 gUVScale(0.5f, 10.0f);
     glm::vec2 gUVScaleSideDresser(0.25f, 0.25f);
-    glm::vec2 gUVScaleDresserLegs(5.25f, 5.25f);
-    glm::vec2 gUVScaleDresserDrawer(5.25f, 5.25f);
+    glm::vec2 gUVScaleDresserLegs(0.25f, 0.25f);
+    glm::vec2 gUVScaleDresserDrawer(1.0f, 1.00f);
 
 
     // camera
@@ -173,7 +175,7 @@ void meshDresserDrawer(GLMesh& mesh);
 void meshCoffeeTable(GLMesh& mesh);
 void meshBalloons(GLMesh& mesh);
 void meshWreath(GLMesh& mesh);
-void meshLamp(GLMesh& mesh);
+void meshSideDresser(GLMesh& mesh);
 void meshDoor(GLMesh& mesh);
 void meshCouch(GLMesh& mesh);
 
@@ -188,7 +190,7 @@ void drawDresserDrawer();
 void drawCoffeeTable();
 void drawBalloons();
 void drawWreath();
-void drawLamp();
+void drawSideDresser();
 void drawDoor();
 void drawCouch();
 
@@ -277,8 +279,10 @@ void main()
 );
 
 
-/* Lamp Vertex Shader Source Code*/
-const GLchar* lampVertexShaderSource = GLSL(440,
+// UNABLE TO GET VERTEX TO ACCEPT A 2ND/DIFFERENT SET OF COORDINATES
+// SOLUTION: create another shader (research other opportunities later)
+/* SideDresser Vertex Shader Source Code*/
+const GLchar* SideDresserVertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position;
     layout(location = 2) in vec2 textureCoordinate;
@@ -298,46 +302,76 @@ const GLchar* lampVertexShaderSource = GLSL(440,
 );
 
 
-/* Fragment Shader Source Code*/
-const GLchar* lampFragmentShaderSource = GLSL(440,
+/* Side Table Fragment Shader Source Code*/
+const GLchar* SideDresserFragmentShaderSource = GLSL(440,
     in vec2 vertexTextureCoordinate;
+    //in vec2 vertexTextureCoordinate2;
 
-    out vec4 fragmentColor; // For outgoing lamp color (smaller cube) to the GPU
+    out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
+    //out vec4 fragmentColor2;
 
     uniform sampler2D uTexRusticWood;
-    uniform sampler2D uTexDresserDrawer;
     uniform vec2 uvScaleSideDresser;
     uniform vec2 uvScaleDresserLegs;
-    uniform vec2 uvScaleDresserDrawer;
-
 
     void main()
     {   
-        //unsure of correct method. ALTERNATIVE IDEAS TO TEST OUT
         // https://open.gl/textures
         //vec4 fragTexRusticWood = texture(uTexRusticWood, vertexTextureCoordinate);
         vec4 fragTexRusticWood = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser);
         //vec4 fragTexRusticWoodLegs = texture(uTexRusticWood, vertexTextureCoordinate);
         vec4 fragTexRusticWoodLegs = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleDresserLegs);
-        //vec4 fragImgDresserDrawer = texture(uTexDresserDrawer, vertexTextureCoordinate);
-        vec4 fragImgDresserDrawer = texture(uTexDresserDrawer, vertexTextureCoordinate * uvScaleDresserDrawer);
 
-        // ideas to test for fragment color/output
+        if (fragTexRusticWood.a < 0.1)
+            discard;
         // fragmentColor = texture(uTexRusticWood, vertexTextureCoordinate * uvScaleSideDresser); // original
         fragmentColor = fragTexRusticWood;
-        // fragmentColor = fragTexRusticWoodLegs;
-        // fragmentColor = fragImgDresserDrawer;
-        // fragmentColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);
         // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs;
         // fragmentColor = fragTexRusticWood + fragTexRusticWoodLegs;
-        // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs * fragImgDresserDrawer;
-        // fragmentColor = fragTexRusticWood * fragTexRusticWoodLegs + fragImgDresserDrawer;
-        // fragmentColor = fragTexRusticWood + fragTexRusticWoodLegs + fragImgDresserDrawer;
-        // fragmentColor = mix(texture(uTexRusticWood, vertexTextureCoordinate), texture(texture2, TexCoord), 0.2);
-
 
     }
 );
+
+
+/* gDresserDrawer Vertex Shader Source Code*/
+const GLchar* DresserDrawerVertexShaderSource = GLSL(440,
+    layout(location = 0) in vec3 position;
+    layout(location = 2) in vec2 textureCoordinate;
+
+out vec2 vertexTextureCoordinate;
+
+//Uniform / Global variables for the  transform matrices
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
+    vertexTextureCoordinate = textureCoordinate;
+}
+);
+
+
+/* Dresser Drawer Fragment Shader Source Code*/
+const GLchar* DresserDrawerFragmentShaderSource = GLSL(440,
+    in vec2 vertexTextureCoordinate;
+
+out vec4 fragmentColor; // For outgoing gDresserDrawer color (smaller cube) to the GPU
+
+uniform sampler2D uTexDresserDrawer;
+uniform vec2 uvScaleDresserDrawer;
+
+void main()
+{
+    vec4 fragImgDresserDrawer = texture(uTexDresserDrawer, vertexTextureCoordinate * uvScaleDresserDrawer);
+    if (fragImgDresserDrawer.a < 0.1)
+        discard;
+    fragmentColor = fragImgDresserDrawer;
+}
+);
+
+
 
 
 // Images are loaded with Y axis going down, but OpenGL's Y axis goes up, so let's flip it
@@ -372,10 +406,14 @@ int main(int argc, char* argv[])
 
 
     // Create the shader programs
+    // look into better way to repeat shaders. attempted combining, but failed on getting different vertexcoordinates into the vertex shader
     if (!UCreateShaderProgram(cubeVertexShaderSource, cubeFragmentShaderSource, gCubeProgramId))
         return EXIT_FAILURE;
 
-    if (!UCreateShaderProgram(lampVertexShaderSource, lampFragmentShaderSource, gLampProgramId))
+    if (!UCreateShaderProgram(SideDresserVertexShaderSource, SideDresserFragmentShaderSource, gSideDresserProgramId))
+        return EXIT_FAILURE;
+
+    if (!UCreateShaderProgram(DresserDrawerVertexShaderSource, DresserDrawerFragmentShaderSource, gDresserDrawerProgramId))
         return EXIT_FAILURE;
 
 
@@ -401,8 +439,8 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    glUseProgram(gLampProgramId);
-    glUniform1i(glGetUniformLocation(gLampProgramId, "uTexRusticWood"), 1);
+    glUseProgram(gSideDresserProgramId);
+    glUniform1i(glGetUniformLocation(gSideDresserProgramId, "uTexRusticWood"), 1);
     
     // image: dresser drawer, side tables
     texFilename = "../../resources/images/dresserDrawer.png";
@@ -411,8 +449,8 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    glUseProgram(gLampProgramId);
-    glUniform1i(glGetUniformLocation(gLampProgramId, "uTexDresserDrawer"), 2);
+    glUseProgram(gDresserDrawerProgramId);
+    glUniform1i(glGetUniformLocation(gDresserDrawerProgramId, "uTexDresserDrawer"), 2);
     
 
 
@@ -440,17 +478,18 @@ int main(int argc, char* argv[])
     
     UDestroyMesh(gMesh);
     UDestroyMesh(gMeshTable);
-    //UDestroyMesh(gMeshDresserDrawer);
+    UDestroyMesh(gMeshDresserDrawer);
 
     // Release texture
     // use destroy textures function later instead
     UDestroyTexture(gTextureId);
     UDestroyTexture(texRusticWood);
-    //UDestroyTexture(texDresserDrawer);
+    UDestroyTexture(texDresserDrawer);
 
     // Release shader programs
     UDestroyShaderProgram(gCubeProgramId);
-    UDestroyShaderProgram(gLampProgramId);
+    UDestroyShaderProgram(gSideDresserProgramId);
+    UDestroyShaderProgram(gDresserDrawerProgramId);
 
     exit(EXIT_SUCCESS); // Terminates the program successfully
 }
@@ -640,12 +679,16 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 // Functioned called to render a frame
 void rendering()
 {
-    // Enable z-depth
-    glEnable(GL_DEPTH_TEST);
+
 
     // Clear the frame and z buffers
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Enable z-depth
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glm::mat4 scale;
     glm::mat4 rotation;
@@ -654,19 +697,20 @@ void rendering()
 
     // move to cube (or remove if cube is deleted)
     // Activate the cube VAO (used by cube)
-    glBindVertexArray(gMesh.vao);
+
 
 
     DrawCube();
     // DrawLight();
     drawFloor();
     drawWall();
+
     drawSideTables();
     drawDresserDrawer();
     drawCoffeeTable();
     drawBalloons();
     drawWreath();
-    drawLamp();
+    drawSideDresser();
     drawDoor();
     drawCouch();
 
@@ -718,6 +762,8 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
         glGenerateMipmap(GL_TEXTURE_2D);
 
         stbi_image_free(image);
+        //added after watching video
+        glActiveTexture(0);
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind the texture
 
         return true;
@@ -741,7 +787,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // image: classic door
      const char* texFilename = "../../resources/images/door-classic.jpg";
-     if (!createEachTexture(texFilename, texDoorClassic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+     if (!createEachTexture(texFilename, texDoorClassic, GL_CSideDresser_TO_BORDER, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -754,7 +800,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
      // image: rustic door (dark wood by default)
      // texFilename = "../../resources/images/door-light-wood.png";
      texFilename = "../../resources/images/door-dark-wood.png";
-     if (!createEachTexture(texFilename, texDoorRustic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+     if (!createEachTexture(texFilename, texDoorRustic, GL_CSideDresser_TO_BORDER, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -763,7 +809,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
      // image: frame sunset picture (large by default. small available)
      texFilename = "../../resources/images/framed-sunset-lrg.png";
      //texFilename = "../../resources/images/frame-sunset-sml.png";
-     if (!createEachTexture(texFilename, texSunsetPic, GL_CLAMP_TO_BORDER, GL_LINEAR))
+     if (!createEachTexture(texFilename, texSunsetPic, GL_CSideDresser_TO_BORDER, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -771,7 +817,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // image: vintage door rug
      texFilename = "../../resources/images/rug-vintage.png";
-     if (!createEachTexture(texFilename, texRug, GL_CLAMP_TO_BORDER, GL_LINEAR))
+     if (!createEachTexture(texFilename, texRug, GL_CSideDresser_TO_BORDER, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -796,7 +842,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
          return EXIT_FAILURE;
      }
 
-     // texture: marble ceramic/cream, lamp base
+     // texture: marble ceramic/cream, SideDresser base
      texFilename = "../../resources/textures/marble-cream.jpg";
      if (!createEachTexture(texFilename, texMarbleCream, GL_REPEAT, GL_LINEAR))
      {
@@ -804,7 +850,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
          return EXIT_FAILURE;
      }
 
-     // texture: cotton/cream, lamp cover
+     // texture: cotton/cream, SideDresser cover
      texFilename = "../../resources/textures/cotton-seamless.jpg";
      if (!createEachTexture(texFilename, texCottonCream, GL_REPEAT, GL_LINEAR))
      {
@@ -1171,12 +1217,12 @@ void meshDresserDrawer(GLMesh& gMeshDresserDrawer)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // place at front of side table dresser cube
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1231,7 +1277,7 @@ void meshBalloons(GLMesh& mesh)
     // solid color texture wit light shine
 }
 
-void meshLamp(GLMesh& mesh)
+void meshSideDresser(GLMesh& mesh)
 {
     // cylinder
     // cylinder
@@ -1377,7 +1423,7 @@ void drawSideTables()
     model = translation * rotation * scale;
 
     // Set the shader to be used
-    glUseProgram(gLampProgramId);
+    glUseProgram(gSideDresserProgramId);
 
     /* sets up loop for multiple tables. not needed yet
     // each table has a unique position
@@ -1396,15 +1442,15 @@ void drawSideTables()
     {
     */
     // Retrieves and passes transform matrices to the Shader program
-    modelLoc = glGetUniformLocation(gLampProgramId, "model");
-    GLint viewLoc = glGetUniformLocation(gLampProgramId, "view");
-    GLint projLoc = glGetUniformLocation(gLampProgramId, "projection");
+    modelLoc = glGetUniformLocation(gSideDresserProgramId, "model");
+    GLint viewLoc = glGetUniformLocation(gSideDresserProgramId, "view");
+    GLint projLoc = glGetUniformLocation(gSideDresserProgramId, "projection");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleSideDresser");
+    GLint UVScaleLoc = glGetUniformLocation(gSideDresserProgramId, "uvScaleSideDresser");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleSideDresser));
 
     // Activate the VBOs contained within the mesh's VAO
@@ -1460,16 +1506,17 @@ void drawSideTables()
         model = translation * rotation * scale;
 
         // Retrieves and passes transform matrices to the Shader program
-        modelLoc = glGetUniformLocation(gLampProgramId, "model");
+        modelLoc = glGetUniformLocation(gSideDresserProgramId, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         // UV scale unique to legs
-        GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleDresserLegs");
+        GLint UVScaleLoc = glGetUniformLocation(gSideDresserProgramId, "uvScaleDresserLegs");
         glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleDresserLegs));
         
         // Activate the VBOs contained within the mesh's VAO
         glBindVertexArray(gMeshTable.vao);
 
+        // TODO: change if need to change binding location to implement different UV scales
         // bind textures on corresponding texture units
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texRusticWood);
@@ -1489,79 +1536,80 @@ void drawSideTables()
 //IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTables)
 void drawDresserDrawer()
 {
-        // declare objects
-        glm::mat4 scale;
-        glm::mat4 rotation;
-        glm::mat4 translation;
-        glm::mat4 model = translation * rotation * scale;;
-        GLint modelLoc;
+    // declare objects
+    glm::mat4 scale;
+    glm::mat4 rotation;
+    glm::mat4 translation;
+    glm::mat4 model = translation * rotation * scale;;
+    GLint modelLoc;
 
-        // ********** dresser main cuboid ************************
-       // dresser drawers - 1 per table, currently 2 tables. possible 2 if scaling is off
-       // create model view: scale, rotate, translate
+    // ********** dresser main cuboid ************************
+   // dresser drawers - 1 per table, currently 2 tables. possible 2 if scaling is off
+   // create model view: scale, rotate, translate
 
-        // TODO: ADJUST SCALE and possible translation. PRE-SET TO DRESSER 
-        scale = glm::scale(glm::vec3(1.8f, 1.8f, 1.8f));
-        rotation = glm::rotate(0.0f, glm::vec3(3.0f, 0.1f, 0.0f));
-        translation = glm::translate(glm::vec3(4.0f, 0.8f, 1.5f));
+    // TODO: ADJUST SCALE and possible translation. PRE-SET TO DRESSER 
+    //scale = glm::scale(glm::vec3(1.8f, 1.8f, 1.8f));
+    //rotation = glm::rotate(0.0f, glm::vec3(3.0f, 0.1f, 0.0f));
+    //translation = glm::translate(glm::vec3(4.0f, 0.8f, 1.5f));
 
-        // camera/view transformation
-        glm::mat4 view = gCamera.GetViewMatrix();
+    scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.3f));
+    rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    translation = glm::translate(glm::vec3(-4.0f, 0.8f, 1.51f));
 
-        // Creates a perspective projection
-        glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+    // camera/view transformation
+    glm::mat4 view = gCamera.GetViewMatrix();
 
-        // Model matrix: transformations are applied right-to-left order
-        model = translation * rotation * scale;
+    // Creates a perspective projection
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
-        // Set the shader to be used
-        glUseProgram(gLampProgramId);
+    // Model matrix: transformations are applied right-to-left order
+    model = translation * rotation * scale;
 
-        /* sets up loop for multiple tables. each to check coordination with legs (below) and drawer function
-         // each drawer has a unique position
-        glm::vec3 drawerPosition[] = {
-        glm::vec3(-3.5f, 0.1f, 1.0f), // 1st dresser
-        // position currently unknown for 2nd dresser
-        glm::vec3(-3.5f, 0.1f, 1.0f), // 2nd dresser
-        };
+    // Set the shader to be used
+    glUseProgram(gDresserDrawerProgramId);
 
-        // counts the number of objects
-        int drawerCount = sizeof(drawerPosition) / sizeof(drawerPosition[0]);
+    /* sets up loop for multiple tables. each to check coordination with legs (below) and drawer function
+     // each drawer has a unique position
+    glm::vec3 drawerPosition[] = {
+    glm::vec3(-3.5f, 0.1f, 1.0f), // 1st dresser
+    // position currently unknown for 2nd dresser
+    glm::vec3(-3.5f, 0.1f, 1.0f), // 2nd dresser
+    };
 
-        // draws dresser draw for each table
-        // note: rotation is assumed to be the same. if differs, needs to add/integrate array for rotations for both cuboid and legs
-        // for (unsigned int i = 0; i < drawerCount; i++)
-        {
-        */
-        // Retrieves and passes transform matrices to the Shader program
-        modelLoc = glGetUniformLocation(gLampProgramId, "model");
-        GLint viewLoc = glGetUniformLocation(gLampProgramId, "view");
-        GLint projLoc = glGetUniformLocation(gLampProgramId, "projection");
+    // counts the number of objects
+    int drawerCount = sizeof(drawerPosition) / sizeof(drawerPosition[0]);
 
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    // draws dresser draw for each table
+    // note: rotation is assumed to be the same. if differs, needs to add/integrate array for rotations for both cuboid and legs
+    // for (unsigned int i = 0; i < drawerCount; i++)
+    {
+    */
+    // Retrieves and passes transform matrices to the Shader program
+    modelLoc = glGetUniformLocation(gDresserDrawerProgramId, "model");
+    GLint viewLoc = glGetUniformLocation(gDresserDrawerProgramId, "view");
+    GLint projLoc = glGetUniformLocation(gDresserDrawerProgramId, "projection");
 
-        GLint UVScaleLoc = glGetUniformLocation(gLampProgramId, "uvScaleDresserDrawer");
-        glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleDresserDrawer));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-        // Activate the VBOs contained within the mesh's VAO
-        glBindVertexArray(gMeshDresserDrawer.vao);
+    GLint UVScaleLoc = glGetUniformLocation(gDresserDrawerProgramId, "uvScaleDresserDrawer");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleDresserDrawer));
 
-        // bind textures on corresponding texture units
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, gTextureId);
-        glActiveTexture(GL_TEXTURE2); // 15
-        glBindTexture(GL_TEXTURE_2D, texDresserDrawer);
-        
-        // Activate the VBOs contained within the mesh's VA
-        glBindVertexArray(gMeshDresserDrawer.vao);
-        // draws primary dresser cube
-        // 
-        // Draws the triangles
-        glDrawArrays(GL_TRIANGLES, 0, gMeshDresserDrawer.nVertices);
-        // IMPORTANT: uncomment when loop is integrated. close for loop
-        //}
+    // bind textures on corresponding texture units
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, gTextureId);
+    glActiveTexture(GL_TEXTURE2); // 15
+    glBindTexture(GL_TEXTURE_2D, texDresserDrawer);
+
+    // Activate the VBOs contained within the mesh's VA
+    glBindVertexArray(gMeshDresserDrawer.vao);
+    // draws primary dresser cube
+    // 
+    // Draws the triangles
+    glDrawArrays(GL_TRIANGLES, 0, gMeshDresserDrawer.nVertices);
+    // IMPORTANT: uncomment when loop is integrated. close for loop
+    //}
 }
 
 
@@ -1580,7 +1628,7 @@ void drawWreath()
 
 }
 
-void drawLamp()
+void drawSideDresser()
 {
 
 }
@@ -1653,20 +1701,20 @@ void DrawLight() {
 
     // camera/view transformation
     glm::mat4 view = gCamera.GetViewMatrix();
-    // LAMP: draw lamp
+    // SideDresser: draw SideDresser
 //----------------
-    glUseProgram(gLampProgramId);
+    glUseProgram(gSideDresserProgramId);
 
     //Transform the smaller cube used as a visual que for the light source
     model = glm::translate(gLightPosition) * glm::scale(gLightScale);
 
-    // Reference matrix uniforms from the Lamp Shader program
-    GLint modelLoc = glGetUniformLocation(gLampProgramId, "model");
-    GLint viewLoc = glGetUniformLocation(gLampProgramId, "view");
-    GLint projLoc = glGetUniformLocation(gLampProgramId, "projection");
+    // Reference matrix uniforms from the SideDresser Shader program
+    GLint modelLoc = glGetUniformLocation(gSideDresserProgramId, "model");
+    GLint viewLoc = glGetUniformLocation(gSideDresserProgramId, "view");
+    GLint projLoc = glGetUniformLocation(gSideDresserProgramId, "projection");
     glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
-    // Pass matrix data to the Lamp Shader program's matrix uniforms
+    // Pass matrix data to the SideDresser Shader program's matrix uniforms
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
