@@ -548,7 +548,7 @@ int main(int argc, char* argv[])
     glUniform1i(glGetUniformLocation(gCubeProgramId, "uTexture"), 0);
 
     // texture: wood (straigtened rustic), side tables
-    texFilename = "../../resources/textures/wood-oak-finejpg";
+    texFilename = "../../resources/textures/wood-scratched.jpg";
     //texFilename = "../../resources/textures/dresser.png";
     if (!createEachTexture(texFilename, texRusticWood, GL_REPEAT, GL_LINEAR))
     {
