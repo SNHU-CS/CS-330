@@ -234,20 +234,19 @@ void createMeshCouch(GLMesh& mesh);
 void createMesh(GLMesh& mesh);
 
 // draw
-void drawHouseFloor();
-void drawWall();
-void drawSideTables();
-void drawSideTableDrawer();
-void drawCoffeeTable();
-void drawBalloons();
-void drawWreath();
-void drawSideDresser();
-void drawDoor();
-void drawCouch();
+void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawSideTableDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawWreath(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawSideDresser(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
 
-void DrawLight();
-void DrawCube();
-
+void DrawLight(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
 
 // ****** VERTEX SHADER SOURCE CODE
 // Vertex Shader Source Code
@@ -623,24 +622,24 @@ void resizeWindow(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-/*
+
 void toOrtho()
 {
-    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    //glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    //GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    //glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 
 
 void toPerspective()
 {
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    //glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+    //GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    //glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
-*/
+
 void changeProjectionCallback()
 {
     // ADD: change to ortho
@@ -806,18 +805,26 @@ void rendering()
     // move to cube (or remove if cube is deleted)
     // Activate the cube VAO (used by cube)
 
-    DrawCube();
+
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 view = gCamera.GetViewMatrix();
+
+
+    DrawCube(view, projection, gCubeProgramId);
     // DrawLight();
-    drawHouseFloor();
-    drawWall();
-    drawSideTables();
-    drawSideTableDrawer();
-    drawCoffeeTable();
-    drawBalloons();
-    drawWreath();
-    drawSideDresser();
-    drawDoor();
-    drawCouch();
+    drawHouseFloor(view, projection, gHouseFloorProgramId);
+
+    drawSideTables(view, projection, gSideTableProgramId);
+    drawSideTableDrawer(view, projection, gSideTableDrawerProgramId);
+    /*
+    drawWall(view, projection, shaderProgramID);
+    drawCoffeeTable(view, projection, shaderProgramID);
+    drawBalloons(view, projection, shaderProgramID);
+    drawWreath(view, projection, shaderProgramID);
+    drawSideDresser(view, projection, shaderProgramID);
+    drawDoor(view, projection, shaderProgramID);
+    drawCouch(view, projection, shaderProgramID);
+    */
 
     // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
@@ -1465,10 +1472,11 @@ void destroyMesh(GLMesh& mesh)
 */
 
 
-
+// CONSIDER CLEANING UP MESH CLASSES 
+// BOTH FOR DRAW OBJECTS AND CALLING MESHES
 
 // ********** DRAW OBJECTS **********
-void drawHouseFloor()
+void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
     glm::mat4 scale;
     glm::mat4 rotation;
@@ -1479,31 +1487,25 @@ void drawHouseFloor()
     scale = glm::scale(glm::vec3(20.0f, 0.2f, 20.0f));
     rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     translation = glm::translate(glm::vec3(0.0f, 0.0f, 10.0f));
-
-    // camera/view transformation
-    glm::mat4 view = gCamera.GetViewMatrix();
-
-    // Creates a perspective projection
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+    glm::vec2 gUVScale(10.0f, 7.00f);
 
     // Model matrix: transformations are applied right-to-left order
     model = translation * rotation * scale;
 
     // Set the shader to be used
-    glUseProgram(gHouseFloorProgramId);
+    glUseProgram(shaderProgramID);
 
     // Retrieves and passes transform matrices to the Shader program
-    modelLoc = glGetUniformLocation(gHouseFloorProgramId, "model");
-    GLint viewLoc = glGetUniformLocation(gHouseFloorProgramId, "view");
-    GLint projLoc = glGetUniformLocation(gHouseFloorProgramId, "projection");
+    modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    glm::vec2 gUVScaleHouseFloor(10.0f, 7.00f);
-    GLint UVScaleLoc = glGetUniformLocation(gHouseFloorProgramId, "uvScaleHouseFloor");
-    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleHouseFloor));
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleHouseFloor");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
     glActiveTexture(GL_TEXTURE3); // 15
@@ -1516,7 +1518,7 @@ void drawHouseFloor()
     glDrawArrays(GL_TRIANGLES, 0, gMeshHouseFloor.nVertices);
 }
 
-void drawWall()
+void drawWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
 
 }
@@ -1527,8 +1529,8 @@ void drawWall()
  * ROTATION: legs uses same rotation as dresser cuboid.
  *            IF needed, add loop for rotation changes
  */
-//  IMPORTANT: remember to keep in position with drawers (drawSideTableDrawer)
-void drawSideTables()
+ //  IMPORTANT: remember to keep in position with drawers (drawSideTableDrawer)
+void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
 
     // declare objects
@@ -1544,19 +1546,14 @@ void drawSideTables()
     scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
     rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     translation = glm::translate(glm::vec3(-4.0f, 0.8f, 1.5f));
-    glm::vec2 gUVScaleSideTable(0.25f, 0.25f);
+    glm::vec2 gUVScale(0.25f, 0.25f);
 
-    // camera/view transformation
-    glm::mat4 view = gCamera.GetViewMatrix();
-
-    // Creates a perspective projection
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
     // Model matrix: transformations are applied right-to-left order
     model = translation * rotation * scale;
 
     // Set the shader to be used
-    glUseProgram(gSideTableProgramId);
+    glUseProgram(shaderProgramID);
 
     /* sets up loop for multiple tables. not needed yet
     // each table has a unique position
@@ -1575,16 +1572,16 @@ void drawSideTables()
     {
     */
     // Retrieves and passes transform matrices to the Shader program
-    modelLoc = glGetUniformLocation(gSideTableProgramId, "model");
-    GLint viewLoc = glGetUniformLocation(gSideTableProgramId, "view");
-    GLint projLoc = glGetUniformLocation(gSideTableProgramId, "projection");
+    modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    GLint UVScaleLoc = glGetUniformLocation(gSideTableProgramId, "uvScaleSideDresser");
-    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleSideTable));
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleSideDresser");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // Activate the VBOs contained within the mesh's VAO
     glBindVertexArray(gMeshSideTable.vao);
@@ -1606,27 +1603,27 @@ void drawSideTables()
 
     // ********** side table legs ************************
     // small legs: 4 per table, currently 2 tables
-    
+
     // ROTATION NOTE: legs uses same rotation as dresser cuboid.
     //                add rotation loop if rotation varies between tables
     // scale for legs (uniform size for all 4 legs)
     scale = glm::scale(glm::vec3(0.15f, 0.3f, 0.2f));
-    glm::vec2 gUVScaleDresserLegs(0.25f, 0.25f);
+    glm::vec2 gUVScale(0.25f, 0.25f);
 
     // each leg has a unique position
     glm::vec3 legPosition[] = {
-    // 1st dresser
-    glm::vec3(-3.5f, 0.1f, 1.0f), // right front leg
-    glm::vec3(-4.5f, 0.1f, 1.0f), // left front leg
-    glm::vec3(-3.5f, 0.1f, 2.0f), // right back leg
-    glm::vec3(-4.5f, 0.1f, 2.0f) // left back leg
-    /* needed for 2nd dresser. position currently unknown
-    // 2nd dresser
-    glm::vec3(-3.5f, 0.1f, 1.0f), // right front leg
-    glm::vec3(-4.5f, 0.1f, 1.0f), // left front leg
-    glm::vec3(-3.5f, 0.1f, 2.0f), // right back leg
-    glm::vec3(-4.5f, 0.1f, 2.0f) // left back leg
-    */
+        // 1st dresser
+        glm::vec3(-3.5f, 0.1f, 1.0f), // right front leg
+        glm::vec3(-4.5f, 0.1f, 1.0f), // left front leg
+        glm::vec3(-3.5f, 0.1f, 2.0f), // right back leg
+        glm::vec3(-4.5f, 0.1f, 2.0f) // left back leg
+        /* needed for 2nd dresser. position currently unknown
+        // 2nd dresser
+        glm::vec3(-3.5f, 0.1f, 1.0f), // right front leg
+        glm::vec3(-4.5f, 0.1f, 1.0f), // left front leg
+        glm::vec3(-3.5f, 0.1f, 2.0f), // right back leg
+        glm::vec3(-4.5f, 0.1f, 2.0f) // left back leg
+        */
     };
 
     // counts the number of objects
@@ -1640,13 +1637,13 @@ void drawSideTables()
         model = translation * rotation * scale;
 
         // Retrieves and passes transform matrices to the Shader program
-        modelLoc = glGetUniformLocation(gSideTableProgramId, "model");
+        modelLoc = glGetUniformLocation(shaderProgramID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         // UV scale unique to legs
-        GLint UVScaleLoc = glGetUniformLocation(gSideTableProgramId, "uvScaleDresserLegs");
-        glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleDresserLegs));
-        
+        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleDresserLegs");
+        glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
         // Activate the VBOs contained within the mesh's VAO
         glBindVertexArray(gMeshSideTable.vao);
 
@@ -1667,15 +1664,15 @@ void drawSideTables()
  * ROTATION: legs uses same rotation as dresser cuboid.
  *            IF needed, add loop for rotation changes
  */
-//IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTables)
-void drawSideTableDrawer()
+ //IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTables)
+void drawSideTableDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
     // declare objects
     glm::mat4 scale;
     glm::mat4 rotation;
     glm::mat4 translation;
     glm::mat4 model = translation * rotation * scale;
-    glm::vec2 gUVScaleSideTableDrawer(1.0f, 1.00f);
+    glm::vec2 gUVScale(1.0f, 1.00f);
 
     GLint modelLoc;
 
@@ -1692,17 +1689,12 @@ void drawSideTableDrawer()
     rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     translation = glm::translate(glm::vec3(-4.0f, 0.8f, 1.51f));
 
-    // camera/view transformation
-    glm::mat4 view = gCamera.GetViewMatrix();
-
-    // Creates a perspective projection
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
     // Model matrix: transformations are applied right-to-left order
     model = translation * rotation * scale;
 
     // Set the shader to be used
-    glUseProgram(gSideTableDrawerProgramId);
+    glUseProgram(shaderProgramID);
 
     /* sets up loop for multiple tables. each to check coordination with legs (below) and drawer function
      // each drawer has a unique position
@@ -1721,16 +1713,16 @@ void drawSideTableDrawer()
     {
     */
     // Retrieves and passes transform matrices to the Shader program
-    modelLoc = glGetUniformLocation(gSideTableDrawerProgramId, "model");
-    GLint viewLoc = glGetUniformLocation(gSideTableDrawerProgramId, "view");
-    GLint projLoc = glGetUniformLocation(gSideTableDrawerProgramId, "projection");
+    modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    GLint UVScaleLoc = glGetUniformLocation(gSideTableDrawerProgramId, "uvScaleSideTableDrawer");
-    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleSideTableDrawer));
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleSideTableDrawer");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
     //glActiveTexture(GL_TEXTURE0);
@@ -1749,68 +1741,62 @@ void drawSideTableDrawer()
 }
 
 
-void drawCoffeeTable()
+void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
 
 }
 
-void drawBalloons()
+void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
 
 }
 
-void drawWreath()
+void drawWreath(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
 
 }
 
-void drawSideDresser()
+void drawSideDresser(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
 
 }
 
-void drawDoor()
+void drawDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
 
 }
 
-void drawCouch()
+void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
 
 }
 
-void DrawCube()
+void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 {
-     glBindVertexArray(gMesh.vao);
+    glBindVertexArray(gMesh.vao);
     // CUBE: draw cube
     //----------------
     // Set the shader to be used
-    glUseProgram(gCubeProgramId);
+    glUseProgram(shaderProgramID);
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = glm::translate(gCubePosition) * glm::scale(gCubeScale);
     glm::vec2 gUVScale(0.5f, 10.0f);
 
-    // camera/view transformation
-    //glm::mat4 view = gCamera.GetViewMatrix();
-
-    // Creates a perspective projection
-    //glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-
     // Retrieves and passes transform matrices to the Shader program
-    GLint modelLoc = glGetUniformLocation(gCubeProgramId, "model");
-    GLint viewLoc = glGetUniformLocation(gCubeProgramId, "view");
-    GLint projLoc = glGetUniformLocation(gCubeProgramId, "projection");
+    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
 
     //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     //glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     //glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
     // Reference matrix uniforms from the Cube Shader program for the cub color, light color, light position, and camera position
-    GLint objectColorLoc = glGetUniformLocation(gCubeProgramId, "objectColor");
-    GLint lightColorLoc = glGetUniformLocation(gCubeProgramId, "lightColor");
-    GLint lightPositionLoc = glGetUniformLocation(gCubeProgramId, "lightPos");
-    //GLint viewPositionLoc = glGetUniformLocation(gCubeProgramId, "viewPosition");
+    GLint objectColorLoc = glGetUniformLocation(shaderProgramID, "objectColor");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    //GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     // Pass color, light, and camera data to the Cube Shader program's corresponding uniforms
     glUniform3f(objectColorLoc, gObjectColor.r, gObjectColor.g, gObjectColor.b);
@@ -1819,7 +1805,7 @@ void DrawCube()
     //const glm::vec3 cameraPosition = gCamera.Position;
     //glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
-    GLint UVScaleLoc = glGetUniformLocation(gCubeProgramId, "uvScale");
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScale");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
@@ -1840,15 +1826,15 @@ void DrawLight() {
     glm::mat4 view = gCamera.GetViewMatrix();
     // SideDresser: draw SideDresser
 //----------------
-    glUseProgram(gSideTableProgramId);
+    glUseProgram(shaderProgramID);
 
     //Transform the smaller cube used as a visual que for the light source
     model = glm::translate(gLightPosition) * glm::scale(gLightScale);
 
     // Reference matrix uniforms from the SideDresser Shader program
-    GLint modelLoc = glGetUniformLocation(gSideTableProgramId, "model");
-    GLint viewLoc = glGetUniformLocation(gSideTableProgramId, "view");
-    GLint projLoc = glGetUniformLocation(gSideTableProgramId, "projection");
+    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
     glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
     // Pass matrix data to the SideDresser Shader program's matrix uniforms
@@ -1905,16 +1891,6 @@ if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 // Set the shader to be used
 glUseProgram(gProgramId);
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
