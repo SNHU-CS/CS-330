@@ -1,49 +1,54 @@
 // ********** IMPORTS/INCLUDE ***********
+// libraries
 #include <iostream>         // cout, cerr
 #include <cstdlib>          // EXIT_FAILURE
 #include <GL/glew.h>        // GLEW library
 #include <GLFW/glfw3.h>     // GLFW library
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>      // Image loading Utility functions
 
 // GLM Math Header inclusions
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// other imports
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>      // Image loading Utility function
 #include <learnOpengl/camera.h> // Camera class
-// #include <learnOpengl/shaders.h>
-
-using namespace std; // Standard namespace
+// not coded yet: #include <learnOpengl/shaders.h>
 
 /*Shader program Macro*/
 #ifndef GLSL
 #define GLSL(Version, Source) "#version " #Version " core \n" #Source
 #endif
 
+using namespace std; // Standard namespace
+
+
 // ********** NAMESPACE ***********
 // Unnamed namespace
 namespace
 {
-    const char* const WINDOW_TITLE = "Katie's Graphics Project"; // Macro for window title
+    const char* const WINDOW_TITLE = "Katie's OpenGL Graphics Project (C++)"; // Macro for window title
+
+    // Main GLFW window
+    GLFWwindow* gWindow = nullptr;
 
     // Variables for window width and height
     const int WINDOW_WIDTH = 1200;
     const int WINDOW_HEIGHT = 800;
 
-    // Stores the GL data relative to a given mesh
-    struct GLMesh
-    {
-        GLuint vao;         // Handle for the vertex array object
-        GLuint vbo;         // Handle for the vertex buffer object
-        GLuint nVertices;    // Number of indices of the mesh
-        GLuint nIndices;    // Number of indices of the mesh
-    };
+    // timing
+    float gDeltaTime = 0.0f; // time between current frame and last frame
+    float gLastFrame = 0.0f;
 
-    // Main GLFW window
-    GLFWwindow* gWindow = nullptr;
+    // camera 
+    // defines where camera is positioned
+    Camera gCamera(glm::vec3(0.2f, 4.6f, 19.9f)); // do not change. precalcated to fit scene at 0.2f, 5.6f, 9.9f
+    float gLastX = WINDOW_WIDTH / 2.0f;
+    float gLastY = WINDOW_HEIGHT / 2.0f;
+    bool gFirstMouse = true;
 
-    // Shader programs
+    // Frag shader program IDs
     GLuint gCubeProgramId;
     GLuint gSideTableProgramId;
     GLuint gSideTableDrawerProgramId;
@@ -61,7 +66,85 @@ namespace
     GLuint gCouchLegsProgramId;
 
 
-    // Triangle mesh data
+    // Texture
+    // defaults
+    GLint gTexWrapMode = GL_REPEAT;
+    GLint gTexFilterMode = GL_LINEAR;
+    GLuint gTextureId; // original
+    // texture IDs
+    GLuint texWoodSolidDark; // 0
+    GLuint texRusticWood; // 1
+    GLuint texSideTableDrawer; // 2, image
+    GLuint texWoodHerring; // 3
+    GLuint texWallpaper; // 4
+    GLuint texDoorClassic; // 5, image
+    GLuint texDoorRustic; // 6, image
+    GLuint texSunsetPic; // 7, image
+    GLuint texRug; // 8, image
+    GLuint texGrassAlphine; // 9
+    GLuint texMarbleCream; // 10
+    GLuint texCottonCream; // 11
+    GLuint texFabricRed; // 12
+    GLuint texMetalBlack; // 13
+    GLuint texWoodOakFine; // 14
+    GLuint texWalnutMed; // 15
+
+    // TODO: check into bindless textures later
+    // **update array as textures and images are added
+    // Texture Array
+    GLuint textureIdAll[16] = {
+        texWoodSolidDark, // 0
+        texRusticWood, // 1
+        texSideTableDrawer, // 2, image
+        texWoodHerring, // 3
+        texWallpaper, // 4
+        texDoorClassic, // 5, image
+        texDoorRustic, // 6, image
+        texSunsetPic, // 7, image
+        texRug, // 8
+        texGrassAlphine, // 9
+        texMarbleCream, // 10
+        texCottonCream, // 11
+        texFabricRed, // 12
+        texMetalBlack, // 13
+        texWoodOakFine, // 14
+        texWalnutMed // 15
+    };
+    int texCount = size(textureIdAll);
+    //int texCount = textureIdAll.length;
+    //int texCount = 16;
+
+    // UV scale of textures
+    // check if can define values within shader, draw or mesh later
+    glm::vec2 gUVScale;
+    glm::vec2 gUVScaleSideTable;
+    glm::vec2 gUVScaleDresserLegs;
+    glm::vec2 gUVScaleSideTableDrawer;
+    glm::vec2 gUVScaleHouseFloor(10.0f, 7.00f);
+    glm::vec2 gUVScaleRug(1.0f, 1.00f);
+    glm::vec2 gUVScaleHouseWall(1.0f, 1.00f);
+    glm::vec2 gUVScaleHouseDoor(1.0f, 1.00f);
+    glm::vec2 gUVScaleWreath(1.0f, 1.00f);
+    glm::vec2 gUVScalePainting(1.0f, 1.00f);
+    glm::vec2 gUVScaleLampTop(1.0f, 1.00f);
+    glm::vec2 gUVScaleLampBottom(1.0f, 1.00f);
+    glm::vec2 gUVScaleBalloons(1.0f, 1.00f);
+    glm::vec2 gUVScaleCoffeeTable(1.0f, 1.00f);
+    glm::vec2 gUVScaleCouchSeats(1.0f, 1.00f);
+    glm::vec2 gUVScaleCouchLegs(1.0f, 1.00f);
+    glm::vec2 gUVScaleCouchArmRests(1.0f, 1.00f);
+
+
+    // Stores the GL data relative to a given mesh
+    struct GLMesh
+    {
+        GLuint vao;         // Handle for the vertex array object
+        GLuint vbo;         // Handle for the vertex buffer object
+        GLuint nVertices;    // Number of indices of the mesh
+        GLuint nIndices;    // Number of indices of the mesh
+    };
+
+    // mesh data
     GLMesh gMesh;
     GLMesh gMeshSideTable;
     GLMesh gMeshSideTableDrawer;
@@ -79,85 +162,6 @@ namespace
     GLMesh gMeshCouchLegs;
     GLMesh gMeshCouchArmRests;
 
-
-    // texture images: uv
-    // check if can define values within shader, draw or mesh later
-    glm::vec2 gUVScale(0.5f, 10.0f);
-    glm::vec2 gUVScaleSideTable(0.25f, 0.25f);
-    glm::vec2 gUVScaleDresserLegs(0.25f, 0.25f);
-    glm::vec2 gUVScaleSideTableDrawer(1.0f, 1.00f);
-    glm::vec2 gUVScaleHouseFloor(10.0f, 7.00f);
-    glm::vec2 gUVScaleRug(1.0f, 1.00f);
-    glm::vec2 gUVScaleHouseWall(1.0f, 1.00f);
-    glm::vec2 gUVScaleHouseDoor(1.0f, 1.00f);
-    glm::vec2 gUVScaleWreath(1.0f, 1.00f);
-    glm::vec2 gUVScalePainting(1.0f, 1.00f);
-    glm::vec2 gUVScaleLampTop(1.0f, 1.00f);
-    glm::vec2 gUVScaleLampBottom(1.0f, 1.00f);
-    glm::vec2 gUVScaleBalloons(1.0f, 1.00f);
-    glm::vec2 gUVScaleCoffeeTable(1.0f, 1.00f);
-    glm::vec2 gUVScaleCouchSeats(1.0f, 1.00f);
-    glm::vec2 gUVScaleCouchLegs(1.0f, 1.00f);
-    glm::vec2 gUVScaleCouchArmRests(1.0f, 1.00f);
-
-    // Texture
-    // defaults
-    GLint gTexWrapMode = GL_REPEAT;
-    GLint gTexFilterMode = GL_LINEAR;
-    GLuint gTextureId; // original
-
-    GLuint texDoorClassic; // 0
-    GLuint texDoorRustic; // 1
-    GLuint texSunsetPic; // 2
-    GLuint texRug; // 3
-    GLuint texWallpaper; // 4
-    GLuint texGrassAlphine; // 5
-    GLuint texMarbleCream; // 6
-    GLuint texCottonCream; // 7
-    GLuint texFabricRed; // 8
-    GLuint texMetalBlack; // 9
-    GLuint texWoodHerring; // 10
-    GLuint texWoodSolidDark; // 11
-    GLuint texRusticWood; // 12
-    GLuint texWoodOakFine; // 13
-    GLuint texWalnutMed; // 14
-    GLuint texSideTableDrawer; //15
-
-    // also check into bindless textures later
-    // remember to update array size as textures and images are added
-    // GLuint textureIdAll[] = {
-    GLuint textureIdAll[16] = {
-        texDoorClassic, // 0
-        texDoorRustic, // 1
-        texSunsetPic, // 2
-        texRug, // 3
-        texWallpaper, // 4
-        texGrassAlphine, // 5
-        texMarbleCream, // 6
-        texCottonCream, // 7
-        texFabricRed, // 8
-        texMetalBlack, // 9
-        texWoodHerring, // 10
-        texWoodSolidDark, // 11
-        texRusticWood, // 12
-        texWoodOakFine, // 13
-        texWalnutMed, // 14
-        texSideTableDrawer, //15
-    };
-    int texCount = size(textureIdAll);
-    //int texCount = textureIdAll.length;
-    //int texCount = 16;
-
-
-    // camera
-    Camera gCamera(glm::vec3(0.2f, 4.6f, 19.9f)); // do not change. precalcated to fit scene at 0.2f, 5.6f, 9.9f
-    float gLastX = WINDOW_WIDTH / 2.0f;
-    float gLastY = WINDOW_HEIGHT / 2.0f;
-    bool gFirstMouse = true;
-
-    // timing
-    float gDeltaTime = 0.0f; // time between current frame and last frame
-    float gLastFrame = 0.0f;
 
     // CUBE
     // Subject position and scale
@@ -177,12 +181,11 @@ namespace
 }
 
 // *********** USER-DEFINED FUNCTIONS **********
+// initialize libraries and events
 bool initializeOGL(int, char* [], GLFWwindow** window);
 void rendering();
 
-// shaders
-void createVertexShader(GLuint programId);
-void createVertexShaderLighting(GLuint programId);
+// create and destroy shaders
 bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
 void destroyShaderProgram(GLuint programId);
 
@@ -191,13 +194,13 @@ void resizeWindow(GLFWwindow* window, int width, int height);
 void toOrtho();
 void toPerspective();
 
-
-// MPV keyboard input:
-
+/* Keyboard input for changing projection setting to ortho
+ * !!IMPORTANT!! Do not delete unless can switch project elsewhere)
+ * Press "p" to change projection from perspective to ortho**
+ */
 void changeProjectionCallback(); // use keyboard to change projection (event)
-// **Press "p" to change projection from perspective to ortho**
-//void projectionKeyboardCallback(GLFWwindow* window, int key, int action);
-//void projectionKeyboardCallback2(GLFWwindow* window, int key, int scancode, int action, int mods);
+void projectionKeyboardCallback(GLFWwindow* window, int key, int action);
+void projectionKeyboardCallback2(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 // user Inputs
 void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
@@ -207,26 +210,28 @@ void keyboardNavigationCallback(GLFWwindow* window);
 
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
-bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
-//check into implementing instead of createEachTexture crowding main
-bool createAllTexture();
-void deleteAllTexture(GLuint& textureIdAll, int texCount);
+bool createTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
 void destroyTexture(GLuint textureId);
+// TODO: research batch texture deletion
+//void deleteAllTexture(GLuint& textureIdAll, int texCount);
 
-// mesh
-void meshHouseFloor(GLMesh& mesh);
-void meshHouseWall(GLMesh& mesh);
-void meshSideTables(GLMesh& mesh);
-void meshSideTableDrawer(GLMesh& mesh);
-void meshCoffeeTable(GLMesh& mesh);
-void meshBalloons(GLMesh& mesh);
-void meshWreath(GLMesh& mesh);
-void meshSideDresser(GLMesh& mesh);
-void meshHouseDoor(GLMesh& mesh);
-void meshCouch(GLMesh& mesh);
 
-void createMesh(GLMesh& mesh);
+// create mesh
+// mesh for cube
+// TODO: check for method to destroy as a batch
 void destroyMesh(GLMesh& mesh);
+
+void createMeshHouseFloor(GLMesh& mesh);
+void createMeshHouseWall(GLMesh& mesh);
+void createMeshSideTables(GLMesh& mesh);
+void createMeshSideTableDrawer(GLMesh& mesh);
+void createMeshCoffeeTable(GLMesh& mesh);
+void createMeshBalloons(GLMesh& mesh);
+void createMeshWreath(GLMesh& mesh);
+void createMeshSideDresser(GLMesh& mesh);
+void createMeshHouseDoor(GLMesh& mesh);
+void createMeshCouch(GLMesh& mesh);
+void createMesh(GLMesh& mesh);
 
 // draw
 void drawHouseFloor();
@@ -244,41 +249,9 @@ void DrawLight();
 void DrawCube();
 
 
-// *********** SHADERS: DEFINE **********
-/*
-// TEST LATER: Generic 2D vertex shader (excludes implementing lighting). created to reduce coding
-// assumes mesh is position, normal, texture
-void createVertexShader(GLuint programId) {
-    const GLchar* programID = GLSL(440,
-
-    layout(location = 0) in vec3 position;
-    layout(location = 2) in vec2 textureCoordinate;
-
-    out vec2 vertexTextureCoordinate;
-
-    //Uniform / Global variables for the  transform matrices
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
-
-    void main()
-    {
-        gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
-        vertexTextureCoordinate = textureCoordinate;
-    }
-    );
-}
-
-// TEST LATER: Generic 2D vertex shader (includes implementing lighting). created to reduce coding
-// assumes mesh is position, normal, texture
-void createVertexShaderLighting(GLuint programId) {
-    // not yet created
-}
-*/
-
-// Cube Vertex Shader Source Code
-
-const GLchar* cubeVertexShaderSource = GLSL(440,
+// ****** VERTEX SHADER SOURCE CODE
+// Vertex Shader Source Code
+const GLchar* vertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
     layout(location = 1) in vec3 normal; // VAP position 1 for normals
@@ -288,22 +261,24 @@ const GLchar* cubeVertexShaderSource = GLSL(440,
     out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
     out vec2 vertexTextureCoordinate;
 
-    //Uniform / Global variables for the  transform matrices
     uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
- 
 
-void main()
-{
-    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
 
-    vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
-
-    vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
-    vertexTextureCoordinate = textureCoordinate;
-}
+    void main()
+    {
+        gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
+        vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
+        vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
+        vertexTextureCoordinate = textureCoordinate;
+    }
 );
+
+
+// ****** FRAGMENT SHADER SOURCE CODE
+// UNABLE TO GET VERTEX TO ACCEPT A 2ND/DIFFERENT SET OF COORDINATES
+// SOLUTION: create another frag shader (research other opportunities later)
 
 // Cube Fragment Shader Source Code
 const GLchar* cubeFragShaderSource = GLSL(440,
@@ -357,32 +332,6 @@ void main()
 );
 
 
-
-// ****** SIDE TABLE SHADERS
-// Vertex Shader Source Code
-const GLchar* vertexShaderSource = GLSL(440,
-
-    layout(location = 0) in vec3 position;
-    layout(location = 2) in vec2 textureCoordinate;
-
-    out vec2 vertexTextureCoordinate;
-
-    //Uniform / Global variables for the  transform matrices
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
-
-    void main()
-    {
-        gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
-        vertexTextureCoordinate = textureCoordinate;
-    }
-);
-
-
-// UNABLE TO GET VERTEX TO ACCEPT A 2ND/DIFFERENT SET OF COORDINATES
-// SOLUTION: create another frag shader (research other opportunities later)
-
 // Fragment Shader: side table
 const GLchar* SideTableFragShaderSource = GLSL(440,
     in vec2 vertexTextureCoordinate;
@@ -417,10 +366,10 @@ const GLchar* SideTableFragShaderSource = GLSL(440,
 const GLchar* SideTableDrawerFragShaderSource = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing gSideTableDrawer color (smaller cube) to the GPU
+    out vec4 fragmentColor; // For outgoing gSideTableDrawer color (smaller cube) to the GPU
 
-uniform sampler2D uTexSideTableDrawer;
-uniform vec2 uvScaleSideTableDrawer;
+    uniform sampler2D uTexSideTableDrawer;
+    uniform vec2 uvScaleSideTableDrawer;
 
 void main()
 {
@@ -436,10 +385,10 @@ void main()
 const GLchar* HouseFloorFragShaderSource = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
+    out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
 
-uniform sampler2D texHouseFloor;
-uniform vec2 uvScaleHouseFloor;
+    uniform sampler2D texHouseFloor;
+    uniform vec2 uvScaleHouseFloor;
 
 void main()
 {
@@ -474,19 +423,23 @@ void flipImageVertical(unsigned char* image, int width, int height, int channels
 // ********** MAIN CLASS ***********
 int main(int argc, char* argv[])
 {
+    // initialize OpenGL, GLFW, glfw events, and GLEW
     if (!initializeOGL(argc, argv, &gWindow))
         return EXIT_FAILURE;
 
-    // Create the mesh
+    // Sets the background color of the window to black (it will be implicitely used by glClear)
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // create the mesh for objects
+    // TODO: raise exceptions
     createMesh(gMesh); // Calls the function to create the Vertex Buffer Object
-    meshSideTables(gMeshSideTable);
-    meshSideTableDrawer(gMeshSideTableDrawer);
-    meshHouseFloor(gMeshHouseFloor);
+    createMeshSideTables(gMeshSideTable);
+    createMeshSideTableDrawer(gMeshSideTableDrawer);
+    createMeshHouseFloor(gMeshHouseFloor);
 
 
-    // Create the shader programs
-    // look into better way to repeat shaders. attempted combining, but failed on getting different vertexcoordinates into the vertex shader
-    if (!createShaderProgram(cubeVertexShaderSource, cubeFragShaderSource, gCubeProgramId))
+    // create the fragment shader programs
+    if (!createShaderProgram(vertexShaderSource, cubeFragShaderSource, gCubeProgramId))
         return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, SideTableFragShaderSource, gSideTableProgramId))
@@ -498,14 +451,15 @@ int main(int argc, char* argv[])
     if (!createShaderProgram(vertexShaderSource, HouseFloorFragShaderSource, gHouseFloorProgramId))
         return EXIT_FAILURE;
 
+    /*if (!createShaderProgram(vertexShaderSource, FragShaderSource, g_ProgramId))
+        return EXIT_FAILURE;
+     */
+
 
     // TODO: MINIMIZE INTO FUNCTION(S) LATER
-    // type (image/texture): texture, object that uses textur
-    // createAllTexture();
-    
-    // texture: wood (solid natural)/dark, table/alternative
+    // TEXTURE: wood, dark brown/red solid
     const char* texFilename = "../../resources/textures/solid-dark-wood.jpg";
-    if (!createEachTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
+    if (!createTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
@@ -513,43 +467,43 @@ int main(int argc, char* argv[])
     glUseProgram(gCubeProgramId);
     glUniform1i(glGetUniformLocation(gCubeProgramId, "uTexture"), 0);
 
-    // texture: wood (straigtened rustic), side tables
+    // TEXTURE: wood, straigtened rustic scratched
     texFilename = "../../resources/textures/wood-scratched.jpg";
-    //texFilename = "../../resources/textures/dresser.png";
-    if (!createEachTexture(texFilename, texRusticWood, GL_REPEAT, GL_LINEAR))
+    if (!createTexture(texFilename, texRusticWood, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
+    // texture use: side tables
     glUseProgram(gSideTableProgramId);
     glUniform1i(glGetUniformLocation(gSideTableProgramId, "texRusticWood"), 1);
     
-    // image: dresser drawer, side tables
+    // TEXTURE (IMAGE): dresser drawer, side tables
     texFilename = "../../resources/images/dresserdrawer.png";
-    if (!createEachTexture(texFilename, texSideTableDrawer, GL_CLAMP_TO_EDGE, GL_LINEAR))
+    if (!createTexture(texFilename, texSideTableDrawer, GL_CLAMP_TO_EDGE, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
+    // texture use: side tables drawers
     glUseProgram(gSideTableDrawerProgramId);
     glUniform1i(glGetUniformLocation(gSideTableDrawerProgramId, "uTexSideTableDrawer"), 2);
 
-    // texture: wood (herring pattern)/dark, floor
+
+    // TEXTURE: wood (herring pattern)/dark
     texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
-    if (!createEachTexture(texFilename, texWoodHerring, GL_REPEAT, GL_LINEAR))
+    if (!createTexture(texFilename, texWoodHerring, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
+    // texture use: floor
     glUseProgram(gHouseFloorProgramId);
     glUniform1i(glGetUniformLocation(gHouseFloorProgramId, "texHouseFloor"), 3);
     
 
-
-    // Sets the background color of the window to black (it will be implicitely used by glClear)
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-    // render loop
+    // render loop. 
+    // (exit key is esc, defined at "exit" (at end of main class)
     while (!glfwWindowShouldClose(gWindow))
     {
         // per-frame timing
@@ -562,28 +516,30 @@ int main(int argc, char* argv[])
         // **Press "p" to change projection from perspective to ortho**
         // projectionKeyboardCallback(gWindow, p, );
 
-        // Render this frame
+        // creates and draws all objects
         rendering();
 
+        // poll for user or OS activity
         glfwPollEvents();
     }
 
-    // Release mesh data
-    
+
+    // release mesh data
+    // TODO: look into batch release destroy/release
     destroyMesh(gMesh);
     destroyMesh(gMeshSideTable);
     destroyMesh(gMeshSideTableDrawer);
     destroyMesh(gMeshHouseFloor);
 
-
-    // Release texture
-    // use destroy textures function later instead
+    // release texture
+    //     // TODO: look into batch release destroy/release. 
+    // OpenGL 4.4 destroy textures function (don't forget that "s")
     destroyTexture(gTextureId);
     destroyTexture(texRusticWood);
     destroyTexture(texSideTableDrawer);
     destroyTexture(texWoodHerring);
 
-    // Release shader programs
+    // release fragment shader programs
     destroyShaderProgram(gCubeProgramId);
     destroyShaderProgram(gSideTableProgramId);
     destroyShaderProgram(gSideTableDrawerProgramId);
@@ -597,18 +553,16 @@ int main(int argc, char* argv[])
 bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
 {
     // GLFW: initialize and configure
-    // ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+    #ifdef __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    #endif
 
     // GLFW: window creation
-    // ---------------------
     * window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
     if (*window == NULL)
     {
@@ -764,8 +718,7 @@ void projectionKeyboardCallback(GLFWwindow* window, int key, int action) {
 
 
 // ********** MOUSE-BASED NAVIGATION **********
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
+// glfw: mouse movement changes orientation of camera
 void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
     if (gFirstMouse)
@@ -785,16 +738,14 @@ void mousePositionCallback(GLFWwindow* window, double xpos, double ypos)
 }
 
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
+// glfw: mouse scroll wheel increase/decreases movement speed
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     gCamera.ProcessMouseScroll(yoffset);
 }
 
 
-// glfw: handle mouse button events
-// --------------------------------
+// glfw: mouse buttons (test mode. only prints text)
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
     switch (button)
@@ -838,7 +789,6 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 void rendering()
 {
 
-
     // Clear the frame and z buffers
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -855,8 +805,6 @@ void rendering()
 
     // move to cube (or remove if cube is deleted)
     // Activate the cube VAO (used by cube)
-
-
 
     DrawCube();
     // DrawLight();
@@ -886,7 +834,7 @@ void rendering()
 
 // generates settings for individual texture 
 // assumes all images are declared and processed as GL_TEXTURE_2D
-bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode)
+bool createTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode)
 {
     int width, height, channels;
 
@@ -934,7 +882,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 // load all textures
 /* IMPORTANT: By default, assumes all images are declared and processed as GL_TEXTURE_2D.
  *    Specify location, textureID, Wrap Parameter and Filter Parameter
- *    To make S or T different from each other, a custom loop needs to be made, based on the createEachTexture
+ *    To make S or T different from each other, a custom loop needs to be made, based on the createTexture
  */
 
  /*
@@ -944,7 +892,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // image: classic door
      const char* texFilename = "../../resources/images/door-classic.jpg";
-     if (!createEachTexture(texFilename, texDoorClassic, GL_CSideDresser_TO_BORDER, GL_LINEAR))
+     if (!createTexture(texFilename, texDoorClassic, GL_CSideDresser_TO_BORDER, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -957,7 +905,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
      // image: rustic door (dark wood by default)
      // texFilename = "../../resources/images/door-light-wood.png";
      texFilename = "../../resources/images/door-dark-wood.png";
-     if (!createEachTexture(texFilename, texDoorRustic, GL_CSideDresser_TO_BORDER, GL_LINEAR))
+     if (!createTexture(texFilename, texDoorRustic, GL_CSideDresser_TO_BORDER, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -966,7 +914,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
      // image: frame sunset picture (large by default. small available)
      texFilename = "../../resources/images/framed-sunset-lrg.png";
      //texFilename = "../../resources/images/frame-sunset-sml.png";
-     if (!createEachTexture(texFilename, texSunsetPic, GL_CSideDresser_TO_BORDER, GL_LINEAR))
+     if (!createTexture(texFilename, texSunsetPic, GL_CSideDresser_TO_BORDER, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -974,7 +922,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // image: vintage door rug
      texFilename = "../../resources/images/rug-vintage.png";
-     if (!createEachTexture(texFilename, texRug, GL_CSideDresser_TO_BORDER, GL_LINEAR))
+     if (!createTexture(texFilename, texRug, GL_CSideDresser_TO_BORDER, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -985,7 +933,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
      // texFilename = "../../resources/textures/wallpaper-uni-dark.jpg";
      // texFilename = "../../resources/textures/wallpaper-uni-light.jpg";
      texFilename = "../../resources/textures/wallpaper-uni-med.jpg";
-     if (!createEachTexture(texFilename, texWallpaper, GL_REPEAT, GL_LINEAR))
+     if (!createTexture(texFilename, texWallpaper, GL_REPEAT, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -993,7 +941,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // texture: grass/alphine, wreath
      texFilename = "../../resources/textures/grass-alphine.jpg";
-     if (!createEachTexture(texFilename, texGrassAlphine, GL_REPEAT, GL_LINEAR))
+     if (!createTexture(texFilename, texGrassAlphine, GL_REPEAT, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -1001,7 +949,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // texture: marble ceramic/cream, SideDresser base
      texFilename = "../../resources/textures/marble-cream.jpg";
-     if (!createEachTexture(texFilename, texMarbleCream, GL_REPEAT, GL_LINEAR))
+     if (!createTexture(texFilename, texMarbleCream, GL_REPEAT, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -1009,7 +957,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // texture: cotton/cream, SideDresser cover
      texFilename = "../../resources/textures/cotton-seamless.jpg";
-     if (!createEachTexture(texFilename, texCottonCream, GL_REPEAT, GL_LINEAR))
+     if (!createTexture(texFilename, texCottonCream, GL_REPEAT, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -1017,7 +965,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // texture: cotton/red, couch fabric
      texFilename = "../../resources/textures/fabric-red-seamless.png";
-     if (!createEachTexture(texFilename, texFabricRed, GL_REPEAT, GL_LINEAR))
+     if (!createTexture(texFilename, texFabricRed, GL_REPEAT, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -1026,7 +974,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // texture: metal brused/black, long table, couch legs
      texFilename = "../../resources/textures/metal-black-brush.jpg";
-     if (!createEachTexture(texFilename, texMetalBlack, GL_REPEAT, GL_LINEAR))
+     if (!createTexture(texFilename, texMetalBlack, GL_REPEAT, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -1034,7 +982,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // texture: wood (herring pattern)/dark, floor
      texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
-     if (!createEachTexture(texFilename, texWoodHerring, GL_REPEAT, GL_LINEAR))
+     if (!createTexture(texFilename, texWoodHerring, GL_REPEAT, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -1042,7 +990,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // texture: wood (solid natural)/dark, table/alternative
      texFilename = "../../resources/textures/solid-dark-wood.jpg";
-     if (!createEachTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
+     if (!createTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -1050,7 +998,7 @@ bool createEachTexture(const char* filename, GLuint& textureId, GLint gTexWrapMo
 
      // texture: wood (straigtened rustic), side tables
      texFilename = "../../resources/textures/wood-scratched.jpg";
-     if (!createEachTexture(texFilename, texRusticWood, GL_REPEAT, GL_LINEAR))
+     if (!createTexture(texFilename, texRusticWood, GL_REPEAT, GL_LINEAR))
      {
          cout << "Failed to load texture " << texFilename << endl;
          return EXIT_FAILURE;
@@ -1232,7 +1180,7 @@ void createMesh(GLMesh& mesh)
 }
 
 
-void meshSideTables(GLMesh& gMeshSideTable)
+void createMeshSideTables(GLMesh& gMeshSideTable)
 {
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
@@ -1309,7 +1257,7 @@ void meshSideTables(GLMesh& gMeshSideTable)
 }
 
 
-void meshSideTableDrawer(GLMesh& gMeshSideTableDrawer)
+void createMeshSideTableDrawer(GLMesh& gMeshSideTableDrawer)
 {
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
@@ -1354,7 +1302,7 @@ void meshSideTableDrawer(GLMesh& gMeshSideTableDrawer)
 
 
 // mesh
-void meshHouseFloor(GLMesh& gMeshHouseFloor)
+void createMeshHouseFloor(GLMesh& gMeshHouseFloor)
 {
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
@@ -1396,7 +1344,7 @@ void meshHouseFloor(GLMesh& gMeshHouseFloor)
     glEnableVertexAttribArray(2);
 }
 
-void meshCoffeeTable(GLMesh& mesh)
+void createMeshCoffeeTable(GLMesh& mesh)
 {
     // elongated cuboid
     // 4 legs
@@ -1404,7 +1352,7 @@ void meshCoffeeTable(GLMesh& mesh)
 }
 
 
-void meshWreath(GLMesh& mesh)
+void createMeshWreath(GLMesh& mesh)
 {
     // torus
     // alphine/green tree texture
@@ -1412,13 +1360,13 @@ void meshWreath(GLMesh& mesh)
 }
 
 
-void meshBalloons(GLMesh& mesh)
+void createMeshBalloons(GLMesh& mesh)
 {
     // balloon
     // solid color texture wit light shine
 }
 
-void meshSideDresser(GLMesh& mesh)
+void createMeshSideDresser(GLMesh& mesh)
 {
     // cylinder
     // cylinder
@@ -1428,7 +1376,7 @@ void meshSideDresser(GLMesh& mesh)
 }
 
 
-void meshCouch(GLMesh& mesh)
+void createMeshCouch(GLMesh& mesh)
 {
     // red fabric texture
     // metal legs texture
@@ -1553,6 +1501,7 @@ void drawHouseFloor()
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+    glm::vec2 gUVScaleHouseFloor(10.0f, 7.00f);
     GLint UVScaleLoc = glGetUniformLocation(gHouseFloorProgramId, "uvScaleHouseFloor");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleHouseFloor));
 
@@ -1595,6 +1544,7 @@ void drawSideTables()
     scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
     rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     translation = glm::translate(glm::vec3(-4.0f, 0.8f, 1.5f));
+    glm::vec2 gUVScaleSideTable(0.25f, 0.25f);
 
     // camera/view transformation
     glm::mat4 view = gCamera.GetViewMatrix();
@@ -1661,6 +1611,7 @@ void drawSideTables()
     //                add rotation loop if rotation varies between tables
     // scale for legs (uniform size for all 4 legs)
     scale = glm::scale(glm::vec3(0.15f, 0.3f, 0.2f));
+    glm::vec2 gUVScaleDresserLegs(0.25f, 0.25f);
 
     // each leg has a unique position
     glm::vec3 legPosition[] = {
@@ -1723,14 +1674,16 @@ void drawSideTableDrawer()
     glm::mat4 scale;
     glm::mat4 rotation;
     glm::mat4 translation;
-    glm::mat4 model = translation * rotation * scale;;
+    glm::mat4 model = translation * rotation * scale;
+    glm::vec2 gUVScaleSideTableDrawer(1.0f, 1.00f);
+
     GLint modelLoc;
 
     // ********** dresser main cuboid ************************
    // dresser drawers - 1 per table, currently 2 tables. possible 2 if scaling is off
    // create model view: scale, rotate, translate
 
-    // TODO: ADJUST SCALE and possible translation. PRE-SET TO DRESSER 
+    // TODO: ADJUST SCALE and possible translation. preset to sidetable #1
     //scale = glm::scale(glm::vec3(1.8f, 1.8f, 1.8f));
     //rotation = glm::rotate(0.0f, glm::vec3(3.0f, 0.1f, 0.0f));
     //translation = glm::translate(glm::vec3(4.0f, 0.8f, 1.5f));
@@ -1828,7 +1781,7 @@ void drawCouch()
 
 void DrawCube()
 {
-        glBindVertexArray(gMesh.vao);
+     glBindVertexArray(gMesh.vao);
     // CUBE: draw cube
     //----------------
     // Set the shader to be used
@@ -1836,6 +1789,7 @@ void DrawCube()
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = glm::translate(gCubePosition) * glm::scale(gCubeScale);
+    glm::vec2 gUVScale(0.5f, 10.0f);
 
     // camera/view transformation
     //glm::mat4 view = gCamera.GetViewMatrix();
