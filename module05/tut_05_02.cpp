@@ -180,25 +180,30 @@ namespace
 bool initializeOGL(int, char* [], GLFWwindow** window);
 void rendering();
 
-// window resize and projection
-void resizeWindow(GLFWwindow* window, int width, int height);
-void toOrtho();
-void toPerspective();
-void changeProjectionCallback(); // use keyboard to change projection (event)
-
 // shaders
 void createVertexShader(GLuint programId);
 void createVertexShaderLighting(GLuint programId);
 bool createShaderProgram(const char* vtxShaderSource, const char* fragShaderSource, GLuint& programId);
 void destroyShaderProgram(GLuint programId);
 
+// window resize and projection
+void resizeWindow(GLFWwindow* window, int width, int height);
+void toOrtho();
+void toPerspective();
+
+
+// MPV keyboard input:
+
+void changeProjectionCallback(); // use keyboard to change projection (event)
+// **Press "p" to change projection from perspective to ortho**
+//void projectionKeyboardCallback(GLFWwindow* window, int key, int action);
+//void projectionKeyboardCallback2(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 // user Inputs
 void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-void keyboardNavigation(GLFWwindow* window);
-// event
-void keyboardControl(GLFWwindow* window);
+void keyboardNavigationCallback(GLFWwindow* window);
 
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
@@ -272,6 +277,7 @@ void createVertexShaderLighting(GLuint programId) {
 */
 
 // Cube Vertex Shader Source Code
+
 const GLchar* cubeVertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
@@ -300,7 +306,7 @@ void main()
 );
 
 // Cube Fragment Shader Source Code
-const GLchar* cubeFragmentShaderSource = GLSL(440,
+const GLchar* cubeFragShaderSource = GLSL(440,
 
     in vec3 vertexNormal; // For incoming normals
     in vec3 vertexFragmentPos; // For incoming fragment position
@@ -351,11 +357,10 @@ void main()
 );
 
 
-// UNABLE TO GET VERTEX TO ACCEPT A 2ND/DIFFERENT SET OF COORDINATES
-// SOLUTION: create another shader (research other opportunities later)
+
 // ****** SIDE TABLE SHADERS
-// SideTable Vertex Shader Source Code
-const GLchar* SideTableVertexShaderSource = GLSL(440,
+// Vertex Shader Source Code
+const GLchar* vertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position;
     layout(location = 2) in vec2 textureCoordinate;
@@ -374,9 +379,12 @@ const GLchar* SideTableVertexShaderSource = GLSL(440,
     }
 );
 
-// ****** SIDE TABLE SHADERS
-// Side Table Fragment Shader Source Code
-const GLchar* SideTableFragmentShaderSource = GLSL(440,
+
+// UNABLE TO GET VERTEX TO ACCEPT A 2ND/DIFFERENT SET OF COORDINATES
+// SOLUTION: create another frag shader (research other opportunities later)
+
+// Fragment Shader: side table
+const GLchar* SideTableFragShaderSource = GLSL(440,
     in vec2 vertexTextureCoordinate;
     //in vec2 vertexTextureCoordinate2;
 
@@ -405,29 +413,8 @@ const GLchar* SideTableFragmentShaderSource = GLSL(440,
     }
 );
 
-// ****** SIDE TABLE DRAWERS SHADERS
-// side table drawers Vertex Shader Source Code
-const GLchar* SideTableDrawerVertexShaderSource = GLSL(440,
-    layout(location = 0) in vec3 position;
-    layout(location = 2) in vec2 textureCoordinate;
-
-out vec2 vertexTextureCoordinate;
-
-//Uniform / Global variables for the  transform matrices
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-void main()
-{
-    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
-    vertexTextureCoordinate = textureCoordinate;
-}
-);
-
-// ****** SIDE TABLE DRAWERS SHADERS
-// side table drawers Fragment Shader Source Code
-const GLchar* SideTableDrawerFragmentShaderSource = GLSL(440,
+// Fragment Shader: side table drawer
+const GLchar* SideTableDrawerFragShaderSource = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
 out vec4 fragmentColor; // For outgoing gSideTableDrawer color (smaller cube) to the GPU
@@ -444,30 +431,9 @@ void main()
 }
 );
 
-// ****** HOUSE FLOOR SHADERS
-// house floor Vertex Shader Source Code
-const GLchar* HouseFloorVertexShaderSource = GLSL(440,
-    layout(location = 0) in vec3 position;
-layout(location = 2) in vec2 textureCoordinate;
 
-out vec2 vertexTextureCoordinate;
-
-//Uniform / Global variables for the  transform matrices
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-void main()
-{
-    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
-    vertexTextureCoordinate = textureCoordinate;
-}
-);
-
-// ******HOUSE FLOOR SHADERS
-// 
-// house floor Fragment Shader Source Code
-const GLchar* HouseFloorFragmentShaderSource = GLSL(440,
+// Fragment Shader: house floor 
+const GLchar* HouseFloorFragShaderSource = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
 out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
@@ -485,8 +451,8 @@ void main()
 );
 
 
-
-// Images are loaded with Y axis going down, but OpenGL's Y axis goes up, so let's flip it
+// flip images vertically
+// Images are loaded with Y axis going down, but OpenGL's Y axis goes up
 void flipImageVertical(unsigned char* image, int width, int height, int channels)
 {
     for (int j = 0; j < height / 2; ++j)
@@ -520,16 +486,16 @@ int main(int argc, char* argv[])
 
     // Create the shader programs
     // look into better way to repeat shaders. attempted combining, but failed on getting different vertexcoordinates into the vertex shader
-    if (!createShaderProgram(cubeVertexShaderSource, cubeFragmentShaderSource, gCubeProgramId))
+    if (!createShaderProgram(cubeVertexShaderSource, cubeFragShaderSource, gCubeProgramId))
         return EXIT_FAILURE;
 
-    if (!createShaderProgram(SideTableVertexShaderSource, SideTableFragmentShaderSource, gSideTableProgramId))
+    if (!createShaderProgram(vertexShaderSource, SideTableFragShaderSource, gSideTableProgramId))
         return EXIT_FAILURE;
 
-    if (!createShaderProgram(SideTableDrawerVertexShaderSource, SideTableDrawerFragmentShaderSource, gSideTableDrawerProgramId))
+    if (!createShaderProgram(vertexShaderSource, SideTableDrawerFragShaderSource, gSideTableDrawerProgramId))
         return EXIT_FAILURE;
 
-    if (!createShaderProgram(HouseFloorVertexShaderSource, HouseFloorFragmentShaderSource, gHouseFloorProgramId))
+    if (!createShaderProgram(vertexShaderSource, HouseFloorFragShaderSource, gHouseFloorProgramId))
         return EXIT_FAILURE;
 
 
@@ -592,7 +558,9 @@ int main(int argc, char* argv[])
         gLastFrame = currentFrame;
 
         // input
-        keyboardNavigation(gWindow);
+        keyboardNavigationCallback(gWindow);
+        // **Press "p" to change projection from perspective to ortho**
+        // projectionKeyboardCallback(gWindow, p, );
 
         // Render this frame
         rendering();
@@ -650,12 +618,30 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
     }
     glfwMakeContextCurrent(*window);
     glfwSetFramebufferSizeCallback(*window, resizeWindow);
+
+
+
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(*window, mousePositionCallback);
     glfwSetScrollCallback(*window, mouseScrollCallback);
     glfwSetMouseButtonCallback(*window, mouseButtonCallback);
 
-    // tell GLFW to capture our mouse
-    glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // need to test if can specific sticky keys to letter p (or P) only
+    //glfwSetInputMode(*window, GLFW_STICKY_KEYS, GLFW_KEY_P);
+
+
+    glfwSetInputMode(*window, GLFW_STICKY_KEYS, GLFW_TRUE);
+    /* change projection when key is pressed:
+     * press "p" to change projection from perspective to ortho*/
+    //glfwSetKeyCallback(*window, projectionKeyboardCallback2);
+    //glfwSetInputMode(*windows, projectionKeyboardCallback);
+
+
+
+
+    // source: https://www.glfw.org/docs/3.3/input_guide.html#input_key
+    // "When sticky keys mode is enabled, the pollable state of a key will remain GLFW_PRESS until the state of that key is polled with glfwGetKey."
 
     // GLEW: initialize
     // ----------------
@@ -690,17 +676,17 @@ void toOrtho()
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
-*/
 
-/*
+
+
 void toPerspective()
 {
     glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
-*/
 
+*/
 void changeProjectionCallback()
 {
     // ADD: change to ortho
@@ -710,7 +696,7 @@ void changeProjectionCallback()
 
 // ********** KEYBOARD-BASED NAVIGATION **********
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-void keyboardNavigation(GLFWwindow* window)
+void keyboardNavigationCallback(GLFWwindow* window)
 {
     static const float cameraSpeed = 2.5f;
 
@@ -732,6 +718,48 @@ void keyboardNavigation(GLFWwindow* window)
         gCamera.ProcessKeyboard(UP, gDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         gCamera.ProcessKeyboard(DOWN, gDeltaTime);
+}
+
+
+// DEFAULT KEYBOARD CALLBACK FOR TESTING!!! NEED TO SWITCH TO NON-2 FOR THE PROJECTION FUNCTION
+// testing callbacks
+// int scan code is only needed to display the value sent to the computer (similar to the ASCII code)
+void projectionKeyboardCallback2(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+        cout << key << endl;
+    
+};
+
+
+//  input: keyboard controls (non-navigation)
+void projectionKeyboardCallback(GLFWwindow* window, int key, int action) {
+
+
+    // currently in IhitializeGL class, check if need to move to here later
+    //glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+    //glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_P)
+
+    // add projection here. call on ortho
+    // use callback or sticky keys (not get key)
+    // source: https://www.glfw.org/docs/3.3/input_guide.html#input_key
+        // "When sticky keys mode is enabled, the pollable state of a key will remain GLFW_PRESS until the state of that key is polled with glfwGetKey."
+    // Creates a ortho projection
+    
+    // test
+   // if (key == GLFW_KEY_P && action == GLFW_PRESS)
+       // toOrtho();
+
+    /*
+    if (key == GLFW_KEY_P)
+        switch (action)
+        {
+        case GLFW_PRESS:
+
+        case GLFW_RELEASE :
+        }
+    */
+
 }
 
 
@@ -1810,32 +1838,32 @@ void DrawCube()
     glm::mat4 model = glm::translate(gCubePosition) * glm::scale(gCubeScale);
 
     // camera/view transformation
-    glm::mat4 view = gCamera.GetViewMatrix();
+    //glm::mat4 view = gCamera.GetViewMatrix();
 
     // Creates a perspective projection
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+    //glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
     // Retrieves and passes transform matrices to the Shader program
     GLint modelLoc = glGetUniformLocation(gCubeProgramId, "model");
     GLint viewLoc = glGetUniformLocation(gCubeProgramId, "view");
     GLint projLoc = glGetUniformLocation(gCubeProgramId, "projection");
 
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    //glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    //glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
     // Reference matrix uniforms from the Cube Shader program for the cub color, light color, light position, and camera position
     GLint objectColorLoc = glGetUniformLocation(gCubeProgramId, "objectColor");
     GLint lightColorLoc = glGetUniformLocation(gCubeProgramId, "lightColor");
     GLint lightPositionLoc = glGetUniformLocation(gCubeProgramId, "lightPos");
-    GLint viewPositionLoc = glGetUniformLocation(gCubeProgramId, "viewPosition");
+    //GLint viewPositionLoc = glGetUniformLocation(gCubeProgramId, "viewPosition");
 
     // Pass color, light, and camera data to the Cube Shader program's corresponding uniforms
     glUniform3f(objectColorLoc, gObjectColor.r, gObjectColor.g, gObjectColor.b);
     glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
     glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
-    const glm::vec3 cameraPosition = gCamera.Position;
-    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+    //const glm::vec3 cameraPosition = gCamera.Position;
+    //glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     GLint UVScaleLoc = glGetUniformLocation(gCubeProgramId, "uvScale");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
@@ -1877,4 +1905,64 @@ void DrawLight() {
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 
 }
+*/
+
+
+
+/*
+void enableView(GLFWwindow* window);
+void switchMVProjection(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+void enableView(GLFWwindow* window)
+{    // Enable z-depth
+    glEnable(GL_DEPTH_TEST);
+
+    // Clear the frame and z buffers
+    // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Transforms the camera: move the camera
+    // stationary glm::mat4 view = glm::translate(glm::vec3(0.0f, 0.0f, -5.0f));
+    // camera/view transformation
+    glm::mat4 view = gCamera.GetViewMatrix();
+    GLint viewLoc = glGetUniformLocation(gProgramId, "view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+    // defaulted to perspective projection
+    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
+    GLint projLoc = glGetUniformLocation(gProgramId, "projection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+    // switched between Ortho and Perspective projection via key callback
+    // source: https://www.glfw.org/docs/latest/input_guide.html#input_keyboard
+
+     // switches between Ortho and Perspective projection via key callback
+   // glfwSetKeyCallback(window, switchMVProjection);
+
+    // code does responsed, but only when holding key P. Uncomment to test
+if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+{
+    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    projLoc = glGetUniformLocation(gProgramId, "projection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+// Set the shader to be used
+glUseProgram(gProgramId);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 */
