@@ -1160,12 +1160,12 @@ void createMeshSideTableDrawer(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // place at front of side table dresser cube
-        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // left bottom
+         0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right bottom
+         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right top
+         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right top
+        -0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left top
+        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f  // left bottom
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1205,12 +1205,12 @@ void createMeshHouseFloor(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // place at front of side table dresser cube
-        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // left back
+         1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right back
+         1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right front
+         1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right front
+        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left front
+        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f  // left back
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1243,17 +1243,18 @@ void createMeshHouseFloor(GLMesh& gMesh)
 }
 
 
+
 void createMeshHouseWall(GLMesh& gMesh)
 {
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // place at front of side table dresser cube
-        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // left bottom
+         1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right bottom
+         1.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right top
+         1.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right top
+        -1.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left top
+        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f  // left bottom
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1450,10 +1451,24 @@ void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
 
 void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
-    glm::mat4 scale = glm::scale(glm::vec3(10.0f, 0.2f, 20.0f));
-    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.5f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.1f, 10.0f));
+    /* HOUSE FLOOR
+    *
+    glm::mat4 scale = glm::scale(glm::vec3(20.0f, 0.2f, 20.0f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 10.0f));
     glm::vec2 gUVScale(10.0f, 7.00f);
+    
+    glm::mat4 scale = glm::scale(glm::vec3(20.0f, 0.2f, 20.0f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 10.0f));
+    glm::vec2 gUVScale(10.0f, 7.00f);
+    */
+    //new
+    glm::mat4 scale = glm::scale(glm::vec3(20.0f, 15.0f, 0.0f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.5f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
+    glm::vec2 gUVScale(10.0f, 7.00f);
+
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
@@ -1695,32 +1710,32 @@ void drawSideTableDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProg
 }
 
 
-void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
 
 }
 
-void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
 
 }
 
-void drawWreath(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void drawWreath(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
 
 }
 
-void drawSideDresser(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void drawSideDresser(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
 
 }
 
-void drawDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void drawDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
 
 }
 
-void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
 
 }
@@ -1763,8 +1778,6 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texWoodSolidDark);
     glActiveTexture(textureNum); // 15
     glBindTexture(GL_TEXTURE_2D, textureName);
 
