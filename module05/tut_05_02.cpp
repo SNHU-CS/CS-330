@@ -234,19 +234,19 @@ void createMeshCouch(GLMesh& gMesh);
 void createMesh(GLMesh& gMesh);
 
 // draw
-void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void drawWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void drawSideTableDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void drawWreath(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void drawSideDresser(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void drawDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void drawWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void drawSideTableDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void drawWreath(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void drawSideDresser(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void drawDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
 
-void DrawLight(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
-void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID);
+void DrawLight(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
+void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh);
 
 // ****** VERTEX SHADER SOURCE CODE
 // Vertex Shader Source Code
@@ -810,12 +810,12 @@ void rendering()
     glm::mat4 view = gCamera.GetViewMatrix();
 
 
-    DrawCube(view, projection, gCubeProgramId);
+    DrawCube(view, projection, gCubeProgramId, gMesh);
     // DrawLight();
-    drawHouseFloor(view, projection, gHouseFloorProgramId);
+    drawHouseFloor(view, projection, gHouseFloorProgramId, gMeshHouseFloor);
 
-    drawSideTables(view, projection, gSideTableProgramId);
-    drawSideTableDrawer(view, projection, gSideTableDrawerProgramId);
+    drawSideTables(view, projection, gSideTableProgramId, gMeshSideTable);
+    drawSideTableDrawer(view, projection, gSideTableDrawerProgramId, gMeshSideTableDrawer);
     /*
     drawWall(view, projection, shaderProgramID);
     drawCoffeeTable(view, projection, shaderProgramID);
@@ -1476,7 +1476,7 @@ void destroyMesh(GLMesh& gMesh)
 // BOTH FOR DRAW OBJECTS AND CALLING MESHES
 
 // ********** DRAW OBJECTS **********
-void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh)
 {
     glm::mat4 scale;
     glm::mat4 rotation;
@@ -1512,10 +1512,10 @@ void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     glBindTexture(GL_TEXTURE_2D, texWoodHerring);
 
     // Activate the VBOs contained within the mesh's VA
-    glBindVertexArray(gMeshHouseFloor.vao);
+    glBindVertexArray(gMesh.vao);
 
     // Draws the triangles
-    glDrawArrays(GL_TRIANGLES, 0, gMeshHouseFloor.nVertices);
+    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 }
 
 void drawWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
@@ -1530,7 +1530,7 @@ void drawWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
  *            IF needed, add loop for rotation changes
  */
  //  IMPORTANT: remember to keep in position with drawers (drawSideTableDrawer)
-void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh)
 {
 
     // declare objects
@@ -1584,7 +1584,7 @@ void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // Activate the VBOs contained within the mesh's VAO
-    glBindVertexArray(gMeshSideTable.vao);
+    glBindVertexArray(gMesh.vao);
 
     // bind textures on corresponding texture units
     //glActiveTexture(GL_TEXTURE0);
@@ -1593,11 +1593,11 @@ void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     glBindTexture(GL_TEXTURE_2D, texRusticWood);
 
     // Activate the VBOs contained within the mesh's VA
-    glBindVertexArray(gMeshSideTable.vao);
+    glBindVertexArray(gMesh.vao);
     // draws primary dresser cube
     // Draws the triangles
 
-    glDrawArrays(GL_TRIANGLES, 0, gMeshSideTable.nVertices);
+    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
     // IMPORTANT: uncomment when loop is integrated. closes for loop
     //}
 
@@ -1645,7 +1645,7 @@ void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
         glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleLegs));
 
         // Activate the VBOs contained within the mesh's VAO
-        glBindVertexArray(gMeshSideTable.vao);
+        glBindVertexArray(gMesh.vao);
 
         // TODO: change if need to change binding location to implement different UV scales
         // bind textures on corresponding texture units
@@ -1653,7 +1653,7 @@ void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
         glBindTexture(GL_TEXTURE_2D, texRusticWood);
 
         // Draws the triangles
-        glDrawArrays(GL_TRIANGLES, 0, gMeshSideTable.nVertices);
+        glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
     }
 }
 
@@ -1665,7 +1665,7 @@ void drawSideTables(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
  *            IF needed, add loop for rotation changes
  */
  //IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTables)
-void drawSideTableDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void drawSideTableDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh)
 {
     // declare objects
     glm::mat4 scale;
@@ -1731,11 +1731,11 @@ void drawSideTableDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProg
     glBindTexture(GL_TEXTURE_2D, texSideTableDrawer);
 
     // Activate the VBOs contained within the mesh's VA
-    glBindVertexArray(gMeshSideTableDrawer.vao);
+    glBindVertexArray(gMesh.vao);
     // draws primary dresser cube
     // 
     // Draws the triangles
-    glDrawArrays(GL_TRIANGLES, 0, gMeshSideTableDrawer.nVertices);
+    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
     // IMPORTANT: uncomment when loop is integrated. close for loop
     //}
 }
@@ -1771,7 +1771,7 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
 
 }
 
-void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID)
+void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh)
 {
     glBindVertexArray(gMesh.vao);
     // CUBE: draw cube
