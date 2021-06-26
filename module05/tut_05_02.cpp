@@ -76,7 +76,7 @@ namespace
     GLuint texRusticWood; // 1
     GLuint texSideTableDrawer; // 2, image
     GLuint texWoodHerring; // 3
-    GLuint texWallpaperGrey; // 4
+    GLuint texWallpaper; // 4
     GLuint texDoorClassic; // 5, image
     GLuint texDoorRustic; // 6, image
     GLuint texSunsetPic; // 7, image
@@ -97,7 +97,7 @@ namespace
         texRusticWood, // 1
         texSideTableDrawer, // 2, image
         texWoodHerring, // 3
-        texWallpaperGrey, // 4
+        texWallpaper, // 4
         texDoorClassic, // 5, image
         texDoorRustic, // 6, image
         texSunsetPic, // 7, image
@@ -528,11 +528,11 @@ int main(int argc, char* argv[])
     glUniform1i(glGetUniformLocation(gHouseFloorProgramId, "texHouseFloor"), 3);
 
     // TEXTURE: wallpaper/grey, house wall
-    texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
-    if (!createTexture(texFilename, texWallpaperGrey, GL_REPEAT, GL_LINEAR))
+    texFilename = "../../resources/textures/wallpaper-pattern.png";
+    if (!createTexture(texFilename, texWallpaper, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
+ 
     }
     glUseProgram(gHouseWallProgramId);
     glUniform1i(glGetUniformLocation(gHouseWallProgramId, "texHouseWall"), 4);
@@ -576,7 +576,7 @@ int main(int argc, char* argv[])
     destroyTexture(texRusticWood);
     destroyTexture(texSideTableDrawer);
     destroyTexture(texWoodHerring);
-    destroyTexture(texWallpaperGrey);
+    destroyTexture(texWallpaper);
 
     // release fragment shader programs
     destroyShaderProgram(gCubeProgramId);
@@ -852,7 +852,7 @@ void rendering()
     drawHouseFloor(view, projection, gHouseFloorProgramId, gMeshHouseFloor, GL_TEXTURE3, texWoodHerring);
     drawSideTables(view, projection, gSideTableProgramId, gMeshSideTable, GL_TEXTURE1, texRusticWood);
     drawSideTableDrawer(view, projection, gSideTableDrawerProgramId, gMeshSideTableDrawer, GL_TEXTURE2, texSideTableDrawer);
-    drawHouseWall(view, projection, gHouseWallProgramId, gMeshHouseWall, GL_TEXTURE4, texWallpaperGrey);
+    drawHouseWall(view, projection, gHouseWallProgramId, gMeshHouseWall, GL_TEXTURE4, texWallpaper);
 
     // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
