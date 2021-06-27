@@ -90,7 +90,12 @@ namespace
     GLuint texWoodOakFine; // 12+1
     GLuint texWalnutMed; // 13+1
 
-
+    // assign texture slots (TEXTURE#)
+    GLenum texNumSideTable;
+    GLenum texNumSideDrawer;
+    GLenum texNumHouseFloor;
+    GLenum texNumHouseWall;
+    GLenum texNumHouseDoor;
 
     // UV scale of textures
     // check if can define values within shader, draw or mesh later
@@ -241,25 +246,25 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
 const GLchar* vertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
-layout(location = 1) in vec3 normal; // VAP position 1 for normals
-layout(location = 2) in vec2 textureCoordinate;
+    layout(location = 1) in vec3 normal; // VAP position 1 for normals
+    layout(location = 2) in vec2 textureCoordinate;
 
-out vec3 vertexNormal; // For outgoing normals to fragment shader
-out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
-out vec2 vertexTextureCoordinate;
+    out vec3 vertexNormal; // For outgoing normals to fragment shader
+    out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
+    out vec2 vertexTextureCoordinate;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
 
 
-void main()
-{
-    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
-    vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
-    vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
-    vertexTextureCoordinate = textureCoordinate;
-}
+    void main()
+    {
+        gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
+        vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
+        vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
+        vertexTextureCoordinate = textureCoordinate;
+    }
 );
 
 
@@ -322,7 +327,6 @@ void main()
 // Fragment Shader: side table
 const GLchar* sideTableFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
-//in vec2 vertexTextureCoordinate2;
 
     out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
     //out vec4 fragmentColor2;
@@ -374,13 +378,13 @@ const GLchar* houseFloorFragShader = GLSL(440,
     uniform sampler2D texHouseFloor;
     uniform vec2 uvScaleHouseFloor;
 
-void main()
-{
-    vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * uvScaleHouseFloor);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * uvScaleHouseFloor);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
 
 
@@ -474,27 +478,32 @@ int main(int argc, char* argv[])
     createMeshCouchArmRests(gMeshCouchArmRests);
     */
 
-
+    // ISSUE: started once added door in program.
+    // when all exceptions are disabled in creating these shaders, problem works
     // create the fragment shader programs
     if (!createShaderProgram(vertexShaderSource, cubeFragShader, gCubeProgramId))
-        return EXIT_FAILURE;
+        cout << "whatsupppppCube" << endl;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, sideTableFragShader, gSideTableProgramId))
-        return EXIT_FAILURE;
+        cout << "Shader crash/return false: side table" << endl;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, sideDrawerFragShader, gSideDrawerProgramId))
-        return EXIT_FAILURE;
+        cout << "Shader crash/return false: side table drawers" << endl;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, houseFloorFragShader, gHouseFloorProgramId))
-        return EXIT_FAILURE;
+        cout << "Shader crash/return false: floor" << endl;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, houseWallFragShader, gHouseWallProgramId))
-        cout << "whatsuppppp" << endl;
-        return EXIT_FAILURE;
+        cout << "Shader crash/return false: wall" << endl;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, houseDoorFragShader, gHouseDoorProgramId))
-        // cout << "whatsuppppp" << endl;
-        return EXIT_FAILURE;
+        cout << "Shader crash/return false: door" << endl;
+        //return EXIT_FAILURE;
 
     //if (!createShaderProgram(vertexShaderSource, paintingFragShader, gPaintingProgramId))
     //    return EXIT_FAILURE;
@@ -530,6 +539,14 @@ int main(int argc, char* argv[])
 
     */
 
+    /*
+    GLenum texNumSideTable = GL_TEXTURE1;
+    GLenum texNumSideDrawer = GL_TEXTURE2;
+    GLenum texNumHouseFloor = GL_TEXTURE3;
+    GLenum texNumHouseWall = GL_TEXTURE4;
+    GLenum texNumHouseDoor = GL_TEXTURE5;
+    */
+
 
 // TODO: MINIMIZE INTO FUNCTION(S) LATER
 // TEXTURE: wood, dark brown/red solid
@@ -542,6 +559,7 @@ int main(int argc, char* argv[])
     glUseProgram(gCubeProgramId);
     glUniform1i(glGetUniformLocation(gCubeProgramId, "uTexture"), 0);
 
+
     // TEXTURE: wood, straigtened rustic scratched
     texFilename = "../../resources/textures/wood-scratched.jpg";
     if (!createTexture(texFilename, texSideTable, GL_REPEAT, GL_LINEAR))
@@ -549,9 +567,11 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    // texture use: side tables
+    // side tables
     glUseProgram(gSideTableProgramId);
     glUniform1i(glGetUniformLocation(gSideTableProgramId, "texSideTable"), 1);
+    texNumSideTable = GL_TEXTURE1;
+
 
     // TEXTURE (IMAGE): dresser drawer, side tables
     texFilename = "../../resources/images/dresserdrawer.png";
@@ -560,9 +580,10 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    // texture use: side tables drawers
+    // side tables drawers
     glUseProgram(gSideDrawerProgramId);
     glUniform1i(glGetUniformLocation(gSideDrawerProgramId, "texSideDrawer"), 2);
+    texNumSideDrawer = GL_TEXTURE2;
 
 
 
@@ -573,20 +594,37 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    // texture use: floor
+    // floor
     glUseProgram(gHouseFloorProgramId);
     glUniform1i(glGetUniformLocation(gHouseFloorProgramId, "texHouseFloor"), 3);
+    texNumHouseFloor = GL_TEXTURE3;
 
-    // TEXTURE: wallpaper/grey, house wall
+
+    // TEXTURE: blue geo pattern
     texFilename = "../../resources/textures/pattern-geo.png";
     if (!createTexture(texFilename, texWallpaper, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
+    //  door
     glUseProgram(gHouseWallProgramId);
     glUniform1i(glGetUniformLocation(gHouseWallProgramId, "texHouseWall"), 4);
+    texNumHouseWall = GL_TEXTURE4;
 
+    
+    // TEXTURE: door, old
+    texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
+    if (!createTexture(texFilename, texHouseDoor, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+    //  door
+    glUseProgram(gHouseDoorProgramId);
+    glUniform1i(glGetUniformLocation(gHouseDoorProgramId, "texHouseDoor"), 5);
+    GLenum texNumHouseDoor = GL_TEXTURE5;
+    
 
 
     // render loop. 
@@ -935,13 +973,15 @@ void rendering()
     glm::mat4 view = gCamera.GetViewMatrix();
 
 
+    // TODO: assign variable to hold texture number
     DrawCube(view, projection, gCubeProgramId, gMesh, GL_TEXTURE0, texWoodSolidDark);
     // DrawLight();
-    drawHouseFloor(view, projection, gHouseFloorProgramId, gMeshHouseFloor, GL_TEXTURE3, texHouseFloor);
-    drawSideTable(view, projection, gSideTableProgramId, gMeshSideTable, GL_TEXTURE1, texSideTable);
-    drawSideDrawer(view, projection, gSideDrawerProgramId, gMeshSideDrawer, GL_TEXTURE2, texSideDrawer);
-    drawHouseWall(view, projection, gHouseWallProgramId, gMeshHouseWall, GL_TEXTURE4, texWallpaper);
-    drawHouseDoor(view, projection, gHouseDoorProgramId, gMeshHouseDoor, GL_TEXTURE5, texHouseDoor);
+
+    drawSideTable(view, projection, gSideTableProgramId, gMeshSideTable, texNumSideTable, texSideTable);
+    drawSideDrawer(view, projection, gSideDrawerProgramId, gMeshSideDrawer, texNumSideDrawer, texSideDrawer);
+    drawHouseFloor(view, projection, gHouseFloorProgramId, gMeshHouseFloor, texNumHouseFloor, texHouseFloor);
+    drawHouseWall(view, projection, gHouseWallProgramId, gMeshHouseWall, texNumHouseWall, texWallpaper);
+    drawHouseDoor(view, projection, gHouseDoorProgramId, gMeshHouseDoor, texNumHouseDoor, texHouseDoor);
 
     // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
