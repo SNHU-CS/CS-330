@@ -528,7 +528,7 @@ int main(int argc, char* argv[])
     glUniform1i(glGetUniformLocation(gHouseFloorProgramId, "texHouseFloor"), 3);
 
     // TEXTURE: wallpaper/grey, house wall
-    texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
+    texFilename = "../../resources/textures/pattern-geo.png";
     if (!createTexture(texFilename, texWallpaperGrey, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
@@ -1719,36 +1719,6 @@ void drawSideTableDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProg
     //}
 }
 
-
-void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
-{
-
-}
-
-void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
-{
-
-}
-
-void drawWreath(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
-{
-
-}
-
-void drawSideDresser(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
-{
-
-}
-
-void drawDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
-{
-
-}
-
-void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
-{
-
-}
 
 void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
