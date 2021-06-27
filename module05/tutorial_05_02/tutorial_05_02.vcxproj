@@ -128,9 +128,6 @@
   <ItemGroup>
     <ClCompile Include="..\tut_05_02.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
