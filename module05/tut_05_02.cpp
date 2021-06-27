@@ -80,6 +80,7 @@ namespace
     GLuint texHouseFloor; // 2+1
     GLuint texWallpaper; // 3+1
     GLuint texHouseDoor; // 4+1, image
+    GLuint texHouseDoor2;
     GLuint texPainting; // 5+1, image
     GLuint texRug; // 6+1, image
     GLuint texWreath; // 7+1
@@ -145,11 +146,6 @@ namespace
     GLMesh gMeshCouchArmRests;
 
 
-    // CUBE
-    // Subject position and scale
-    glm::vec3 gCubePosition(0.0f, 0.0f, 0.0f);
-    glm::vec3 gCubeScale(2.0f);
-
     // Cube and light color
     //m::vec3 gObjectColor(0.6f, 0.5f, 0.75f);
     glm::vec3 gObjectColor(1.f, 0.2f, 0.0f);
@@ -159,7 +155,6 @@ namespace
     // Light position and scale
     glm::vec3 gLightPosition(1.5f, 0.5f, 3.0f);
     glm::vec3 gLightScale(0.3f);
-
 }
 
 // *********** USER-DEFINED FUNCTIONS **********
@@ -249,14 +244,13 @@ const GLchar* vertexShaderSource = GLSL(440,
     layout(location = 1) in vec3 normal; // VAP position 1 for normals
     layout(location = 2) in vec2 textureCoordinate;
 
-    out vec3 vertexNormal; // For outgoing normals to fragment shader
     out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
+    out vec3 vertexNormal; // For outgoing normals to fragment shader
     out vec2 vertexTextureCoordinate;
 
     uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
-
 
     void main()
     {
@@ -334,6 +328,8 @@ const GLchar* sideTableFragShader = GLSL(440,
     uniform sampler2D texSideTable;
     uniform vec2 uvScaleSideDresser;
     uniform vec2 uvScaleDresserLegs;
+    uniform vec3 lightColor;
+uniform vec3 lightPos;
 
 void main()
 {
@@ -478,8 +474,12 @@ int main(int argc, char* argv[])
     createMeshCouchArmRests(gMeshCouchArmRests);
     */
 
-    // ISSUE: started once added door in program.
-    // when all exceptions are disabled in creating these shaders, problem works
+    /* ISSUE: started once added door in program.
+    * when all exceptions are disabled within shaders, program works
+    * when expections are enable, throws ANY/ALL expections. in either form, statement is not shown
+    * started when added programming for texture5 for the door
+    * TRIED: viewing fragshader, draw in rendering, and draw function. did not find conflicts
+    */
     // create the fragment shader programs
     if (!createShaderProgram(vertexShaderSource, cubeFragShader, gCubeProgramId))
         cout << "whatsupppppCube" << endl;
@@ -539,13 +539,6 @@ int main(int argc, char* argv[])
 
     */
 
-    /*
-    GLenum texNumSideTable = GL_TEXTURE1;
-    GLenum texNumSideDrawer = GL_TEXTURE2;
-    GLenum texNumHouseFloor = GL_TEXTURE3;
-    GLenum texNumHouseWall = GL_TEXTURE4;
-    GLenum texNumHouseDoor = GL_TEXTURE5;
-    */
 
 
 // TODO: MINIMIZE INTO FUNCTION(S) LATER
@@ -614,8 +607,8 @@ int main(int argc, char* argv[])
 
     
     // TEXTURE: door, old
-    texFilename = "../../resources/textures/wood-floor-herringdark.jpg";
-    if (!createTexture(texFilename, texHouseDoor, GL_REPEAT, GL_LINEAR))
+    texFilename = "../../resources/images/door-dark-wood.png";
+    if (!createTexture(texFilename, texHouseDoor, GL_CLAMP_TO_EDGE, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
@@ -623,9 +616,8 @@ int main(int argc, char* argv[])
     //  door
     glUseProgram(gHouseDoorProgramId);
     glUniform1i(glGetUniformLocation(gHouseDoorProgramId, "texHouseDoor"), 5);
-    GLenum texNumHouseDoor = GL_TEXTURE5;
+    texNumHouseDoor = GL_TEXTURE5;
     
-
 
     // render loop. 
     // (exit key is esc, defined at "exit" (at end of main class)
@@ -1337,8 +1329,6 @@ void createMeshSideDrawer(GLMesh& gMesh)
 }
 
 
-
-// mesh
 void createMeshHouseFloor(GLMesh& gMesh)
 {
     GLfloat verts[] = {
@@ -1380,7 +1370,6 @@ void createMeshHouseFloor(GLMesh& gMesh)
     glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
     glEnableVertexAttribArray(2);
 }
-
 
 
 void createMeshHouseWall(GLMesh& gMesh)
@@ -1431,47 +1420,12 @@ void createMeshHouseDoor(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-        // back
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-        // left side
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        // right side
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         // bottom
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        // top
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
+        -0.55f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         0.55f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+         0.55f, 1.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.55f, 1.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -0.55f, 1.0f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -0.55f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1511,84 +1465,6 @@ void destroyMesh(GLMesh& gMesh)
 }
 
 
-/*  DRAW ELEMENT TEMPLATE
-    // Using indexed drawing- store only the unique vertices and then specify the order at which we want to draw these vertices in.
-    // Position and Color data of pyramid
-    GLfloat verts[] = {
-        // Vertex Positions    // Normal            //texture coordinates
-        // peek of pyramid
-         0.0f,  0.5f,  0.0f,   0.0f,  1.0f,  0.0f,  0.5f, 0.5f, // V0 Top: center vertex
-        // sides of pyramid
-         0.5f, -0.5f,  0.5f,  -1.0f, -1.0f,  1.0f,  1.0f, 0.0f, // V1: Side: Front Bottom-Right
-        -0.5f, -0.5f,  0.5f,  -1.0f, -1.0f,  1.0f,  0.0f, 0.0f, // V2 Side: Front Bottom-Left
-         0.5f, -0.5f, -0.5f,  -1.0f, -1.0f, -1.0f,  0.0f, 0.0f, // V3 Side: Back bottom-right
-        -0.5f, -0.5f, -0.5f,  -1.0f, -1.0f, -1.0f,  1.0f, 0.0f, // V4 Side: Back bottom-left
-
-        // Base of pyramid. (Texture coordinates are different than sides)
-         0.5f, -0.5f,  0.5f,  -1.0f, -1.0f,  1.0f,  1.0f, 1.0f, // V5 Base: Front-Right
-        -0.5f, -0.5f,  0.5f,  -1.0f, -1.0f,  1.0f,  0.0f, 1.0f, // V6 Base: Front-Left
-         0.5f, -0.5f, -0.5f,  -1.0f, -1.0f, -1.0f,  1.0f, 0.0f, // V7 Base: Back-right
-        -0.5f, -0.5f, -0.5f,  -1.0f, -1.0f, -1.0f,  0.0f, 0.0f  // V8 Base: Back-left
-    };
-
-    // Index data to share position data of pyramid
-    GLushort indices[] = {
-        0, 1, 2,  // Triangle 1 - front
-        0, 1, 3,  // Triangle 2 - right
-        0, 3, 4,  // Triangle 3 - back
-        0, 2, 4,  // Triangle 4 - left
-        7, 8, 5,  // Triangle 5 - bottom/front
-        5, 8, 6   // Triangle 6 - bottom/back
-    };
-
-    //multi-light how-to
-    glm::vec3 pointLightPositions[] = {
-        glm::vec3(0.7f,  0.2f,  2.0f),
-        glm::vec3(2.3f, -3.3f, -4.0f),
-        //glm::vec3(-4.0f,  2.0f, -12.0f),
-        //glm::vec3(0.0f,  0.0f, -3.0f)
-    };
-
-
-    const GLuint floatsPerVertex = 3;
-    const GLuint floatsPerNormal = 3;
-    const GLuint floatsPerUV = 2;
-
-    glGenVertexArrays(1, &mesh.vao); // we can also generate multiple VAOs or buffers at the same time
-    glBindVertexArray(mesh.vao);
-
-    // buffer for vertex data
-    glGenBuffers(2, mesh.vbos);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbos[0]); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
-
-    // buffer for indices data
-    mesh.nIndices = sizeof(indices) / sizeof(indices[0]);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.vbos[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // calculate strides between vertex coordinates
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
-
-    // Create Vertex Attribute Pointers
-    // position pointer
-    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
-    glEnableVertexAttribArray(0);
-    // normal pointer
-    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
-    glEnableVertexAttribArray(1);
-    // texture pointer
-    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
-    glEnableVertexAttribArray(2);
-
-    //NEED TO ADD IN UV SCALE
-
-*/
-
-
-// CONSIDER CLEANING UP MESH CLASSES 
-// BOTH FOR DRAW OBJECTS AND CALLING MESHES
-
 // ********** DRAW OBJECTS **********
 
 void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
@@ -1599,7 +1475,7 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
    // create model view: scale, rotate, translate
     glm::mat4 scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(-4.0f, 0.8f, 1.5f));
+    glm::mat4 translation = glm::translate(glm::vec3(-5.0f, 0.8f, 1.5f));
     glm::vec2 gUVScale(0.25f, 0.25f);
 
 
@@ -1609,22 +1485,6 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     // Set the shader to be used
     glUseProgram(shaderProgramID);
 
-    /* sets up loop for multiple tables. not needed yet
-    // each table has a unique position
-    glm::vec3 tablePosition[] = {
-    glm::vec3(-3.5f, 0.1f, 1.0f), // 1st dresser
-    // position currently unknown for 2nd dresser
-    glm::vec3(-3.5f, 0.1f, 1.0f), // 2nd dresser
-    };
-
-    //counts the number of objects
-    int tableCount = sizeof(tablePosition) / sizeof(tablePosition[0]);
-
-    // draws each dresser cuboid
-    // note: rotation is assumed to be the same. if differs, needs to add/integrate array for rotations for both cuboid and legs
-    // for (unsigned int i = 0; i < tableCount; i++)
-    {
-    */
     // Retrieves and passes transform matrices to the Shader program
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
@@ -1641,43 +1501,29 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glBindVertexArray(gMesh.vao);
 
     // bind textures on corresponding texture units
-    //glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, gTextureId);
     glActiveTexture(textureNum); // 15
     glBindTexture(GL_TEXTURE_2D, textureName);
 
-    // Activate the VBOs contained within the mesh's VA
     glBindVertexArray(gMesh.vao);
-    // draws primary dresser cube
-    // Draws the triangles
 
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-    // IMPORTANT: uncomment when loop is integrated. closes for loop
-    //}
+
 
     // ********** side table legs ************************
-    // small legs: 4 per table, currently 2 tables
-
-    // ROTATION NOTE: legs uses same rotation as dresser cuboid.
-    //                add rotation loop if rotation varies between tables
+    // small legs: 4 per table
+    // legs uses same rotation as dresser cuboid.
     // scale for legs (uniform size for all 4 legs)
     scale = glm::scale(glm::vec3(0.15f, 0.3f, 0.2f));
+    // glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     glm::vec2 gUVScaleLegs(0.25f, 0.25f);
 
-    // each leg has a unique position
+    // transition / each leg has a unique position
     glm::vec3 legPosition[] = {
         // 1st dresser
-        glm::vec3(-3.5f, 0.1f, 1.0f), // right front leg
-        glm::vec3(-4.5f, 0.1f, 1.0f), // left front leg
-        glm::vec3(-3.5f, 0.1f, 2.0f), // right back leg
-        glm::vec3(-4.5f, 0.1f, 2.0f) // left back leg
-        /* needed for 2nd dresser. position currently unknown
-        // 2nd dresser
-        glm::vec3(-3.5f, 0.1f, 1.0f), // right front leg
-        glm::vec3(-4.5f, 0.1f, 1.0f), // left front leg
-        glm::vec3(-3.5f, 0.1f, 2.0f), // right back leg
-        glm::vec3(-4.5f, 0.1f, 2.0f) // left back leg
-        */
+        glm::vec3(-4.5f, 0.1f, 1.0f), // right front leg
+        glm::vec3(-5.5f, 0.1f, 1.0f), // left front leg
+        glm::vec3(-4.5f, 0.1f, 2.0f), // right back leg
+        glm::vec3(-5.5f, 0.1f, 2.0f) // left back leg
     };
 
     // counts the number of objects
@@ -1711,28 +1557,13 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     }
 }
 
-/* TO DRAW BOTH SIDE TABLES, ONLY NEED TO ADD ADDITIONAL POSITIONS
- * for multiple tables, dresser cuboid will need the loop uncomment and positions added
- * fore more legs, legs wil need extra positiongs added to the array used in the leg loop
- * ROTATION: legs uses same rotation as dresser cuboid.
- *            IF needed, add loop for rotation changes
- */
+
  //IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTable)
 void drawSideDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
-
-    // ********** dresser main cuboid ************************
-   // dresser drawers - 1 per table, currently 2 tables. possible 2 if scaling is off
-   // create model view: scale, rotate, translate
-
-    // TODO: ADJUST SCALE and possible translation. preset to sidetable #1
-    //scale = glm::scale(glm::vec3(1.8f, 1.8f, 1.8f));
-    //rotation = glm::rotate(0.0f, glm::vec3(3.0f, 0.1f, 0.0f));
-    //translation = glm::translate(glm::vec3(4.0f, 0.8f, 1.5f));
-
     glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.3f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(-4.0f, 0.8f, 1.51f));
+    glm::mat4 translation = glm::translate(glm::vec3(-5.0f, 0.8f, 1.51f));
     glm::vec2 gUVScale(1.0f, 1.00f);
 
     // Model matrix: transformations are applied right-to-left order
@@ -1741,22 +1572,6 @@ void drawSideDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     // Set the shader to be used
     glUseProgram(shaderProgramID);
 
-    /* sets up loop for multiple tables. each to check coordination with legs (below) and drawer function
-     // each drawer has a unique position
-    glm::vec3 drawerPosition[] = {
-    glm::vec3(-3.5f, 0.1f, 1.0f), // 1st dresser
-    // position currently unknown for 2nd dresser
-    glm::vec3(-3.5f, 0.1f, 1.0f), // 2nd dresser
-    };
-
-    // counts the number of objects
-    int drawerCount = sizeof(drawerPosition) / sizeof(drawerPosition[0]);
-
-    // draws dresser draw for each table
-    // note: rotation is assumed to be the same. if differs, needs to add/integrate array for rotations for both cuboid and legs
-    // for (unsigned int i = 0; i < drawerCount; i++)
-    {
-    */
     // Retrieves and passes transform matrices to the Shader program
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
@@ -1775,12 +1590,9 @@ void drawSideDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
 
     // Activate the VBOs contained within the mesh's VA
     glBindVertexArray(gMesh.vao);
-    // draws primary dresser cube
-    // 
+
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-    // IMPORTANT: uncomment when loop is integrated. close for loop
-    //}
 }
 
 
@@ -1825,7 +1637,7 @@ void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
 void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     glm::mat4 scale = glm::scale(glm::vec3(20.0f, 15.0f, -0.1f));
-    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.5f, 0.1f, 0.0f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0, 0.1f, 0.0f));
     glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
     glm::vec2 gUVScale(30.0f, 20.0f);
 
@@ -1841,12 +1653,20 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
 
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+
+
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleHouseWall");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+    // ADDED LIGHTING
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
 
     // bind textures on corresponding texture units
     glActiveTexture(textureNum); // 15
@@ -1862,10 +1682,10 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 
 void drawHouseDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
-    glm::mat4 scale = glm::scale(glm::vec3(5.0f, 5.0f, 2.1f));
-    glm::mat4 rotation = glm::rotate(10.0f, glm::vec3(0.8f, 0.5f, 1.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(2.0f, 2.0f, 3.0f));
-    glm::vec2 gUVScale(10.0f, 10.0f);
+    glm::mat4 scale = glm::scale(glm::vec3(2.25f, 5.0f, 0.0f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(5.0f, -0.1f, 0.1f));
+    glm::vec2 gUVScale(1.0f, 1.0f);
 
 
     // Model matrix: transformations are applied right-to-left order
@@ -1898,18 +1718,18 @@ void drawHouseDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 }
 
 
-
-
 void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     glBindVertexArray(gMesh.vao);
-    // CUBE: draw cube
-    //----------------
-    // Set the shader to be used
+
     glUseProgram(shaderProgramID);
+    glm::mat4 scale = glm::scale(glm::vec3(3.0f, 2.0f, -3.0f));
+    glm::mat4 rotation = glm::rotate(15.0f, glm::vec3(0.0, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f)); 
 
     // Model matrix: transformations are applied right-to-left order
-    glm::mat4 model = glm::translate(gCubePosition) * glm::scale(gCubeScale);
+    glm::mat4 model = translation * rotation * scale;
+    // TRANSLATION^^^ AND SCALE^^^ nothing new
     glm::vec2 gUVScale(0.5f, 10.0f);
 
     // Retrieves and passes transform matrices to the Shader program
@@ -1945,37 +1765,6 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 
 }
-
-/*
-void DrawLight() {
-    // Model matrix: transformations are applied right-to-left order
-    glm::mat4 model = glm::translate(gCubePosition) * glm::scale(gCubeScale);
-
-    // camera/view transformation
-    glm::mat4 view = gCamera.GetViewMatrix();
-    // SideDresser: draw SideDresser
-//----------------
-    glUseProgram(shaderProgramID);
-
-    //Transform the smaller cube used as a visual que for the light source
-    model = glm::translate(gLightPosition) * glm::scale(gLightScale);
-
-    // Reference matrix uniforms from the SideDresser Shader program
-    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
-    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
-    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-
-    // Pass matrix data to the SideDresser Shader program's matrix uniforms
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-
-}
-*/
-
 
 
 /*
@@ -2020,8 +1809,5 @@ if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 // Set the shader to be used
 glUseProgram(gProgramId);
 };
-
-
-
 
 */
