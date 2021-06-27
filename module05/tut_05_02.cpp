@@ -241,25 +241,25 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
 const GLchar* vertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
-    layout(location = 1) in vec3 normal; // VAP position 1 for normals
-    layout(location = 2) in vec2 textureCoordinate;
+layout(location = 1) in vec3 normal; // VAP position 1 for normals
+layout(location = 2) in vec2 textureCoordinate;
 
-    out vec3 vertexNormal; // For outgoing normals to fragment shader
-    out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
-    out vec2 vertexTextureCoordinate;
+out vec3 vertexNormal; // For outgoing normals to fragment shader
+out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
+out vec2 vertexTextureCoordinate;
 
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 
-    void main()
-    {
-        gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
-        vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
-        vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
-        vertexTextureCoordinate = textureCoordinate;
-    }
+void main()
+{
+    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
+    vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
+    vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
+    vertexTextureCoordinate = textureCoordinate;
+}
 );
 
 
@@ -271,18 +271,18 @@ const GLchar* vertexShaderSource = GLSL(440,
 const GLchar* cubeFragShader = GLSL(440,
 
     in vec3 vertexNormal; // For incoming normals
-    in vec3 vertexFragmentPos; // For incoming fragment position
-    in vec2 vertexTextureCoordinate;
+in vec3 vertexFragmentPos; // For incoming fragment position
+in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing cube color to the GPU
+out vec4 fragmentColor; // For outgoing cube color to the GPU
 
-    // Uniform / Global variables for object color, light color, light position, and camera/view position
-    uniform vec3 objectColor;
-    uniform vec3 lightColor;
-    uniform vec3 lightPos;
-    uniform vec3 viewPosition;
-    uniform sampler2D uTexture; // Useful when working with multiple textures
-    uniform vec2 uvScale;
+// Uniform / Global variables for object color, light color, light position, and camera/view position
+uniform vec3 objectColor;
+uniform vec3 lightColor;
+uniform vec3 lightPos;
+uniform vec3 viewPosition;
+uniform sampler2D uTexture; // Useful when working with multiple textures
+uniform vec2 uvScale;
 
 
 void main()
@@ -322,37 +322,37 @@ void main()
 // Fragment Shader: side table
 const GLchar* sideTableFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
-    //in vec2 vertexTextureCoordinate2;
+//in vec2 vertexTextureCoordinate2;
 
-    out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
-    //out vec4 fragmentColor2;
+out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
+//out vec4 fragmentColor2;
 
-    uniform sampler2D texSideTable;
-    uniform vec2 uvScaleSideDresser;
-    uniform vec2 uvScaleDresserLegs;
+uniform sampler2D texSideTable;
+uniform vec2 uvScaleSideDresser;
+uniform vec2 uvScaleDresserLegs;
 
-    void main()
-    {   
-        // https://open.gl/textures
-        vec4 fragTexFrame = texture(texSideTable, vertexTextureCoordinate * uvScaleSideDresser);
-        //vec4 fragTexLegs = texture(texSideTable, vertexTextureCoordinate * uvScaleDresserLegs);
+void main()
+{
+    // https://open.gl/textures
+    vec4 fragTexFrame = texture(texSideTable, vertexTextureCoordinate * uvScaleSideDresser);
+    //vec4 fragTexLegs = texture(texSideTable, vertexTextureCoordinate * uvScaleDresserLegs);
 
-        if (fragTexFrame.a < 0.1)
-            discard;
-        fragmentColor = fragTexFrame;
-        // fragmentColor = fragtexFrame * fragtexLegs;
-        // fragmentColor = fragtexFrame + fragtexLegs;
+    if (fragTexFrame.a < 0.1)
+        discard;
+    fragmentColor = fragTexFrame;
+    // fragmentColor = fragtexFrame * fragtexLegs;
+    // fragmentColor = fragtexFrame + fragtexLegs;
 
-    }
+}
 );
 
 // Fragment Shader: side table drawer
 const GLchar* sideDrawerFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
-    uniform sampler2D texSideDrawer;
-    uniform vec2 uvScaleSideDrawer;
+out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
+uniform sampler2D texSideDrawer;
+uniform vec2 uvScaleSideDrawer;
 
 void main()
 {
@@ -471,48 +471,48 @@ int main(int argc, char* argv[])
 
     if (!createShaderProgram(vertexShaderSource, houseWallFragShader, gHouseWallProgramId))
         cout << "whatsuppppp" << endl;
-        //return EXIT_FAILURE;
-      
-    //if (!createShaderProgram(vertexShaderSource, houseDoorFragShader, gHouseDoorProgramId))
-    //    return EXIT_FAILURE;
+    //return EXIT_FAILURE;
 
-    //if (!createShaderProgram(vertexShaderSource, paintingFragShader, gPaintingProgramId))
-    //    return EXIT_FAILURE;
+//if (!createShaderProgram(vertexShaderSource, houseDoorFragShader, gHouseDoorProgramId))
+//    return EXIT_FAILURE;
 
-    /*
+//if (!createShaderProgram(vertexShaderSource, paintingFragShader, gPaintingProgramId))
+//    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, rugFragShader, gRugProgramId))
-        return EXIT_FAILURE;
+/*
 
-    if (!createShaderProgram(vertexShaderSource, houseWreathFragShader, gHouseWreathProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, rugFragShader, gRugProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, lampBottomFragShader, gLampBottomProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, houseWreathFragShader, gHouseWreathProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, lampTopFragShader, gLampTopProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, lampBottomFragShader, gLampBottomProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, balloonsFragShader, gBalloonsProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, lampTopFragShader, gLampTopProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, coffeeTableFragShader, gCoffeeTableProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, balloonsFragShader, gBalloonsProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, couchSeatsFragShader, gCouchSeatsProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, coffeeTableFragShader, gCoffeeTableProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, couchLegsFragShader, gCouchArmRestsProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, couchSeatsFragShader, gCouchSeatsProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegsProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, couchLegsFragShader, gCouchArmRestsProgramId))
+    return EXIT_FAILURE;
 
-    */
+if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegsProgramId))
+    return EXIT_FAILURE;
+
+*/
 
 
-    // TODO: MINIMIZE INTO FUNCTION(S) LATER
-    // TEXTURE: wood, dark brown/red solid
+// TODO: MINIMIZE INTO FUNCTION(S) LATER
+// TEXTURE: wood, dark brown/red solid
     const char* texFilename = "../../resources/textures/solid-dark-wood.jpg";
     if (!createTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
     {
@@ -532,7 +532,7 @@ int main(int argc, char* argv[])
     // texture use: side tables
     glUseProgram(gSideTableProgramId);
     glUniform1i(glGetUniformLocation(gSideTableProgramId, "texSideTable"), 1);
-    
+
     // TEXTURE (IMAGE): dresser drawer, side tables
     texFilename = "../../resources/images/dresserdrawer.png";
     if (!createTexture(texFilename, texSideDrawer, GL_CLAMP_TO_EDGE, GL_LINEAR))
@@ -666,9 +666,9 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    #ifdef __APPLE__
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    #endif
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 
     // GLFW: window creation
     * window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
@@ -696,18 +696,18 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
     glfwSetInputMode(*window, GLFW_STICKY_KEYS, GLFW_TRUE);
     /* change projection when key is pressed:
      * press "p" to change projection from perspective to ortho*/
-    //glfwSetKeyCallback(*window, projectionKeyboardCallback2);
-    //glfwSetInputMode(*windows, projectionKeyboardCallback);
+     //glfwSetKeyCallback(*window, projectionKeyboardCallback2);
+     //glfwSetInputMode(*windows, projectionKeyboardCallback);
 
 
 
 
-    // source: https://www.glfw.org/docs/3.3/input_guide.html#input_key
-    // "When sticky keys mode is enabled, the pollable state of a key will remain GLFW_PRESS until the state of that key is polled with glfwGetKey."
+     // source: https://www.glfw.org/docs/3.3/input_guide.html#input_key
+     // "When sticky keys mode is enabled, the pollable state of a key will remain GLFW_PRESS until the state of that key is polled with glfwGetKey."
 
-    // GLEW: initialize
-    // ----------------
-    // Note: if using GLEW version 1.13 or earlier
+     // GLEW: initialize
+     // ----------------
+     // Note: if using GLEW version 1.13 or earlier
     glewExperimental = GL_TRUE;
     GLenum GlewInitResult = glewInit();
 
@@ -790,7 +790,7 @@ void projectionKeyboardCallback2(GLFWwindow* window, int key, int scancode, int 
 
     if (key == GLFW_KEY_P && action == GLFW_PRESS)
         cout << key << endl;
-    
+
 };
 
 
@@ -807,7 +807,7 @@ void projectionKeyboardCallback(GLFWwindow* window, int key, int action) {
     // source: https://www.glfw.org/docs/3.3/input_guide.html#input_key
         // "When sticky keys mode is enabled, the pollable state of a key will remain GLFW_PRESS until the state of that key is polled with glfwGetKey."
     // Creates a ortho projection
-    
+
     // test
    // if (key == GLFW_KEY_P && action == GLFW_PRESS)
        // toOrtho();
@@ -987,7 +987,7 @@ bool createTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, 
  *    Specify location, textureID, Wrap Parameter and Filter Parameter
  *    To make S or T different from each other, a custom loop needs to be made, based on the createTexture */
 
-// delete textures. change this to default later
+ // delete textures. change this to default later
 void deleteAllTexture(GLuint& textureIdAll, int texCount)
 {
     // uses glDeleteTextures
@@ -1093,37 +1093,37 @@ void createMesh(GLMesh& gMesh)
     -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
     -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
 
-      //Left Face          //Negative X Normal
-     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-     -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-     -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+    //Left Face          //Negative X Normal
+   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+   -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+   -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-     //Right Face         //Positive X Normal
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+   //Right Face         //Positive X Normal
+   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+   0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-     //Bottom Face        //Negative Y Normal
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+   //Bottom Face        //Negative Y Normal
+  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-    //Top Face           //Positive Y Normal
-   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-   -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+  //Top Face           //Positive Y Normal
+ -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+  0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+ -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+ -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
     const GLuint floatsPerVertex = 3;
