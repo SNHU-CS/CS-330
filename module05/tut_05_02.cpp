@@ -324,12 +324,12 @@ const GLchar* sideTableFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 //in vec2 vertexTextureCoordinate2;
 
-out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
-//out vec4 fragmentColor2;
+    out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
+    //out vec4 fragmentColor2;
 
-uniform sampler2D texSideTable;
-uniform vec2 uvScaleSideDresser;
-uniform vec2 uvScaleDresserLegs;
+    uniform sampler2D texSideTable;
+    uniform vec2 uvScaleSideDresser;
+    uniform vec2 uvScaleDresserLegs;
 
 void main()
 {
@@ -350,9 +350,10 @@ void main()
 const GLchar* sideDrawerFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
-uniform sampler2D texSideDrawer;
-uniform vec2 uvScaleSideDrawer;
+    out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
+
+    uniform sampler2D texSideDrawer;
+    uniform vec2 uvScaleSideDrawer;
 
 void main()
 {
@@ -368,10 +369,10 @@ void main()
 const GLchar* houseFloorFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor;
+    out vec4 fragmentColor;
 
-uniform sampler2D texHouseFloor;
-uniform vec2 uvScaleHouseFloor;
+    uniform sampler2D texHouseFloor;
+    uniform vec2 uvScaleHouseFloor;
 
 void main()
 {
@@ -387,20 +388,38 @@ void main()
 const GLchar* houseWallFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
+    out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
 
-uniform sampler2D texHouseWall;
-uniform vec2 uvScaleHouseWall;
+    uniform sampler2D texHouseWall;
+    uniform vec2 uvScaleHouseWall;
 
-void main()
-{
-    vec4 fragTex = texture(texHouseWall, vertexTextureCoordinate * uvScaleHouseWall);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texHouseWall, vertexTextureCoordinate * uvScaleHouseWall);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
 
+
+// fragment shader: house door
+const GLchar* houseDoorFragShader = GLSL(440,
+    in vec2 vertexTextureCoordinate;
+
+    out vec4 fragmentColor;
+
+    uniform sampler2D texHouseDoor;
+    uniform vec2 gUVScaleHouseDoor;
+
+    void main()
+    {
+        vec4 fragTex = texture(texHouseDoor, vertexTextureCoordinate * gUVScaleHouseDoor);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+}
+);
 
 
 
@@ -441,7 +460,7 @@ int main(int argc, char* argv[])
     createMeshSideDrawer(gMeshSideDrawer);
     createMeshHouseFloor(gMeshHouseFloor);;
     createMeshHouseWall(gMeshHouseWall);
-    //createMeshHouseDoor(gMeshHouseDoor);
+    createMeshHouseDoor(gMeshHouseDoor);
     //createMeshPainting(gMeshPainting);
     /*
     createMeshRug)(gMeshRug);
@@ -471,44 +490,45 @@ int main(int argc, char* argv[])
 
     if (!createShaderProgram(vertexShaderSource, houseWallFragShader, gHouseWallProgramId))
         cout << "whatsuppppp" << endl;
-    //return EXIT_FAILURE;
+        return EXIT_FAILURE;
 
-//if (!createShaderProgram(vertexShaderSource, houseDoorFragShader, gHouseDoorProgramId))
-//    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, houseDoorFragShader, gHouseDoorProgramId))
+        // cout << "whatsuppppp" << endl;
+        return EXIT_FAILURE;
 
-//if (!createShaderProgram(vertexShaderSource, paintingFragShader, gPaintingProgramId))
-//    return EXIT_FAILURE;
+    //if (!createShaderProgram(vertexShaderSource, paintingFragShader, gPaintingProgramId))
+    //    return EXIT_FAILURE;
 
-/*
+    /*
 
-if (!createShaderProgram(vertexShaderSource, rugFragShader, gRugProgramId))
-    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, rugFragShader, gRugProgramId))
+        return EXIT_FAILURE;
 
-if (!createShaderProgram(vertexShaderSource, houseWreathFragShader, gHouseWreathProgramId))
-    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, houseWreathFragShader, gHouseWreathProgramId))
+        return EXIT_FAILURE;
 
-if (!createShaderProgram(vertexShaderSource, lampBottomFragShader, gLampBottomProgramId))
-    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, lampBottomFragShader, gLampBottomProgramId))
+        return EXIT_FAILURE;
 
-if (!createShaderProgram(vertexShaderSource, lampTopFragShader, gLampTopProgramId))
-    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, lampTopFragShader, gLampTopProgramId))
+        return EXIT_FAILURE;
 
-if (!createShaderProgram(vertexShaderSource, balloonsFragShader, gBalloonsProgramId))
-    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, balloonsFragShader, gBalloonsProgramId))
+        return EXIT_FAILURE;
 
-if (!createShaderProgram(vertexShaderSource, coffeeTableFragShader, gCoffeeTableProgramId))
-    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, coffeeTableFragShader, gCoffeeTableProgramId))
+        return EXIT_FAILURE;
 
-if (!createShaderProgram(vertexShaderSource, couchSeatsFragShader, gCouchSeatsProgramId))
-    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, couchSeatsFragShader, gCouchSeatsProgramId))
+        return EXIT_FAILURE;
 
-if (!createShaderProgram(vertexShaderSource, couchLegsFragShader, gCouchArmRestsProgramId))
-    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, couchLegsFragShader, gCouchArmRestsProgramId))
+        return EXIT_FAILURE;
 
-if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegsProgramId))
-    return EXIT_FAILURE;
+    if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegsProgramId))
+        return EXIT_FAILURE;
 
-*/
+    */
 
 
 // TODO: MINIMIZE INTO FUNCTION(S) LATER
@@ -598,7 +618,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyMesh(gMeshSideDrawer);
     destroyMesh(gMeshHouseFloor);
     destroyMesh(gMeshHouseWall);
-    //destroyMesh(gMeshHouseDoor);
+    destroyMesh(gMeshHouseDoor);
     //destroyMesh(gMeshPainting);
     /*
     destroyMesh(gMeshRug);
@@ -620,7 +640,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyTexture(texSideDrawer);
     destroyTexture(texHouseFloor);
     destroyTexture(texWallpaper);
-    //destroyTexture(texHouseDoor);
+    destroyTexture(texHouseDoor);
     //destroyTexture(texPainting);
     /*
     destroyTexture(texRug); // 7 image
@@ -639,7 +659,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyShaderProgram(gSideDrawerProgramId);
     destroyShaderProgram(gHouseFloorProgramId);
     destroyShaderProgram(gHouseWallProgramId);
-    //destroyShaderProgram(gHouseDoorProgramId);
+    destroyShaderProgram(gHouseDoorProgramId);
     //destroyShaderProgram(gPaintingProgramId);
     /*
      destroyShaderProgram(gRugProgramId);
@@ -921,6 +941,7 @@ void rendering()
     drawSideTable(view, projection, gSideTableProgramId, gMeshSideTable, GL_TEXTURE1, texSideTable);
     drawSideDrawer(view, projection, gSideDrawerProgramId, gMeshSideDrawer, GL_TEXTURE2, texSideDrawer);
     drawHouseWall(view, projection, gHouseWallProgramId, gMeshHouseWall, GL_TEXTURE4, texWallpaper);
+    drawHouseDoor(view, projection, gHouseDoorProgramId, gMeshHouseDoor, GL_TEXTURE5, texHouseDoor);
 
     // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
@@ -1365,42 +1386,81 @@ void createMeshHouseWall(GLMesh& gMesh)
 }
 
 
-void createMeshCoffeeTable(GLMesh& gMesh)
+void createMeshHouseDoor(GLMesh& gMesh)
 {
-    // elongated cuboid
-    // 4 legs
-    // metal texture
-}
+    GLfloat verts[] = {
+        // Vertex Positions    // normals  // textures
+        // front
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        // back
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        // left side
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        // right side
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         // bottom
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+        // top
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
+    };
 
+    const GLuint floatsPerVertex = 3;
+    const GLuint floatsPerNormal = 3;
+    const GLuint floatsPerUV = 2;
 
-void createMeshWreath(GLMesh& gMesh)
-{
-    // torus
-    // alphine/green tree texture
-    // ??add ornaments??
-}
+    gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
+    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(gMesh.vao);
 
-void createMeshBalloons(GLMesh& gMesh)
-{
-    // balloon
-    // solid color texture wit light shine
-}
+    // buffer for vertex data
+    glGenBuffers(1, &gMesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
-void createMeshSideDresser(GLMesh& gMesh)
-{
-    // cylinder
-    // cylinder
-    // cone
-    // marble texture, cloth texture
+    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
 
-}
+    // Create Vertex Attribute Pointers
+    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
 
+    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
+    glEnableVertexAttribArray(1);
 
-void createMeshCouch(GLMesh& gMesh)
-{
-    // red fabric texture
-    // metal legs texture
+    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
+    glEnableVertexAttribArray(2);
 }
 
 
@@ -1758,6 +1818,47 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 }
+
+
+void drawHouseDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
+{
+    glm::mat4 scale = glm::scale(glm::vec3(5.0f, 5.0f, 2.1f));
+    glm::mat4 rotation = glm::rotate(10.0f, glm::vec3(0.8f, 0.5f, 1.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(2.0f, 2.0f, 3.0f));
+    glm::vec2 gUVScale(10.0f, 10.0f);
+
+
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = translation * rotation * scale;
+
+    // Set the shader to be used
+    glUseProgram(shaderProgramID);
+
+    // Retrieves and passes transform matrices to the Shader program
+    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleHouseDoor");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // bind textures on corresponding texture units
+    glActiveTexture(textureNum); // 15
+    glBindTexture(GL_TEXTURE_2D, textureName);
+
+    // Activate the VBOs contained within the mesh's VA
+    glBindVertexArray(gMesh.vao);
+
+    // Draws the triangles
+    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+}
+
+
+
 
 void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
