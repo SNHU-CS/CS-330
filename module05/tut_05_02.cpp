@@ -244,24 +244,24 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
 const GLchar* vertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
-    layout(location = 1) in vec3 normal; // VAP position 1 for normals
-    layout(location = 2) in vec2 textureCoordinate;
+layout(location = 1) in vec3 normal; // VAP position 1 for normals
+layout(location = 2) in vec2 textureCoordinate;
 
-    out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
-    out vec3 vertexNormal; // For outgoing normals to fragment shader
-    out vec2 vertexTextureCoordinate;
+out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
+out vec3 vertexNormal; // For outgoing normals to fragment shader
+out vec2 vertexTextureCoordinate;
 
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-    void main()
-    {
-        gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
-        vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
-        vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
-        vertexTextureCoordinate = textureCoordinate;
-    }
+void main()
+{
+    gl_Position = projection * view * model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
+    vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
+    vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
+    vertexTextureCoordinate = textureCoordinate;
+}
 );
 
 
@@ -325,13 +325,13 @@ void main()
 const GLchar* sideTableFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
-    //out vec4 fragmentColor2;
+out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
+//out vec4 fragmentColor2;
 
-    uniform sampler2D texSideTable;
-    uniform vec2 uvScaleSideDresser;
-    uniform vec2 uvScaleDresserLegs;
-    uniform vec3 lightColor;
+uniform sampler2D texSideTable;
+uniform vec2 uvScaleSideDresser;
+uniform vec2 uvScaleDresserLegs;
+uniform vec3 lightColor;
 uniform vec3 lightPos;
 
 void main()
@@ -353,10 +353,10 @@ void main()
 const GLchar* sideDrawerFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
+out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
 
-    uniform sampler2D texSideDrawer;
-    uniform vec2 uvScaleSideDrawer;
+uniform sampler2D texSideDrawer;
+uniform vec2 uvScaleSideDrawer;
 
 void main()
 {
@@ -372,18 +372,18 @@ void main()
 const GLchar* houseFloorFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor;
+out vec4 fragmentColor;
 
-    uniform sampler2D texHouseFloor;
-    uniform vec2 uvScaleHouseFloor;
+uniform sampler2D texHouseFloor;
+uniform vec2 uvScaleHouseFloor;
 
-    void main()
-    {
-        vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * uvScaleHouseFloor);
-        if (fragTex.a < 0.1)
-            discard;
-        fragmentColor = fragTex;
-    }
+void main()
+{
+    vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * uvScaleHouseFloor);
+    if (fragTex.a < 0.1)
+        discard;
+    fragmentColor = fragTex;
+}
 );
 
 
@@ -391,18 +391,18 @@ const GLchar* houseFloorFragShader = GLSL(440,
 const GLchar* houseWallFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
+out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
 
-    uniform sampler2D texHouseWall;
-    uniform vec2 uvScaleHouseWall;
+uniform sampler2D texHouseWall;
+uniform vec2 uvScaleHouseWall;
 
-    void main()
-    {
-        vec4 fragTex = texture(texHouseWall, vertexTextureCoordinate * uvScaleHouseWall);
-        if (fragTex.a < 0.1)
-            discard;
-        fragmentColor = fragTex;
-    }
+void main()
+{
+    vec4 fragTex = texture(texHouseWall, vertexTextureCoordinate * uvScaleHouseWall);
+    if (fragTex.a < 0.1)
+        discard;
+    fragmentColor = fragTex;
+}
 );
 
 
@@ -410,18 +410,18 @@ const GLchar* houseWallFragShader = GLSL(440,
 const GLchar* houseDoorFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor;
+out vec4 fragmentColor;
 
-    uniform sampler2D texHouseDoor;
-    uniform vec2 gUVScaleHouseDoor;
+uniform sampler2D texHouseDoor;
+uniform vec2 gUVScaleHouseDoor;
 
-    void main()
-    {
-        vec4 fragTex = texture(texHouseDoor, vertexTextureCoordinate * gUVScaleHouseDoor);
-        if (fragTex.a < 0.1)
-            discard;
-        fragmentColor = fragTex;
-    }
+void main()
+{
+    vec4 fragTex = texture(texHouseDoor, vertexTextureCoordinate * gUVScaleHouseDoor);
+    if (fragTex.a < 0.1)
+        discard;
+    fragmentColor = fragTex;
+}
 );
 
 
@@ -430,19 +430,41 @@ const GLchar* houseDoorFragShader = GLSL(440,
 const GLchar* paintingFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor;
+out vec4 fragmentColor;
 
-    uniform sampler2D texPainting;
-    uniform vec2 gUVScalePainting;
+uniform sampler2D texPainting;
+uniform vec2 gUVScalePainting;
 
-    void main()
-    {
-        vec4 fragTex = texture(texPainting, vertexTextureCoordinate * gUVScalePainting);
-        if (fragTex.a < 0.1)
-            discard;
-        fragmentColor = fragTex;
-    }
+void main()
+{
+    vec4 fragTex = texture(texPainting, vertexTextureCoordinate * gUVScalePainting);
+    if (fragTex.a < 0.1)
+        discard;
+    fragmentColor = fragTex;
+}
 );
+
+
+
+// fragment shader: coffee table
+const GLchar* coffeeTableFragShader = GLSL(440,
+    in vec2 vertexTextureCoordinate;
+
+out vec4 fragmentColor;
+
+uniform sampler2D texCoffeeTable;
+uniform vec2 gUVScaleCoffeeTable;
+
+void main()
+{
+    vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * gUVScaleCoffeeTable);
+    if (fragTex.a < 0.1)
+        discard;
+    fragmentColor = fragTex;
+}
+);
+
+
 
 /*
 // fragment shader: coffee table
@@ -510,7 +532,7 @@ int main(int argc, char* argv[])
     createMeshHouseWall(gMeshHouseWall);
     createMeshHouseDoor(gMeshHouseDoor);
     createMeshPainting(gMeshPainting);
-    //createMeshCoffeeTable(gMeshCoffeeTable);
+    createMeshCoffeeTable(gMeshCoffeeTable);
     /*
     createMeshRug)(gMeshRug);
     createMeshWreath(gMeshHouseWreath);
@@ -532,64 +554,63 @@ int main(int argc, char* argv[])
     // create the fragment shader programs
     if (!createShaderProgram(vertexShaderSource, cubeFragShader, gCubeProgramId))
         cout << "whatsupppppCube" << endl;
-        //return EXIT_FAILURE;
+    //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, sideTableFragShader, gSideTableProgramId))
         cout << "Shader crash/return false: side table" << endl;
-        //return EXIT_FAILURE;
+    //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, sideDrawerFragShader, gSideDrawerProgramId))
         cout << "Shader crash/return false: side table drawers" << endl;
-        //return EXIT_FAILURE;
+    //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, houseFloorFragShader, gHouseFloorProgramId))
         cout << "Shader crash/return false: floor" << endl;
-        //return EXIT_FAILURE;
+    //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, houseWallFragShader, gHouseWallProgramId))
         cout << "Shader crash/return false: wall" << endl;
-        //return EXIT_FAILURE;
+    //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, houseDoorFragShader, gHouseDoorProgramId))
         cout << "Shader crash/return false: door" << endl;
-        //return EXIT_FAILURE;
+    //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, paintingFragShader, gPaintingProgramId))
         cout << "Shader crash/return false: painting" << endl;
-        //return EXIT_FAILURE;
+    //return EXIT_FAILURE;
 
-    /*
     if (!createShaderProgram(vertexShaderSource, coffeeTableFragShader, gCoffeeTableProgramId))
         cout << "Shader crash/return false: coffee table" << endl;
-        //return EXIT_FAILURE;
-     */
-     /*
+    //return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, rugFragShader, gRugProgramId))
-        return EXIT_FAILURE;
+ /*
 
-    if (!createShaderProgram(vertexShaderSource, houseWreathFragShader, gHouseWreathProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, rugFragShader, gRugProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, lampBottomFragShader, gLampBottomProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, houseWreathFragShader, gHouseWreathProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, lampTopFragShader, gLampTopProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, lampBottomFragShader, gLampBottomProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, balloonsFragShader, gBalloonsProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, lampTopFragShader, gLampTopProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, couchSeatsFragShader, gCouchSeatsProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, balloonsFragShader, gBalloonsProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, couchLegsFragShader, gCouchArmRestsProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, couchSeatsFragShader, gCouchSeatsProgramId))
+    return EXIT_FAILURE;
 
-    if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegsProgramId))
-        return EXIT_FAILURE;
+if (!createShaderProgram(vertexShaderSource, couchLegsFragShader, gCouchArmRestsProgramId))
+    return EXIT_FAILURE;
 
-    */
+if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegsProgramId))
+    return EXIT_FAILURE;
+
+*/
 
 
 
@@ -659,7 +680,7 @@ int main(int argc, char* argv[])
     glUniform1i(glGetUniformLocation(gHouseWallProgramId, "texHouseWall"), 4);
     texNumHouseWall = GL_TEXTURE4;
 
-    
+
     // TEXTURE: door, old
     texFilename = "../../resources/images/door-dark-wood.png";
     if (!createTexture(texFilename, texHouseDoor, GL_CLAMP_TO_EDGE, GL_LINEAR))
@@ -671,7 +692,7 @@ int main(int argc, char* argv[])
     glUseProgram(gHouseDoorProgramId);
     glUniform1i(glGetUniformLocation(gHouseDoorProgramId, "texHouseDoor"), 5);
     texNumHouseDoor = GL_TEXTURE5;
-    
+
 
     // TEXTURE: painting image
     texFilename = "../../resources/images/framed-sunset-lrg.png";
@@ -730,7 +751,7 @@ int main(int argc, char* argv[])
     destroyMesh(gMeshHouseWall);
     destroyMesh(gMeshHouseDoor);
     destroyMesh(gMeshPainting);
-    //destroyMesh(gMeshCoffeeTable);
+    destroyMesh(gMeshCoffeeTable);
     /*
     destroyMesh(gMeshRug);
     destroyMesh(gMeshHouseWreath);
@@ -752,6 +773,7 @@ int main(int argc, char* argv[])
     destroyTexture(texWallpaper);
     destroyTexture(texHouseDoor);
     destroyTexture(texPainting);
+    destroyTexture(texWoodSolidDark);
     //destroyTexture(texCoffeeTable);
     /*
     destroyTexture(texRug); // 7 image
@@ -772,7 +794,7 @@ int main(int argc, char* argv[])
     destroyShaderProgram(gHouseWallProgramId);
     destroyShaderProgram(gHouseDoorProgramId);
     destroyShaderProgram(gPaintingProgramId);
-    //destroyShaderProgram(gCoffeeTableProgramId);
+    destroyShaderProgram(gCoffeeTableProgramId);
     /*
      destroyShaderProgram(gRugProgramId);
      destroyShaderProgram(gHouseWreathProgramId);
@@ -1582,8 +1604,7 @@ void createMeshPainting(GLMesh& gMesh)
     glEnableVertexAttribArray(2);
 }
 
-// create mesh coffee table
-/* 
+// create mesh coffee table 
 void createMeshCoffeeTable(GLMesh& gMesh)
 {
     GLfloat verts[] = {
@@ -1659,7 +1680,7 @@ void createMeshCoffeeTable(GLMesh& gMesh)
     glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
     glEnableVertexAttribArray(2);
 }
-*/
+
 
 void destroyMesh(GLMesh& gMesh)
 {
@@ -1761,7 +1782,7 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 }
 
 
- //IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTable)
+//IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTable)
 void drawSideDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.3f));
@@ -1924,8 +1945,8 @@ void drawHouseDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
 
-    //paiting
-    glm::mat4 scale = glm::scale(glm::vec3(2.9f, 2.3f, 1.0f));
+    //painting
+    glm::mat4 scale = glm::scale(glm::vec3(2.9f, 2.3f, 0.1f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     glm::mat4 translation = glm::translate(glm::vec3(-1.5f, 4.0f, 0.1f));
     glm::vec2 gUVScale(1.0f, 1.0f);
@@ -2058,7 +2079,7 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
     glUseProgram(shaderProgramID);
     glm::mat4 scale = glm::scale(glm::vec3(3.0f, 2.0f, -3.0f));
     glm::mat4 rotation = glm::rotate(15.0f, glm::vec3(0.0, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f)); 
+    glm::mat4 translation = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f));
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
