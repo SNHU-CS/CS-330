@@ -273,51 +273,51 @@ void main()
 const GLchar* cubeFragShader = GLSL(440,
 
     in vec3 vertexNormal; // For incoming normals
-in vec3 vertexFragmentPos; // For incoming fragment position
-in vec2 vertexTextureCoordinate;
+    in vec3 vertexFragmentPos; // For incoming fragment position
+    in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing cube color to the GPU
+    out vec4 fragmentColor; // For outgoing cube color to the GPU
 
-// Uniform / Global variables for object color, light color, light position, and camera/view position
-uniform vec3 objectColor;
-uniform vec3 lightColor;
-uniform vec3 lightPos;
-uniform vec3 viewPosition;
-uniform sampler2D uTexture; // Useful when working with multiple textures
-uniform vec2 uvScale;
+    // Uniform / Global variables for object color, light color, light position, and camera/view position
+    uniform vec3 objectColor;
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
+    uniform sampler2D uTexture; // Useful when working with multiple textures
+    uniform vec2 uvScale;
 
 
-void main()
-{
-    //Phong lighting model calculations to generate ambient, diffuse, and specular components
+    void main()
+    {
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
 
-    //Calculate Ambient lighting
-    float ambientStrength = 0.1f; // Set ambient or global lighting strength
-    vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+        //Calculate Ambient lighting
+        float ambientStrength = 0.1f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
-    //Calculate Diffuse lighting
-    vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-    vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-    float impact = max(dot(norm, lightDirection), 0.0);// Calculate diffuse impact by generating dot product of normal and light
-    vec3 diffuse = impact * lightColor; // Generate diffuse light color
+        //Calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.0);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
-    //Calculate Specular lighting
-    float specularIntensity = 0.8f; // Set specular light strength
-    float highlightSize = 16.0f; // Set specular highlight size
-    vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-    vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
-    //Calculate specular component
-    float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
-    vec3 specular = specularIntensity * specularComponent * lightColor;
+        //Calculate Specular lighting
+        float specularIntensity = 0.8f; // Set specular light strength
+        float highlightSize = 16.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        //Calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
 
-    // Texture holds the color to be used for all three components
-    vec4 textureColor = texture(uTexture, vertexTextureCoordinate * uvScale);
+        // Texture holds the color to be used for all three components
+        vec4 textureColor = texture(uTexture, vertexTextureCoordinate * uvScale);
 
-    // Calculate phong result
-    vec3 phong = (ambient + diffuse + specular) * textureColor.xyz;
+        // Calculate phong result
+        vec3 phong = (ambient + diffuse + specular) * textureColor.xyz;
 
-    fragmentColor = vec4(phong, 1.0); // Send lighting results to GPU
-}
+        fragmentColor = vec4(phong, 1.0); // Send lighting results to GPU
+    }
 );
 
 
@@ -325,46 +325,46 @@ void main()
 const GLchar* sideTableFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
-//out vec4 fragmentColor2;
+    out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
+    //out vec4 fragmentColor2;
 
-uniform sampler2D texSideTable;
-uniform vec2 uvScaleSideDresser;
-uniform vec2 uvScaleDresserLegs;
-uniform vec3 lightColor;
-uniform vec3 lightPos;
+    uniform sampler2D texSideTable;
+    uniform vec2 uvScaleSideDresser;
+    uniform vec2 uvScaleDresserLegs;
+    //uniform vec3 lightColor;
+    //uniform vec3 lightPos;
 
-void main()
-{
-    // https://open.gl/textures
-    vec4 fragTexFrame = texture(texSideTable, vertexTextureCoordinate * uvScaleSideDresser);
-    vec4 fragTexLegs = texture(texSideTable, vertexTextureCoordinate * uvScaleDresserLegs);
+    void main()
+    {
+        // https://open.gl/textures
+        vec4 fragTexFrame = texture(texSideTable, vertexTextureCoordinate * uvScaleSideDresser);
+        vec4 fragTexLegs = texture(texSideTable, vertexTextureCoordinate * uvScaleDresserLegs);
 
-    if (fragTexFrame.a < 0.1)
-        discard;
-    fragmentColor = fragTexFrame;
-    // fragmentColor = fragtexFrame * fragtexLegs;
-    // fragmentColor = fragtexFrame + fragtexLegs;
+        if (fragTexFrame.a < 0.1)
+            discard;
+        fragmentColor = fragTexFrame;
+        // fragmentColor = fragtexFrame * fragtexLegs;
+        // fragmentColor = fragtexFrame + fragtexLegs;
 
-}
+    }
 );
 
 // Fragment Shader: side table drawer
 const GLchar* sideDrawerFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
+    out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
 
-uniform sampler2D texSideDrawer;
-uniform vec2 uvScaleSideDrawer;
+    uniform sampler2D texSideDrawer;
+    uniform vec2 uvScaleSideDrawer;
 
-void main()
-{
-    vec4 fragTex = texture(texSideDrawer, vertexTextureCoordinate * uvScaleSideDrawer);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texSideDrawer, vertexTextureCoordinate * uvScaleSideDrawer);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
 
 
@@ -372,18 +372,18 @@ void main()
 const GLchar* houseFloorFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor;
+    out vec4 fragmentColor;
 
-uniform sampler2D texHouseFloor;
-uniform vec2 uvScaleHouseFloor;
+    uniform sampler2D texHouseFloor;
+    uniform vec2 uvScaleHouseFloor;
 
-void main()
-{
-    vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * uvScaleHouseFloor);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * uvScaleHouseFloor);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
 
 
@@ -391,18 +391,18 @@ void main()
 const GLchar* houseWallFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
+    out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
 
-uniform sampler2D texHouseWall;
-uniform vec2 uvScaleHouseWall;
+    uniform sampler2D texHouseWall;
+    uniform vec2 uvScaleHouseWall;
 
-void main()
-{
-    vec4 fragTex = texture(texHouseWall, vertexTextureCoordinate * uvScaleHouseWall);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texHouseWall, vertexTextureCoordinate * uvScaleHouseWall);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
 
 
@@ -410,18 +410,18 @@ void main()
 const GLchar* houseDoorFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor;
+    out vec4 fragmentColor;
 
-uniform sampler2D texHouseDoor;
-uniform vec2 gUVScaleHouseDoor;
+    uniform sampler2D texHouseDoor;
+    uniform vec2 gUVScaleHouseDoor;
 
-void main()
-{
-    vec4 fragTex = texture(texHouseDoor, vertexTextureCoordinate * gUVScaleHouseDoor);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texHouseDoor, vertexTextureCoordinate * gUVScaleHouseDoor);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
 
 
@@ -430,18 +430,18 @@ void main()
 const GLchar* paintingFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor;
+    out vec4 fragmentColor;
 
-uniform sampler2D texPainting;
-uniform vec2 gUVScalePainting;
+    uniform sampler2D texPainting;
+    uniform vec2 gUVScalePainting;
 
-void main()
-{
-    vec4 fragTex = texture(texPainting, vertexTextureCoordinate * gUVScalePainting);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texPainting, vertexTextureCoordinate * gUVScalePainting);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
 
 
@@ -450,18 +450,18 @@ void main()
 const GLchar* coffeeTableFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor;
+    out vec4 fragmentColor;;
 
-uniform sampler2D texCoffeeTable;
-uniform vec2 gUVScaleCoffeeTable;
+    uniform sampler2D texCoffeeTable;
+    uniform vec2 gUVScaleCoffeeTable;
 
-void main()
-{
-    vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * gUVScaleCoffeeTable);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * gUVScaleCoffeeTable);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
 
 
@@ -616,20 +616,19 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
 
 // TODO: MINIMIZE INTO FUNCTION(S) LATER
 // TEXTURE: wood, dark brown/red solid
-    const char* texFilename = "../../resources/textures/solid-dark-wood.jpg";
-    if (!createTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
+    /*const char* texFilename = "../../resources/textures/solid-dark-wood.jpg";
+    if (!createTexture(texFilename, texCoffeeTable, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    /*
     glUseProgram(gCoffeeTableProgramId);
     glUniform1i(glGetUniformLocation(gCoffeeTableProgramId, "texCoffeeTable"), 0);
     texNumCoffeeTable = GL_TEXTURE0;
     */
 
     // TEXTURE: wood, straigtened rustic scratched
-    texFilename = "../../resources/textures/wood-scratched.jpg";
+    const char* texFilename = "../../resources/textures/wood-scratched.jpg";
     if (!createTexture(texFilename, texSideTable, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
@@ -706,10 +705,9 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     glUniform1i(glGetUniformLocation(gPaintingProgramId, "texPainting"), 6);
     texNumPainting = GL_TEXTURE6;
 
-    /*
-    // TEXTURE: solid dark wood
+    // TEXTURE: brushed metal, black
     texFilename = "../../resources/textures/solid-dark-wood.jpg";
-    if (!createTexture(texFilename, texWoodSolidDark, GL_REPEAT, GL_LINEAR))
+    if (!createTexture(texFilename, texCoffeeTable, GL_REPEAT, GL_NEAREST))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
@@ -718,7 +716,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     glUseProgram(gCoffeeTableProgramId);
     glUniform1i(glGetUniformLocation(gCoffeeTableProgramId, "texCoffeeTable"), 7);
     texNumCoffeeTable = GL_TEXTURE7;
-    */
+    
 
     // render loop. 
     // (exit key is esc, defined at "exit" (at end of main class)
@@ -774,7 +772,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyTexture(texHouseDoor);
     destroyTexture(texPainting);
     destroyTexture(texWoodSolidDark);
-    //destroyTexture(texCoffeeTable);
+    destroyTexture(texCoffeeTable);
     /*
     destroyTexture(texRug); // 7 image
     destroyTexture(texWreath); // 8
@@ -843,7 +841,7 @@ void rendering()
     drawHouseWall(view, projection, gHouseWallProgramId, gMeshHouseWall, texNumHouseWall, texWallpaper);
     drawHouseDoor(view, projection, gHouseDoorProgramId, gMeshHouseDoor, texNumHouseDoor, texHouseDoor);
     drawPainting(view, projection, gPaintingProgramId, gMeshPainting, texNumPainting, texPainting);
-    //drawCoffeeTable(view, projection, gCoffeeTableProgramId, gMeshCoffeeTable, texNumCoffeeTable, texCoffeeTable);
+    drawCoffeeTable(view, projection, gCoffeeTableProgramId, gMeshCoffeeTable, texNumCoffeeTable, texCoffeeTable);
 
     // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
@@ -1415,7 +1413,6 @@ void createMeshSideDrawer(GLMesh& gMesh)
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
     // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
@@ -1458,7 +1455,6 @@ void createMeshHouseFloor(GLMesh& gMesh)
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
     // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
@@ -1501,7 +1497,6 @@ void createMeshHouseWall(GLMesh& gMesh)
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
     // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
@@ -1544,7 +1539,6 @@ void createMeshHouseDoor(GLMesh& gMesh)
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
     // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
@@ -1982,16 +1976,16 @@ void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
 
 
 // draw coffee table
-/*
+
 void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
 
     // ********** TOP of coffee table ******************
     // create model view: scale, rotate, translate
-    glm::mat4 scale = glm::scale(glm::vec3(3.3f, 1.2f, 1.3f));
+    glm::mat4 scale = glm::scale(glm::vec3(2.5f, 0.5f, 1.3f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(-3.0f, 0.8f, 3.5f));
-    glm::vec2 gUVScale(1.25f, 1.25f);
+    glm::mat4 translation = glm::translate(glm::vec3(-1.0f, 0.8f, 5.5f));
+    glm::vec2 gUVScale(5.25f, 5.25f);
 
 
     // Model matrix: transformations are applied right-to-left order
@@ -2009,7 +2003,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleCoffeeDresser");
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleCoffeeTable");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // Activate the VBOs contained within the mesh's VAO
@@ -2023,7 +2017,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
 
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 
-
+    /*
     // ********** coffee table legs ************************
     // 4 legs needed for coffee table
     // legs uses same rotation as top of coffee table.
@@ -2039,7 +2033,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
         glm::vec3(-4.5f, 0.1f, 4.0f), // right back leg
         glm::vec3(-1.5f, 0.1f, 4.0f) // left back leg
     };
-
+    
     // counts the number of objects
     int legCount = sizeof(legPosition) / sizeof(legPosition[0]);
 
@@ -2069,8 +2063,9 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
         // Draws the triangles
         glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
     }
+    */
 }
-*/
+
 
 void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
