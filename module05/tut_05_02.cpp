@@ -1804,7 +1804,7 @@ void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     glm::mat4 scale = glm::scale(glm::vec3(20.0f, 0.2f, 20.0f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 10.0f));
-    glm::vec2 gUVScale(8.0f, 5.00f);
+    glm::vec2 gUVScale(5.0f, 4.00f);
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
@@ -1842,7 +1842,7 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glm::mat4 scale = glm::scale(glm::vec3(20.0f, 15.0f, -0.1f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0, 0.1f, 0.0f));
     glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
-    glm::vec2 gUVScale(30.0f, 20.0f);
+    glm::vec2 gUVScale(40.0f, 20.0f);
 
 
     // Model matrix: transformations are applied right-to-left order
