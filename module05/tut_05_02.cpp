@@ -445,53 +445,24 @@ const GLchar* paintingFragShader = GLSL(440,
 );
 
 
-
-// fragment shader: coffee table
+// Fragment Shader: table
 const GLchar* coffeeTableFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor;;
-
-    uniform sampler2D texCoffeeTable;
-    uniform vec2 gUVScaleCoffeeTable;
-
-    void main()
-    {
-        vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * gUVScaleCoffeeTable);
-        if (fragTex.a < 0.1)
-            discard;
-        fragmentColor = fragTex;
-    }
-);
-
-
-
-/*
-// fragment shader: coffee table
-const GLchar* coffeeTableFragShader = GLSL(440,
-    in vec2 vertexTextureCoordinate;
-
-out vec4 fragmentColor;
+out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
 
 uniform sampler2D texCoffeeTable;
 uniform vec2 uvScaleCoffeeTable;
-uniform vec2 uvScaleCoffeeLegs;
-
 
 void main()
-    {
-        // https://open.gl/textures
-        vec4 fragTexCoffeeTable = texture(texCoffeeTable, vertexTextureCoordinate * uvScaleCoffeeTable);
-        vec4 fragCoffeeLegs = texture(texCoffeeLegs, vertexTextureCoordinate * uvScaleCoffeeLegs);
-
-        if (fragTexCoffee.a < 0.1)
-            discard;
-        fragmentColor = fragTexCoffeeTable;
-        //fragmentColor = fragTexCoffeeTable * fragCoffeeLegs;
-        //fragmentColor = fragTexCoffeeTable + fragCoffeeLegs;
-    }
+{
+    vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * uvScaleCoffeeTable);
+    if (fragTex.a < 0.1)
+        discard;
+    fragmentColor = fragTex;
+}
 );
-*/
+
 
 // flip images vertically
 // Images are loaded with Y axis going down, but OpenGL's Y axis goes up
@@ -616,7 +587,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
 
 // TODO: MINIMIZE INTO FUNCTION(S) LATER
 // TEXTURE: wood, dark brown/red solid
-    /*const char* texFilename = "../../resources/textures/solid-dark-wood.jpg";
+    const char* texFilename = "../../resources/textures/wood-dark.png";
     if (!createTexture(texFilename, texCoffeeTable, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
@@ -625,10 +596,9 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     glUseProgram(gCoffeeTableProgramId);
     glUniform1i(glGetUniformLocation(gCoffeeTableProgramId, "texCoffeeTable"), 0);
     texNumCoffeeTable = GL_TEXTURE0;
-    */
 
     // TEXTURE: wood, straigtened rustic scratched
-    const char* texFilename = "../../resources/textures/wood-scratched.jpg";
+    texFilename = "../../resources/textures/wood-dark.png";
     if (!createTexture(texFilename, texSideTable, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
@@ -639,9 +609,8 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     glUniform1i(glGetUniformLocation(gSideTableProgramId, "texSideTable"), 1);
     texNumSideTable = GL_TEXTURE1;
 
-
     // TEXTURE (IMAGE): dresser drawer, side tables
-    texFilename = "../../resources/images/dresserdrawer.png";
+    texFilename = "../../resources/images/dresserdrawer1.png";
     if (!createTexture(texFilename, texSideDrawer, GL_CLAMP_TO_EDGE, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
@@ -705,19 +674,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     glUniform1i(glGetUniformLocation(gPaintingProgramId, "texPainting"), 6);
     texNumPainting = GL_TEXTURE6;
 
-    // TEXTURE: brushed metal, black
-    texFilename = "../../resources/textures/solid-dark-wood.jpg";
-    if (!createTexture(texFilename, texCoffeeTable, GL_REPEAT, GL_NEAREST))
-    {
-        cout << "Failed to load texture " << texFilename << endl;
-        return EXIT_FAILURE;
-    }
-    // coffee table
-    glUseProgram(gCoffeeTableProgramId);
-    glUniform1i(glGetUniformLocation(gCoffeeTableProgramId, "texCoffeeTable"), 7);
-    texNumCoffeeTable = GL_TEXTURE7;
-    
-
+  
     // render loop. 
     // (exit key is esc, defined at "exit" (at end of main class)
     while (!glfwWindowShouldClose(gWindow))
@@ -819,9 +776,9 @@ void rendering()
 
     // Enable z-depth
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
     glEnable(GL_TEXTURE_2D);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // move to cube (or remove if cube is deleted)
     // Activate the cube VAO (used by cube)
@@ -842,7 +799,7 @@ void rendering()
     drawHouseDoor(view, projection, gHouseDoorProgramId, gMeshHouseDoor, texNumHouseDoor, texHouseDoor);
     drawPainting(view, projection, gPaintingProgramId, gMeshPainting, texNumPainting, texPainting);
     drawCoffeeTable(view, projection, gCoffeeTableProgramId, gMeshCoffeeTable, texNumCoffeeTable, texCoffeeTable);
-
+    
     // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
     glUseProgram(0);
@@ -1125,7 +1082,7 @@ bool createTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, 
         glGenerateMipmap(GL_TEXTURE_2D);
 
         stbi_image_free(image);
-        //added after watching video
+
         glActiveTexture(0);
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind the texture
 
@@ -1393,12 +1350,12 @@ void createMeshSideDrawer(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // place at front of side table dresser cube
-        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // left bottom
-         0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right bottom
-         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right top
-         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right top
-        -0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left top
-        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f  // left bottom
+        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left bottom
+         0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right bottom
+         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right top
+         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right top
+        -0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // left top
+        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f  // left bottom
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1985,7 +1942,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
     glm::mat4 scale = glm::scale(glm::vec3(2.5f, 0.5f, 1.3f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     glm::mat4 translation = glm::translate(glm::vec3(-1.0f, 0.8f, 5.5f));
-    glm::vec2 gUVScale(5.25f, 5.25f);
+    glm::vec2 gUVScale(2.0f, 0.25f);
 
 
     // Model matrix: transformations are applied right-to-left order
