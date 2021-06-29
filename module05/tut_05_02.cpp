@@ -587,7 +587,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
 
 // TODO: MINIMIZE INTO FUNCTION(S) LATER
 // TEXTURE: wood, dark brown/red solid
-    const char* texFilename = "../../resources/textures/wood-dark.png";
+    const char* texFilename = "../../resources/textures/wood-dark-rotate.png";
     if (!createTexture(texFilename, texCoffeeTable, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
@@ -620,7 +620,6 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     glUseProgram(gSideDrawerProgramId);
     glUniform1i(glGetUniformLocation(gSideDrawerProgramId, "texSideDrawer"), 2);
     texNumSideDrawer = GL_TEXTURE2;
-
 
 
     // TEXTURE: wood (herring pattern)/dark
@@ -750,6 +749,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyShaderProgram(gHouseDoorProgramId);
     destroyShaderProgram(gPaintingProgramId);
     destroyShaderProgram(gCoffeeTableProgramId);
+
     /*
      destroyShaderProgram(gRugProgramId);
      destroyShaderProgram(gHouseWreathProgramId);
@@ -807,7 +807,6 @@ void rendering()
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     glfwSwapBuffers(gWindow);    // Flips the the back buffer with the front buffer every frame.
 }
-
 
 
 // ********** INTIALIZE OPENGL AND EVENTS **********
@@ -887,8 +886,6 @@ void resizeWindow(GLFWwindow* window, int width, int height)
 void toOrtho()
 {
     //glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-    //GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
-    //glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 
@@ -896,8 +893,7 @@ void toOrtho()
 void toPerspective()
 {
     //glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-    //GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
-    //glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
 }
 
 
@@ -1538,7 +1534,6 @@ void createMeshPainting(GLMesh& gMesh)
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
 
     // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
@@ -1561,12 +1556,12 @@ void createMeshCoffeeTable(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
-        -1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f,  0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         1.0f,  0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -1.0f,  0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.25f,
+         1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.25f,
+         1.0f,  0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.25f,
+         1.0f,  0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.25f,
+        -1.0f,  0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.25f,
+        -1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.25f,
         // back
         -1.0f, -0.25f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
          1.0f, -0.25f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
