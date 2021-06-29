@@ -171,22 +171,15 @@ void destroyShaderProgram(GLuint programId);
 
 // window resize and projection
 void resizeWindow(GLFWwindow* window, int width, int height);
+void toOrtho(GLFWwindow* window);
+//void toOrtho(GLFWwindow* window, glm::mat4 projection);
 
-
-/* Keyboard input for changing projection setting to ortho
- * !!IMPORTANT!! Do not delete unless can switch project elsewhere)
- * Press "p" to change projection from perspective to ortho**
- */
-void changeProjectionCallback(); // use keyboard to change projection (event)
-void projectionKeyboardCallback(GLFWwindow* window, int key, int action);
-void projectionKeyboardCallback2(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 // user Inputs
 void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void keyboardNavigationCallback(GLFWwindow* window);
-void enableView(GLFWwindow* window);
 
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
@@ -688,6 +681,11 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
         glm::mat4 view = gCamera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
+        // press key to switch from perspective to ortho
+        // FIXME: print/cout response is correct, but perspective does not change. tried poly and callback events, but no success.
+        toOrtho(gWindow);
+        //toOrtho(gWindow, projection);
+
         // creates and draws all objects
         rendering(view, projection);
 
@@ -769,7 +767,6 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
 // Functioned called to render a frame
 void rendering(glm::mat4 view, glm::mat4 projection)
 {
-
 
     // Clear the frame and z buffers
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -861,27 +858,15 @@ void resizeWindow(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-
-
-
-void toOrtho()
+// switch projection from perspective to ortho by pressing key "p"
+void toOrtho(GLFWwindow* window)
+//void toOrtho(GLFWwindow* window, glm::mat4 projection)
 {
-    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-}
-
-/*
-void toPerspective()
-{
-    glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-        if (key == GLFW_KEY_P && action == GLFW_PRESS)
-        //toOrtho();
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
         glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-    else
-    {
-        glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
-    }
-}
-*/
+        //projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+        cout << "switching projection to ortho" << endl;
+};
 
 
 // ********** KEYBOARD-BASED NAVIGATION **********
@@ -910,47 +895,6 @@ void keyboardNavigationCallback(GLFWwindow* window)
         gCamera.ProcessKeyboard(DOWN, gDeltaTime);
 }
 
-
-// DEFAULT KEYBOARD CALLBACK FOR TESTING!!! NEED TO SWITCH TO NON-2 FOR THE PROJECTION FUNCTION
-// testing callbacks
-// int scan code is only needed to display the value sent to the computer (similar to the ASCII code)
-void projectionKeyboardCallback2(GLFWwindow* window, int key, int action, int mods) {
-
-    if (key == GLFW_KEY_P && action == GLFW_PRESS)
-        toOrtho();
-        cout << "switching projection" << endl;
-};
-
-
-//  input: keyboard controls (non-navigation)
-void projectionKeyboardCallback(GLFWwindow* window, int key, int action) {
-
-
-    // currently in IhitializeGL class, check if need to move to here later
-    //glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
-    //glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_P)
-
-    // add projection here. call on ortho
-    // use callback or sticky keys (not get key)
-    // source: https://www.glfw.org/docs/3.3/input_guide.html#input_key
-        // "When sticky keys mode is enabled, the pollable state of a key will remain GLFW_PRESS until the state of that key is polled with glfwGetKey."
-    // Creates a ortho projection
-
-    // test
-   // if (key == GLFW_KEY_P && action == GLFW_PRESS)
-       // toOrtho();
-
-    /*
-    if (key == GLFW_KEY_P)
-        switch (action)
-        {
-        case GLFW_PRESS:
-
-        case GLFW_RELEASE :
-        }
-    */
-
-}
 
 
 // ********** MOUSE-BASED NAVIGATION **********
