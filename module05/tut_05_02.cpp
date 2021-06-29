@@ -171,8 +171,6 @@ void destroyShaderProgram(GLuint programId);
 
 // window resize and projection
 void resizeWindow(GLFWwindow* window, int width, int height);
-void toOrtho(GLFWwindow* window);
-//void toOrtho(GLFWwindow* window, glm::mat4 projection);
 
 
 // user Inputs
@@ -180,6 +178,7 @@ void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void keyboardNavigationCallback(GLFWwindow* window);
+void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 // textures
 void flipImageVertical(unsigned char* image, int width, int height, int channels);
@@ -681,12 +680,7 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
         glm::mat4 view = gCamera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
-        // press key to switch from perspective to ortho
-        // FIXME: print/cout response is correct, but perspective does not change. tried poly and callback events, but no success.
-        toOrtho(gWindow);
-        //toOrtho(gWindow, projection);
-
-        // creates and draws all objects
+       // creates and draws all objects
         rendering(view, projection);
 
         // poll for user or OS activity
@@ -833,7 +827,7 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
     glfwSetCursorPosCallback(*window, mousePositionCallback);
     glfwSetScrollCallback(*window, mouseScrollCallback);
     glfwSetMouseButtonCallback(*window, mouseButtonCallback);
-
+    glfwSetKeyCallback(*window, keyboardCallback);
 
     glewExperimental = GL_TRUE;
     GLenum GlewInitResult = glewInit();
@@ -857,16 +851,6 @@ void resizeWindow(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
-
-// switch projection from perspective to ortho by pressing key "p"
-void toOrtho(GLFWwindow* window)
-//void toOrtho(GLFWwindow* window, glm::mat4 projection)
-{
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-        glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-        //projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-        cout << "switching projection to ortho" << endl;
-};
 
 
 // ********** KEYBOARD-BASED NAVIGATION **********
@@ -892,8 +876,22 @@ void keyboardNavigationCallback(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         gCamera.ProcessKeyboard(UP, gDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-        gCamera.ProcessKeyboard(DOWN, gDeltaTime);
+        gCamera.ProcessKeyboard(DOWN, gDeltaTime);        
 }
+
+
+void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    // Change projection to ortho
+    // FIX ME: does not change to ortho. Tried GetKey method, but causes indefinite loop when ortho projection change is added
+    // source: https://stackoverflow.com/questions/51873906/is-there-a-way-to-process-only-one-input-event-after-a-key-is-pressed-using-glfw
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+    {
+        glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+        cout << "Switching from perspective to ortho projection" << endl;
+    }
+}
+
 
 
 
