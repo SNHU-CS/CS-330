@@ -879,12 +879,11 @@ void keyboardNavigationCallback(GLFWwindow* window)
         gCamera.ProcessKeyboard(DOWN, gDeltaTime);        
 }
 
-
+// Change projection to ortho
+// FIX ME: does not change to ortho. Tried GetKey method, but causes indefinite loop when ortho projection change is added
+// source: https://stackoverflow.com/questions/51873906/is-there-a-way-to-process-only-one-input-event-after-a-key-is-pressed-using-glfw
 void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    // Change projection to ortho
-    // FIX ME: does not change to ortho. Tried GetKey method, but causes indefinite loop when ortho projection change is added
-    // source: https://stackoverflow.com/questions/51873906/is-there-a-way-to-process-only-one-input-event-after-a-key-is-pressed-using-glfw
     if (key == GLFW_KEY_P && action == GLFW_PRESS)
     {
         glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
