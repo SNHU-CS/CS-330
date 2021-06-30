@@ -1575,11 +1575,22 @@ void createMeshCoffeeTable(GLMesh& gMesh)
         -1.0f,  0.25f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
     };
 
+    // Index data to share position data of pyramid
+    GLushort indices[] = {
+        0, 1, 2,  // Triangle 1 - front
+        0, 1, 3,  // Triangle 2 - right
+        0, 3, 4,  // Triangle 3 - back
+        0, 2, 4,  // Triangle 4 - left
+        1, 2, 4,  // Triangle 5 - bottom/front
+        1, 3, 4   // Triangle 6 - bottom/back
+    };
+
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
     const GLuint floatsPerUV = 2;
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
+    gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
     glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
     glBindVertexArray(gMesh.vao);
@@ -1643,19 +1654,35 @@ void createMeshTableLegs(GLMesh& gMesh)
         0.704f, -1.0f, -0.406,0.0f, 0.0f, 0.1f, 0.0f, 0.0f // 25,  bottom right back
     };
 
+    // Index data to share position data of pyramid
+    GLushort indices[] = {
+        0, 1, 2,  // Triangle 1 - front
+        0, 1, 3,  // Triangle 2 - right
+        0, 3, 4,  // Triangle 3 - back
+        0, 2, 4,  // Triangle 4 - left
+        1, 2, 4,  // Triangle 5 - bottom/front
+        1, 3, 4,   // Triangle 6 - bottom/back
+    };
+
+
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
     const GLuint floatsPerUV = 2;
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
+    gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
     glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
     glBindVertexArray(gMesh.vao);
 
-    // buffer for vertex data
+
+    //glGenBuffers(2, &gMesh.vbo);  // Create 2 buffers: vertex data and the indices
     glGenBuffers(1, &gMesh.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+   //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gMesh.vbo);
+   //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 
     // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
     GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
@@ -2098,6 +2125,8 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+    //glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+
 }
 
 
@@ -2146,5 +2175,6 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
 
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+
 
 }
