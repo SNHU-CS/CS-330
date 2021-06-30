@@ -1575,22 +1575,12 @@ void createMeshCoffeeTable(GLMesh& gMesh)
         -1.0f,  0.25f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
     };
 
-    // Index data to share position data of pyramid
-    GLushort indices[] = {
-        0, 1, 2,  // Triangle 1 - front
-        0, 1, 3,  // Triangle 2 - right
-        0, 3, 4,  // Triangle 3 - back
-        0, 2, 4,  // Triangle 4 - left
-        1, 2, 4,  // Triangle 5 - bottom/front
-        1, 3, 4   // Triangle 6 - bottom/back
-    };
 
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
     const GLuint floatsPerUV = 2;
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
-    gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
     glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
     glBindVertexArray(gMesh.vao);
@@ -1625,59 +1615,64 @@ void createMeshTableLegs(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
-        0.000f, 1.0f, 0.000f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 0, center top center
-        0.813f, 1.0f, 0.000f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 1, top right middle
-        0.704f, 1.0f, 0.406f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 2, top right front
-        0.406f, 1.0f, 0.704f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 3, top right front
-        0.000f, 1.0f, 0.813f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 4, top middle front
-        -0.406f, 1.0f, 0.704f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 5, top left front
-        -0.704f, 1.0f, 0.406f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 6, top left front
-        -0.813f, 1.0f, 0.000f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 7, top left middle
-        -0.704f, 1.0f, -0.406, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 8, top left back
-        -0.406f, 1.0f, -0.704f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 9, top left back  
-        0.000f, 1.0f, -0.813f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 10, top middle back
-        0.406f, 1.0f, -0.704f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 11, top right back
-        0.704f, 1.0f, -0.406, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 12, top right back
+         0.000f,  1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 0, center top center
+         0.813f,  1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 1, top right middle
+         0.704f,  1.0f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 2, top right front
+         0.406f,  1.0f,  0.704f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 3, top right front
+         0.000f,  1.0f,  0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 4, top middle front
+        -0.406f,  1.0f,  0.704f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 5, top left front
+        -0.704f,  1.0f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 6, top left front
+        -0.813f,  1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 7, top left middle
+        -0.704f,  1.0f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 8, top left back
+        -0.406f,  1.0f, -0.704f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 9, top left back  
+         0.000f,  1.0f, -0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 10, top middle back
+         0.406f,  1.0f, -0.704f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 11, top right back
+         0.704f,  1.0f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 12, top right back
 
-        0.000f, -1.0f, 0.000f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 13, center bottom center
-        0.813f, -1.0f, 0.000f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 14, bottom right middle
-        0.704f, -1.0f, 0.406f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 15,  bottom right front
-        0.406f, -1.0f, 0.704f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 16,  bottom right front
-        0.000f, -1.0f, 0.813f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f,  // 17,  bottom middle front
-        -0.406f, -1.0f, 0.704f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 18,  bottom left front
-        -0.704f, -1.0f, 0.406f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 19,  bottom left front
-        -0.813f, -1.0f, 0.000f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 20,  bottom left middle
-        -0.704f, -1.0f, -0.406, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 21,  bottom left back
-        -0.406f, -1.0f, -0.704f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 22,  bottom left back
-        0.000f, -1.0f, -0.813f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 23,  bottom middle back
-        0.406f, -1.0f, -0.704f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, // 24,  bottom right back
-        0.704f, -1.0f, -0.406,0.0f, 0.0f, 0.1f, 0.0f, 0.0f // 25,  bottom right back
+         0.000f, -1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 13, center bottom center
+         0.813f, -1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 14, bottom right middle
+         0.704f, -1.0f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 15,  bottom right front
+         0.406f, -1.0f,  0.704f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 16,  bottom right front
+         0.000f, -1.0f,  0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 17,  bottom middle front
+        -0.406f, -1.0f,  0.704f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 18,  bottom left front
+        -0.704f, -1.0f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 19,  bottom left front
+        -0.813f, -1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 20,  bottom left middle
+        -0.704f, -1.0f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 21,  bottom left back
+        -0.406f, -1.0f, -0.704f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 22,  bottom left back
+         0.000f, -1.0f, -0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 23,  bottom middle back
+         0.406f, -1.0f, -0.704f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 24,  bottom right back
+         0.704f, -1.0f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f  // 25,  bottom right back
+
     };
 
-    // Index data to share position data of pyramid
+    // Index data to share position data of cylinder
     GLushort indices[] = {
-        0, 1, 2,  // Triangle 1 - front
-        0, 1, 3,  // Triangle 2 - right
-        0, 3, 4,  // Triangle 3 - back
-        0, 2, 4,  // Triangle 4 - left
-        1, 2, 4,  // Triangle 5 - bottom/front
-        1, 3, 4,   // Triangle 6 - bottom/back
-    };
+        4, 8, 12,  // top large center
+        12, 2, 4,  // top medium left
+        4, 6, 8,   // top medium right
+        8, 10, 12, // top medium front
+        12, 1, 2,  // top small center right
+        2, 3, 4,   // top small back right
+        4, 5, 6,   // top small back left
+        6, 7, 8,   // top small center left
+        8, 9, 10,  // top small front left
+        10, 11, 12 // top small front right
 
+    };
 
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
     const GLuint floatsPerUV = 2;
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
-    gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
+    //gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
     glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
     glBindVertexArray(gMesh.vao);
 
 
-    //glGenBuffers(2, &gMesh.vbo);  // Create 2 buffers: vertex data and the indices
     glGenBuffers(1, &gMesh.vbo);
+   //glGenBuffers(2, &gMesh.vbo);  // Create 2 buffers: vertex data and the indices
     glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gMesh.vbo);
@@ -2124,8 +2119,8 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glBindVertexArray(gMesh.vao);
 
     // Draws the triangles
-    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-    //glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+    //glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 
 }
 
