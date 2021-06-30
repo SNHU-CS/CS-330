@@ -4,11 +4,13 @@
 #include <cstdlib>          // EXIT_FAILURE
 #include <GL/glew.h>        // GLEW library
 #include <GLFW/glfw3.h>     // GLFW library
+#include <math.h>
 
 // GLM Math Header inclusions
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 
 // other imports
 #define STB_IMAGE_IMPLEMENTATION
@@ -19,6 +21,10 @@
 /*Shader program Macro*/
 #ifndef GLSL
 #define GLSL(Version, Source) "#version " #Version " core \n" #Source
+#endif
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
 #endif
 
 using namespace std; // Standard namespace
@@ -210,6 +216,7 @@ void createMeshCoffeeTable(GLMesh& gMesh);
 void createMeshCouch(GLMesh& gMesh);
 void createMeshCouchLegs(GLMesh& gMesh);
 void createMeshCouchArmRests(GLMesh& gMesh);
+void createMeshC(GLMesh& gMesh);
 
 // draw
 void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
@@ -230,6 +237,7 @@ void drawCouchArmRests(glm::mat4 view, glm::mat4 projection, GLuint shaderProgra
 
 void DrawLight(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
+
 
 // ****** VERTEX SHADER SOURCE CODE
 // Vertex Shader Source Code
@@ -778,6 +786,9 @@ void rendering(glm::mat4 view, glm::mat4 projection)
     // TODO: assign variable to hold texture number
     DrawCube(view, projection, gCubeProgramId, gMesh, GL_TEXTURE0, texWoodSolidDark);
     // DrawLight();
+
+
+
 
     drawSideTable(view, projection, gSideTableProgramId, gMeshSideTable, texNumSideTable, texSideTable);
     drawSideDrawer(view, projection, gSideDrawerProgramId, gMeshSideDrawer, texNumSideDrawer, texSideDrawer);
@@ -1938,6 +1949,8 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
     }
     */
 }
+
+
 
 
 void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
