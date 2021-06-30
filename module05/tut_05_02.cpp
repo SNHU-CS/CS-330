@@ -63,11 +63,12 @@ namespace
     GLuint gHouseWallProgramId;
     GLuint gHouseDoorProgramId;
     GLuint gPaintingProgramId;
+    GLuint gCoffeeTableProgramId;
+    GLuint gTableLegsProgramId;
     GLuint gHouseWreathProgramId;
     GLuint gLampBottomProgramId;
     GLuint gLampTopProgramId;
     GLuint gBalloonsProgramId;
-    GLuint gCoffeeTableProgramId;
     GLuint gCouchSeatsProgramId;
     GLuint gCouchArmRestsProgramId;
     GLuint gCouchLegsProgramId;
@@ -94,6 +95,7 @@ namespace
     GLuint texCottonCream; // 9+2
     GLuint texFabric; // 10+2
     GLuint texMetalBlack; // 11+2
+    GLuint texTableLegs;
     GLuint texWoodOakFine; // 12+2
     GLuint texWalnutMed; // 13+2
 
@@ -105,6 +107,7 @@ namespace
     GLenum texNumHouseDoor;
     GLenum texNumPainting;
     GLenum texNumCoffeeTable;
+    GLenum texNumTableLegs;
 
     // UV scale of textures
     // check if can define values within shader, draw or mesh later
@@ -117,11 +120,13 @@ namespace
     glm::vec2 gUVScaleHouseDoor;
     glm::vec2 gUVScaleWreath;
     glm::vec2 gUVScalePainting;
+    glm::vec2 gUVScaleCoffeeTable;    
+    glm::vec2 gUVScaleTableLegs;    
     glm::vec2 gUVScaleLampTop;
     glm::vec2 gUVScaleLampBottom;
     glm::vec2 gUVScaleBalloons;
-    glm::vec2 gUVScaleCoffeeTable;
-    glm::vec2 gUVScaleCoffeeLegs;
+
+
     glm::vec2 gUVScaleCouchSeats;
     glm::vec2 gUVScaleCouchLegs;
     glm::vec2 gUVScaleCouchArmRests;
@@ -150,6 +155,7 @@ namespace
     GLMesh gMeshLampTop;
     GLMesh gMeshBalloons;
     GLMesh gMeshCoffeeTable;
+    GLMesh gMeshTableLegs;
     GLMesh gMeshCouchSeats;
     GLMesh gMeshCouchLegs;
     GLMesh gMeshCouchArmRests;
@@ -211,12 +217,13 @@ void createMeshPainting(GLMesh& gMesh);
 void createMeshLapBottom(GLMesh& gMesh);
 void createMeshLapTop(GLMesh& gMesh);
 void createMeshCoffeeTable(GLMesh& gMesh);
+void createMeshTableLegs(GLMesh& gMesh);
 void createMeshBalloons(GLMesh& gMesh);
 void createMeshCoffeeTable(GLMesh& gMesh);
 void createMeshCouch(GLMesh& gMesh);
-void createMeshCouchLegs(GLMesh& gMesh);
+void createMeshTableLegs(GLMesh& gMesh);
 void createMeshCouchArmRests(GLMesh& gMesh);
-void createMeshC(GLMesh& gMesh);
+
 
 // draw
 void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
@@ -232,7 +239,7 @@ void drawLampTop(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, G
 void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
-void drawCouchLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
+void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawCouchArmRests(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 
 void DrawLight(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
@@ -463,6 +470,23 @@ void main()
 }
 );
 
+// Fragment Shader: legs for tables and other furnature
+const GLchar* tableLegsFragShader = GLSL(440,
+    in vec2 vertexTextureCoordinate;
+
+out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
+
+uniform sampler2D texTableLegs;
+uniform vec2 gUVScaleTableLegs;
+
+void main()
+{
+    vec4 fragTex = texture(texTableLegs, vertexTextureCoordinate * uvScaleTableLegs);
+    if (fragTex.a < 0.1)
+        discard;
+    fragmentColor = fragTex;
+}
+);
 
 // flip images vertically
 // Images are loaded with Y axis going down, but OpenGL's Y axis goes up
