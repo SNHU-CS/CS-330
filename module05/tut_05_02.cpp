@@ -2542,6 +2542,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
 }
 
 
+// draw coffee table legs, couch legs, balloon string, balloon string holder
 void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     // Set the shader to be used
@@ -2553,8 +2554,7 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
     
-
-
+   
     // ********* COFFEE TABLE LEGS (4) *********
     glm::mat4 scale = glm::scale(glm::vec3(0.15f, 0.5f, 0.15f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
@@ -2597,6 +2597,31 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
         // Draws the triangles
         glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
     }
+
+
+    // ********* Balloon string *********
+    scale = glm::scale(glm::vec3(0.01f, 1.1f, 0.01f));
+    rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(2.5f, 2.0f, 1.6f));
+
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = translation * rotation * scale;
+
+    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleTableLegs");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // bind textures on corresponding texture units
+    glActiveTexture(textureNum);
+    glBindTexture(GL_TEXTURE_2D, textureName);
+
+    // Activate the VBOs contained within the mesh's VA
+    glBindVertexArray(gMesh.vao);
+
+    // Draws the triangles
+    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 }
 
 
@@ -2676,9 +2701,9 @@ void drawLampTop(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, G
 
 void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
-    glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.0f));
+    glm::mat4 scale = glm::scale(glm::vec3(0.4f, 0.6f, 0.4f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(2.5f, 2.0f, 1.5f));
+    glm::mat4 translation = glm::translate(glm::vec3(2.5f, 3.5f, 1.6f));
     glm::vec2 gUVScale(1.0f, 1.0f);
 
     // Model matrix: transformations are applied right-to-left order
