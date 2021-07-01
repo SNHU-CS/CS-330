@@ -73,7 +73,6 @@ namespace
     GLuint gCouchArmRestsProgramId;
 
 
-
     // TODO: check into bindless textures later
     // Texture
     // defaults
@@ -93,13 +92,15 @@ namespace
     GLuint texWreath; // 7+2
     GLuint texMarbleCream; // 8+2
     GLuint texCottonCream; // 9+2
+    GLenum texLampTop;
+    GLenum texLampBottom;
     GLuint texFabric; // 10+2
     GLuint texMetalBlack; // 11+2
     GLuint texTableLegs;
     GLuint texWoodOakFine; // 12+2
     GLuint texWalnutMed; // 13+2
 
-    // assign texture slots (TEXTURE#)
+    // assign texture slots (TEXTURE NUM #)
     GLenum texNumSideTable;
     GLenum texNumSideDrawer;
     GLenum texNumHouseFloor;
@@ -108,6 +109,8 @@ namespace
     GLenum texNumPainting;
     GLenum texNumCoffeeTable;
     GLenum texNumTableLegs;
+    GLenum texNumLampTop;
+    GLenum texNumLampBottom;
 
     // UV scale of textures
     // check if can define values within shader, draw or mesh later
@@ -150,8 +153,7 @@ namespace
     GLMesh gMeshHouseDoor;
     GLMesh gMeshHouseWreath;
     GLMesh gMeshPainting;
-    GLMesh gMeshLampBottom;
-    GLMesh gMeshLampTop;
+    GLMesh gMeshLamp;
     GLMesh gMeshBalloons;
     GLMesh gMeshCoffeeTable;
     GLMesh gMeshTableLegs;
@@ -213,8 +215,7 @@ void createMeshHouseWall(GLMesh& gMesh);
 void createMeshHouseDoor(GLMesh& gMesh);
 void createMeshWreath(GLMesh& gMesh);
 void createMeshPainting(GLMesh& gMesh);
-void createMeshLapBottom(GLMesh& gMesh);
-void createMeshLapTop(GLMesh& gMesh);
+void createMeshLamp(GLMesh& gMesh);
 void createMeshCoffeeTable(GLMesh& gMesh);
 void createMeshTableLegs(GLMesh& gMesh);
 void createMeshBalloons(GLMesh& gMesh);
@@ -247,16 +248,16 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
 const GLchar* vertexShaderSource = GLSL(440,
 
     layout(location = 0) in vec3 position; // VAP position 0 for vertex position data
-layout(location = 1) in vec3 normal; // VAP position 1 for normals
-layout(location = 2) in vec2 textureCoordinate;
+    layout(location = 1) in vec3 normal; // VAP position 1 for normals
+    layout(location = 2) in vec2 textureCoordinate;
 
-out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
-out vec3 vertexNormal; // For outgoing normals to fragment shader
-out vec2 vertexTextureCoordinate;
+    out vec3 vertexFragmentPos; // For outgoing color / pixels to fragment shader
+    out vec3 vertexNormal; // For outgoing normals to fragment shader
+    out vec2 vertexTextureCoordinate;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
 
 void main()
 {
@@ -452,36 +453,75 @@ const GLchar* paintingFragShader = GLSL(440,
 const GLchar* coffeeTableFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
+    out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
 
-uniform sampler2D texCoffeeTable;
-uniform vec2 uvScaleCoffeeTable;
+    uniform sampler2D texCoffeeTable;
+    uniform vec2 uvScaleCoffeeTable;
 
-void main()
-{
-    vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * uvScaleCoffeeTable);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * uvScaleCoffeeTable);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
+
 
 // Fragment Shader: legs for tables and other furniture
 const GLchar* tableLegsFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
-out vec4 fragmentColor;
+    out vec4 fragmentColor;
 
-uniform sampler2D texTableLegs;
-uniform vec2 gUVScaleTableLegs;
+    uniform sampler2D texTableLegs;
+    uniform vec2 gUVScaleTableLegs;
 
-void main()
-{
-    vec4 fragTex = texture(texTableLegs, vertexTextureCoordinate * gUVScaleTableLegs);
-    if (fragTex.a < 0.1)
-        discard;
-    fragmentColor = fragTex;
-}
+    void main()
+    {
+        vec4 fragTex = texture(texTableLegs, vertexTextureCoordinate * gUVScaleTableLegs);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
+);
+
+
+// Fragment Shader: lamp bottom (base)
+const GLchar* lampBottomFragShader = GLSL(440,
+    in vec2 vertexTextureCoordinate;
+
+    out vec4 fragmentColor;
+
+    uniform sampler2D texLampBottom;
+    uniform vec2 gUVScaleLampBottom;
+
+    void main()
+    {
+        vec4 fragTex = texture(texLampBottom, vertexTextureCoordinate * gUVScaleLampBottom);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
+);
+
+
+// Fragment Shader: lamp top (shade)
+const GLchar* lampTopFragShader = GLSL(440,
+    in vec2 vertexTextureCoordinate;
+
+    out vec4 fragmentColor;
+
+    uniform sampler2D texLampTop;
+    uniform vec2 gUVScaleLampTop;
+
+    void main()
+    {
+        vec4 fragTex = texture(texLampTop, vertexTextureCoordinate * gUVScaleLampTop);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+    }
 );
 
 
@@ -526,11 +566,10 @@ int main(int argc, char* argv[])
     createMeshPainting(gMeshPainting);
     createMeshCoffeeTable(gMeshCoffeeTable);
     createMeshTableLegs(gMeshTableLegs);
+    createMeshLamp(gMeshLamp);
     /*
     createMeshRug)(gMeshRug);
     createMeshWreath(gMeshHouseWreath);
-    createMeshLapBottom(gMeshLampBottom);
-    createMeshLapTop(gMeshLampTop);
     createMeshBalloons(gMeshBalloons);
     createMeshCoffeeTable(gMeshCoffeeTable);
     createMeshCouchSeats(gMeshCouchSeats);
@@ -581,18 +620,20 @@ int main(int argc, char* argv[])
         cout << "Shader crash/return false: table legs" << endl;
     //return EXIT_FAILURE;
 
+    if (!createShaderProgram(vertexShaderSource, lampBottomFragShader, gLampBottomProgramId))
+        cout << "Shader crash/return false: lamp bottom" << endl;
+    //return EXIT_FAILURE;
+
+    if (!createShaderProgram(vertexShaderSource, lampTopFragShader, gLampTopProgramId))
+        cout << "Shader crash/return false: lamp top" << endl;
+    //return EXIT_FAILURE;
+
  /*
 
 if (!createShaderProgram(vertexShaderSource, rugFragShader, gRugProgramId))
     return EXIT_FAILURE;
 
 if (!createShaderProgram(vertexShaderSource, houseWreathFragShader, gHouseWreathProgramId))
-    return EXIT_FAILURE;
-
-if (!createShaderProgram(vertexShaderSource, lampBottomFragShader, gLampBottomProgramId))
-    return EXIT_FAILURE;
-
-if (!createShaderProgram(vertexShaderSource, lampTopFragShader, gLampTopProgramId))
     return EXIT_FAILURE;
 
 if (!createShaderProgram(vertexShaderSource, balloonsFragShader, gBalloonsProgramId))
@@ -710,8 +751,33 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     } 
     //  table legs, furniture legs
     glUseProgram(gTableLegsProgramId);
-    glUniform1i(glGetUniformLocation(gTableLegsProgramId, "texTableLegs"), 6);
-    texNumTableLegs = GL_TEXTURE6;
+    glUniform1i(glGetUniformLocation(gTableLegsProgramId, "texTableLegs"), 7);
+    texNumTableLegs = GL_TEXTURE7;
+
+
+    // TEXTURE: marble, cream colored
+    texFilename = "../../resources/textures/marble-cream.jpg";
+    if (!createTexture(texFilename, texLampBottom, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+    // lamp base
+    glUseProgram(gLampBottomProgramId);
+    glUniform1i(glGetUniformLocation(gLampBottomProgramId, "texLampBottom"), 8);
+    texNumLampBottom = GL_TEXTURE8;
+    
+    // TEXTURE: cotton fabric, off-white cream color
+    texFilename = "../../resources/textures/cotton-seamless.jpg";
+    if (!createTexture(texFilename, texLampTop, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+    // lamp shade
+    glUseProgram(gLampTopProgramId);
+    glUniform1i(glGetUniformLocation(gLampTopProgramId, "texLampTop"), 9);
+    texNumLampTop = GL_TEXTURE9;
 
 
     // render loop. 
@@ -747,11 +813,10 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyMesh(gMeshPainting);
     destroyMesh(gMeshCoffeeTable);
     destroyMesh(gMeshTableLegs);
+    destroyMesh(gMeshLamp);
     /*
     destroyMesh(gMeshRug);
     destroyMesh(gMeshHouseWreath);
-    destroyMesh(gMeshLampBottom);
-    destroyMesh(gMeshLampTop);
     destroyMesh(gMeshBalloons);
     destroyMesh(gMeshCouchSeats);
     destroyMesh(gMeshCouchLegs);
@@ -772,6 +837,8 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyTexture(texCoffeeTable);
     destroyTexture(texMetalBlack);
     destroyTexture(texTableLegs);
+    destroyTexture(texLampBottom);
+    destroyTexture(texLampTop);
     /*
     destroyTexture(texRug); // 7 image
     destroyTexture(texWreath); // 8
@@ -793,12 +860,12 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyShaderProgram(gPaintingProgramId);
     destroyShaderProgram(gCoffeeTableProgramId);
     destroyShaderProgram(gTableLegsProgramId);
-
+    destroyShaderProgram(gLampBottomProgramId);
+    destroyShaderProgram(gLampTopProgramId);
     /*
      destroyShaderProgram(gRugProgramId);
      destroyShaderProgram(gHouseWreathProgramId);
-     destroyShaderProgram(gLampBottomProgramId);
-     destroyShaderProgram(gLampTopProgramId);
+
      destroyShaderProgram(gBalloonsProgramId);
      destroyShaderProgram(gCouchSeatsProgramId);
      destroyShaderProgram(gCouchArmRestsProgramId);
@@ -840,6 +907,8 @@ void rendering(glm::mat4 view, glm::mat4 projection)
     drawPainting(view, projection, gPaintingProgramId, gMeshPainting, texNumPainting, texPainting);
     drawCoffeeTable(view, projection, gCoffeeTableProgramId, gMeshCoffeeTable, texNumCoffeeTable, texCoffeeTable);
     drawTableLegs(view, projection, gTableLegsProgramId, gMeshTableLegs, texNumTableLegs, texTableLegs);
+    drawLampBottom(view, projection, gLampBottomProgramId, gMeshLamp, texNumLampBottom, texLampBottom);
+    drawLampTop(view, projection, gLampTopProgramId, gMeshLamp, texNumLampTop, texLampTop);
     
     // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
@@ -944,7 +1013,6 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
         cout << "Switching from perspective to ortho projection" << endl;
     }
 }
-
 
 
 
@@ -1603,14 +1671,12 @@ void createMeshCoffeeTable(GLMesh& gMesh)
 }
 
 
-// mesh for coffee table legs and couch legs
+// mesh for coffee table legs and couch legs (only tube, has no top/bottom)
 void createMeshTableLegs(GLMesh& gMesh)
 {
-    /// mapped out to max triagnels (1 large tri in middle, 3 medium tri around, and 6 tri as the edges)
     // source: https://stackoverflow.com/questions/59468388/how-the-heck-do-you-use-gl-triangle-fan-to-draw-a-circle-in-opengl
     // coordinate calculations: https://www.sr-research.com/circular-coordinate-calculator/
 
-    //draw elements version.... cylinder tube is not calculated
     GLfloat verts[] = {
         // Vertex Positions       // normals         // textures
         // top
@@ -1629,7 +1695,6 @@ void createMeshTableLegs(GLMesh& gMesh)
          0.406f,  1.0f, -0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 11, top right back
          0.704f,  1.0f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 12, top right back - done
          // bottom
-
          0.813f, -1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 13 (1), bottom right middle
          0.704f, -1.0f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 14 (2), bottom right front - DONE
          0.406f, -1.0f,  0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 15 (3), bottom right front - DONE
@@ -1647,11 +1712,11 @@ void createMeshTableLegs(GLMesh& gMesh)
 
     };
 
-    // Index data to share position data of cylinder
-    // designed for max space used per triangle (1 large tri in middle, 3 medium tri around, and 6 tri as the edges)
-    // top and bottom are not for textured display
+    // displays cylinder tube only
+    // top and bottom are NOT needed for display. 
     GLushort indices[] = {
-        
+        /*
+        // minimizes number of triangles needed for top and bottom
         // top
          4,  8, 12, // top large center
         12,  2,  4, // top medium left
@@ -1675,7 +1740,7 @@ void createMeshTableLegs(GLMesh& gMesh)
         18, 19, 20, // bottom small center left
         20, 21, 22, // bottom small front left
         22, 23, 24,  // bottom small front right
-        
+        */
         // TUBE
         // back right panels
          1,  2, 13, // top 
@@ -1707,6 +1772,143 @@ void createMeshTableLegs(GLMesh& gMesh)
         24, 13,  1  // bottom
     };
     
+
+    const GLuint floatsPerVertex = 3;
+    const GLuint floatsPerNormal = 3;
+    const GLuint floatsPerUV = 2;
+
+
+    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(gMesh.vao);
+
+
+    gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]));
+    glGenBuffers(2, gMesh.vbos); // Create 2 buffers: vertex data and the indices
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbos[0]); // Activates the buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gMesh.vbos[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+
+    // Create Vertex Attribute Pointers
+    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float)* floatsPerVertex));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float)* (floatsPerVertex + floatsPerNormal)));
+    glEnableVertexAttribArray(2);
+}
+
+// mesh for lamp, both top and bottom
+void createMeshLamp(GLMesh& gMesh)
+{
+
+    // source: https://stackoverflow.com/questions/59468388/how-the-heck-do-you-use-gl-triangle-fan-to-draw-a-circle-in-opengl
+    // coordinate calculations: https://www.sr-research.com/circular-coordinate-calculator/
+
+    GLfloat verts[] = {
+        // Vertex Positions       // normals         // textures
+        // top center point
+         0.000f,  1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 0, center top center
+        // top
+         0.813f,  1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 1, top right middle - DONE
+         0.704f,  1.0f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 2, top right front - DONE
+         0.406f,  1.0f,  0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 3, top right front
+         0.000f,  1.0f,  0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 4, top middle front - done
+        -0.406f,  1.0f,  0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 5, top left front - p
+        -0.704f,  1.0f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 6, top left front - done
+        -0.813f,  1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 7, top left middle -p
+        -0.704f,  1.0f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 8, top left back - done
+        -0.406f,  1.0f, -0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 9, top left back  
+         0.000f,  1.0f, -0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 10, top middle back - p
+         0.406f,  1.0f, -0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 11, top right back
+         0.704f,  1.0f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 12, top right back - done
+         
+        // bottom
+         0.813f, -1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 13 (1), bottom right middle
+         0.704f, -1.0f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 14 (2), bottom right front - DONE
+         0.406f, -1.0f,  0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 15 (3), bottom right front - DONE
+         0.000f, -1.0f,  0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 16 (4), bottom middle front
+        -0.406f, -1.0f,  0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 17 (5), bottom left front   (0.0, 0.1)
+        -0.704f, -1.0f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 18 (6), bottom left front
+        -0.813f, -1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 19 (7), bottom left middle
+        -0.704f, -1.0f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 20 (8), bottom left back
+        -0.406f, -1.0f, -0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 21 (9), bottom left back
+         0.000f, -1.0f, -0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 22 (10), bottom middle back
+         0.406f, -1.0f, -0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 23 (11), bottom right back
+         0.704f, -1.0f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 24 (12), bottom right back
+        // bottom center point
+         0.000f, -1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 25 (0), center bottom center
+
+    };
+
+    // Index data to share position data of cylinder
+    // top and bottom are "triangle fan" for a better texture display
+    GLushort indices[] = {
+        
+        // top
+        0, 1, 2, 
+        0, 2, 3,
+        0, 3, 4, 
+        0, 4, 5, 
+        0, 5, 6, 
+        0, 6, 7, 
+        0, 7, 8, 
+        0, 8, 9,
+        0, 9, 10,
+        0, 10, 11,
+        0, 11, 12,
+        0, 12, 1,
+        // bottom
+        25, 13, 14,
+        25, 14, 15,
+        25, 15, 16,
+        25, 16, 17,
+        25, 17, 18,
+        25, 18, 19,
+        25, 19, 20,
+        25, 20, 21,
+        25, 21, 22,
+        25, 22, 23,
+        25, 23, 24,
+        25, 24, 13,
+        // TUBE
+        // back right panels
+         1,  2, 13, // top 
+        13, 14,  2, // bottom
+         2,  3, 14, // top
+        14, 15,  3, // bottom
+         3,  4, 15, // top
+        15, 16,  4,
+        // back left panels
+         4,  5, 16, // top
+        16, 17,  5, // bottom
+         5,  6, 17, // top
+        17, 18,  6, // bottom
+         6,  7, 18, // top
+        18, 19,  7, // bottom
+        // front left panels
+         7,  8, 19, // top
+        19, 20,  8, // bottom
+         8,  9, 20, // top
+        20, 21,  9, // bottom
+         9, 10, 21, // top
+        21, 22, 10,
+        // front right panels
+        10, 11, 22, // top 
+        22, 23, 11, // bottom
+        11, 12, 23, // top
+        23, 24, 12, // bottom
+        12,  1, 24, // top
+        24, 13,  1  // bottom
+    };
+
 
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
@@ -2174,6 +2376,80 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 }
 
 
+void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
+{
+    glm::mat4 scale = glm::scale(glm::vec3(0.25f, 0.5f, 0.25f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(-5.0f, 1.85f, 1.5f));
+    glm::vec2 gUVScale(1.25f, 1.5f);
+
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = translation * rotation * scale;
+
+    // Set the shader to be used
+    glUseProgram(shaderProgramID);
+
+    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleLampBottom");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // bind textures on corresponding texture units
+    glActiveTexture(textureNum);
+    glBindTexture(GL_TEXTURE_2D, textureName);
+
+    // Activate the VBOs contained within the mesh's VA
+    glBindVertexArray(gMesh.vao);
+
+    // Draws the triangles
+    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+}
+
+
+void drawLampTop(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
+{
+    glm::mat4 scale = glm::scale(glm::vec3(0.6f, 0.4f, 0.6f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(-5.0f, 2.5f, 1.5f));
+    glm::vec2 gUVScale(0.4f, 0.6f);
+
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = translation * rotation * scale;
+
+    // Set the shader to be used
+    glUseProgram(shaderProgramID);
+
+    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleLampTop");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // bind textures on corresponding texture units
+    glActiveTexture(textureNum);
+    glBindTexture(GL_TEXTURE_2D, textureName);
+
+    // Activate the VBOs contained within the mesh's VA
+    glBindVertexArray(gMesh.vao);
+
+    // Draws the triangles
+    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+
+}
+
+
 void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     glBindVertexArray(gMesh.vao);
@@ -2181,7 +2457,7 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
     glUseProgram(shaderProgramID);
     glm::mat4 scale = glm::scale(glm::vec3(3.0f, 2.0f, -3.0f));
     glm::mat4 rotation = glm::rotate(15.0f, glm::vec3(0.0, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 2.0f, 2.0f));
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
