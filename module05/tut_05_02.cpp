@@ -790,8 +790,8 @@ int main(int argc, char* argv[])
     texNumBalloons = GL_TEXTURE10;
 
     // TEXTURE: red woven fabric
-    texFilename = "../../resources/textures/rubber-green.jpg";
-    if (!createTexture(texFilename, texCouch, GL_REPEAT, GL_LINEAR))
+    texFilename = "../../resources/textures/fabric-red-seamless.png";
+    if (!createTexture(texFilename, texCouch, GL_MIRRORED_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
@@ -2558,7 +2558,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
     // create model view: scale, rotate, translate
     glm::mat4 scale = glm::scale(glm::vec3(2.0f, 0.5f, 1.3f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(-1.0f, 0.8f, 5.5f));
+    glm::mat4 translation = glm::translate(glm::vec3(-1.25f, 0.8f, 5.5f));
     glm::vec2 gUVScale(2.0f, 0.25f);
 
 
@@ -2608,26 +2608,67 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     
    
     // ********* COFFEE TABLE LEGS (4) *********
-    glm::mat4 scale = glm::scale(glm::vec3(0.15f, 0.5f, 0.15f));
+    glm::mat4 scale = glm::scale(glm::vec3(0.1f, 0.5f, 0.1f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     glm::vec2 gUVScale(1.0f, 1.0f);
     
     // transition. each leg has a unique position
-    glm::vec3 legPosition[] = {
+    glm::vec3 legPositionCoffee[] = {
         // 1st dresser
-        glm::vec3(-2.75f, 0.3f, 5.2f), // right front leg
-        glm::vec3( 0.75f, 0.3f, 5.2f), // left front leg
-        glm::vec3(-2.75f, 0.3f, 5.8f), // right back leg
-        glm::vec3( 0.75f, 0.3f, 5.8f) // left back leg
+        glm::vec3(-3.0f, 0.3f, 5.2f), // right front leg
+        glm::vec3( 0.5f, 0.3f, 5.2f), // left front leg
+        glm::vec3(-3.0f, 0.3f, 5.8f), // right back leg
+        glm::vec3( 0.5f, 0.3f, 5.8f) // left back leg
     };
 
     // counts the number of objects
-    int legCount = sizeof(legPosition) / sizeof(legPosition[0]);
+    int legCount = sizeof(legPositionCoffee) / sizeof(legPositionCoffee[0]);
 
     // draws each leg
     for (unsigned int i = 0; i < legCount; i++)
     {
-        glm::mat4 translation = glm::translate(glm::vec3(legPosition[i]));
+        glm::mat4 translation = glm::translate(glm::vec3(legPositionCoffee[i]));
+
+        // Model matrix: transformations are applied right-to-left order
+        glm::mat4 model = translation * rotation * scale;
+
+        // Retrieves and passes transform matrices to the Shader program
+        GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleTableLegs");
+        glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+        // bind textures on corresponding texture units
+        glActiveTexture(textureNum);
+        glBindTexture(GL_TEXTURE_2D, textureName);
+
+        // Activate the VBOs contained within the mesh's VA
+        glBindVertexArray(gMesh.vao);
+
+        // Draws the triangles
+        glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+    }
+
+        // ********* COFFEE TABLE LEGS (4) *********
+    scale = glm::scale(glm::vec3(0.15f, 0.5f, 0.15f));
+    
+    // transition. each leg has a unique position
+    glm::vec3 legPositionCouch[] = {
+        // 1st dresser
+        glm::vec3(-3.25f, 0.3f, 0.51f), // right front leg
+        glm::vec3( 0.75f, 0.3f, 0.51f), // left front leg
+        glm::vec3(-3.25f, 0.3f, 2.51f), // right back leg
+        glm::vec3( 0.75f, 0.3f, 2.51f) // left back leg
+    };
+
+    // counts the number of objects
+    legCount = sizeof(legPositionCouch) / sizeof(legPositionCouch[0]);
+
+    // draws each leg
+    for (unsigned int i = 0; i < legCount; i++)
+    {
+        glm::mat4 translation = glm::translate(glm::vec3(legPositionCouch[i]));
 
         // Model matrix: transformations are applied right-to-left order
         glm::mat4 model = translation * rotation * scale;
@@ -2827,8 +2868,8 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
     // ********* COUCH SEATS *********
     glm::mat4 scale = glm::scale(glm::vec3(2.5f, 1.5f, 1.5f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(-1.25f, 0.8f, 1.5f));
-    glm::vec2 gUVScale(1.0f, 1.0f);
+    glm::mat4 translation = glm::translate(glm::vec3(-1.25f, 0.8f, 1.51f));
+    glm::vec2 gUVScale(3.0f, 1.0f);
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
@@ -2838,7 +2879,7 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleCouch");
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleCouch");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
@@ -2854,29 +2895,20 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
 
     // Draws the triangles
 
-  /*
+  
     // ********* COUCH BACK REST *********
-    glm::mat4 scale = glm::scale(glm::vec3(20.0f, 0.2f, 20.0f));
-    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 10.0f));
-    glm::vec2 gUVScale(5.0f, 4.00f);
+    scale = glm::scale(glm::vec3(2.5f, 4.5f, 0.5f));
+    rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    translation = glm::translate(glm::vec3(-1.25f, 1.5f, 0.75f));
 
     // Model matrix: transformations are applied right-to-left order
-    glm::mat4 model = translation * rotation * scale;
-
-    // Set the shader to be used
-    glUseProgram(shaderProgramID);
+    model = translation * rotation * scale;
 
     // Retrieves and passes transform matrices to the Shader program
-    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
-    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
-    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
-
+    modelLoc = glGetUniformLocation(shaderProgramID, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleCouch");
+    UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleCouch");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
@@ -2889,7 +2921,7 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
 
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-*/
+
 }
 
 
