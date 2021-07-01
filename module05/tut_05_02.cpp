@@ -909,6 +909,7 @@ void rendering(glm::mat4 view, glm::mat4 projection)
     drawTableLegs(view, projection, gTableLegsProgramId, gMeshTableLegs, texNumTableLegs, texTableLegs);
     drawLampBottom(view, projection, gLampBottomProgramId, gMeshLamp, texNumLampBottom, texLampBottom);
     drawLampTop(view, projection, gLampTopProgramId, gMeshLamp, texNumLampTop, texLampTop);
+    drawBalloons(view, projection, gBalloonsProgramId, gMeshBalloons, texNumBalloons, texBalloons)
     
     // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
@@ -1943,6 +1944,248 @@ void createMeshLamp(GLMesh& gMesh)
 }
 
 
+void createMeshBalloons(GLMesh& gMesh)
+{
+    GLfloat verts[] = {
+        // Vertex Positions       // normals         // textures
+        // top center point
+         0.000f,  1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 0, center top center
+        // top
+         0.813f,  0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 1, top right middle
+         0.704f,  0.5f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 2, top right front 
+         0.406f,  0.5f,  0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 3, top right front
+         0.000f,  0.5f,  0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 4, top middle front
+        -0.406f,  0.5f,  0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 5, top left front 
+        -0.704f,  0.5f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 6, top left front
+        -0.813f,  0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 7, top left middle
+        -0.704f,  0.5f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 8, top left back
+        -0.406f,  0.5f, -0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 9, top left back  
+         0.000f,  0.5f, -0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 10, top middle back
+         0.406f,  0.5f, -0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 11, top right back
+         0.704f,  0.5f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 12, top right back
+
+        // bottom
+         0.813f, -0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 13 (1), bottom right middle
+         0.704f, -0.5f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 14 (2), bottom right front
+         0.406f, -0.5f,  0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 15 (3), bottom right front
+         0.000f, -0.5f,  0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 16 (4), bottom middle front
+        -0.406f, -0.5f,  0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 17 (5), bottom left front
+        -0.704f, -0.5f,  0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 18 (6), bottom left front
+        -0.813f, -0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 19 (7), bottom left middle
+        -0.704f, -0.5f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 20 (8), bottom left back
+        -0.406f, -0.5f, -0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 21 (9), bottom left back
+         0.000f, -0.5f, -0.813f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 22 (10), bottom middle back
+         0.406f, -0.5f, -0.704f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 23 (11), bottom right back
+         0.704f, -0.5f, -0.406f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 24 (12), bottom right back
+        
+		//center
+         0.965f, -0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 25 (13, 1), center right middle
+         0.835f, -0.5f,  0.482f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 26 (14, 2), center right front
+         0.482f, -0.5f,  0.835f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 27 (15, 3), center right front
+         0.000f, -0.5f,  0.965f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 28 (16, 4), center middle front
+        -0.482f, -0.5f,  0.835f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 29 (17, 5), center left front
+        -0.835f, -0.5f,  0.482f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 30 (18, 6), center left front
+        -0.965f, -0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 31 (19, 7), center left middle
+        -0.835f, -0.5f, -0.482f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 32 (20, 8), center left back
+        -0.482f, -0.5f, -0.835f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 33 (21, 9), center left back
+         0.000f, -0.5f, -0.965f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 34 (22, 10), center middle back
+         0.482f, -0.5f, -0.835f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 35 (23, 11), center right back
+         0.835f, -0.5f, -0.482f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 36 (24, 12), center right back
+
+        // bottom center point
+         0.000f, -1.0f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f // 37 (0), center bottom center
+
+    };
+
+    // Index data to share position data of cylinder
+    // top and bottom are "triangle fan" for a better texture display
+    GLushort indices[] = {
+
+        // top
+        0, 1, 2,
+        0, 2, 3,
+        0, 3, 4,
+        0, 4, 5,
+        0, 5, 6,
+        0, 6, 7,
+        0, 7, 8,
+        0, 8, 9,
+        0, 9, 10,
+        0, 10, 11,
+        0, 11, 12,
+        0, 12, 1,
+		
+        // bottom
+        37, 13, 14,
+        37, 14, 15,
+        37, 15, 16,
+        37, 16, 17,
+        37, 17, 18,
+        37, 18, 19,
+        37, 19, 20,
+        37, 20, 21,
+        37, 21, 22,
+        37, 22, 23,
+        37, 23, 24,
+        37, 24, 13,
+        
+        // mid-upper tube
+        // upper back right panels
+         1,  2, 25, // top 
+        25, 26,  2, // bottom
+         2,  3, 26, // top
+        26, 27,  3, // bottom
+         3,  4, 27, // top
+        27, 28,  4,
+        // upper back left panels
+         4,  5, 28, // top
+        28, 29,  5, // bottom
+         5,  6, 29, // top
+        29, 30,  6, // bottom
+         6,  7, 30, // top
+        30, 31,  7, // bottom
+        // upper front left panels
+         7,  8, 31, // top
+        31, 32,  8, // bottom
+         8,  9, 32, // top
+        32, 33,  9, // bottom
+         9, 10, 33, // top
+        33, 34, 10,
+        // upper front right panels
+        10, 11, 34, // top 
+        34, 35, 11, // bottom
+        11, 12, 35, // top
+        35, 36, 12, // bottom
+        12,  1, 36, // top
+        36, 25,  1,  // bottom
+		
+		// mid-lower tube
+        // lower back right panels
+         13,  14, 25, // bottom 
+        25, 26,  14, // top
+         14,  15, 26, // bottom
+        26, 27,  15, // top
+         15,  16, 27, // bottom
+        27, 28,  16,
+        // lower back left panels
+         16,  17, 28, // bottom
+        28, 29,  17, // top
+         17,  18, 29, // bottom
+        29, 30,  18, // top
+         18,  19, 30, // bottom
+        30, 31,  19, // top
+        // lower front left panels
+         19,  20, 31, // bottom
+        31, 32,  20, // top
+         20,  21, 32, // bottom
+        32, 33,  21, // top
+         21, 22, 33, // bottom
+        33, 34, 22,
+        // lower front right panels
+        22, 23, 34, // bottom 
+        34, 35, 23, // top
+        23, 24, 35, // bottom
+        35, 36, 24, // top
+        24,  13, 36, // bottom
+        36, 25,  13  // top
+    };
+
+
+    // Index data to share position data of cylinder
+    // top and bottom are "triangle fan" for a better texture display
+    GLushort indices[] = {
+
+        // top
+        0, 1, 2,
+        0, 2, 3,
+        0, 3, 4,
+        0, 4, 5,
+        0, 5, 6,
+        0, 6, 7,
+        0, 7, 8,
+        0, 8, 9,
+        0, 9, 10,
+        0, 10, 11,
+        0, 11, 12,
+        0, 12, 1,
+        // bottom
+        25, 13, 14,
+        25, 14, 15,
+        25, 15, 16,
+        25, 16, 17,
+        25, 17, 18,
+        25, 18, 19,
+        25, 19, 20,
+        25, 20, 21,
+        25, 21, 22,
+        25, 22, 23,
+        25, 23, 24,
+        25, 24, 13,
+        // TUBE
+        // back right panels
+         1,  2, 13, // top 
+        13, 14,  2, // bottom
+         2,  3, 14, // top
+        14, 15,  3, // bottom
+         3,  4, 15, // top
+        15, 16,  4,
+        // back left panels
+         4,  5, 16, // top
+        16, 17,  5, // bottom
+         5,  6, 17, // top
+        17, 18,  6, // bottom
+         6,  7, 18, // top
+        18, 19,  7, // bottom
+        // front left panels
+         7,  8, 19, // top
+        19, 20,  8, // bottom
+         8,  9, 20, // top
+        20, 21,  9, // bottom
+         9, 10, 21, // top
+        21, 22, 10,
+        // front right panels
+        10, 11, 22, // top 
+        22, 23, 11, // bottom
+        11, 12, 23, // top
+        23, 24, 12, // bottom
+        12,  1, 24, // top
+        24, 13,  1  // bottom
+    };
+
+
+    const GLuint floatsPerVertex = 3;
+    const GLuint floatsPerNormal = 3;
+    const GLuint floatsPerUV = 2;
+
+
+    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(gMesh.vao);
+
+
+    gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]));
+    glGenBuffers(2, gMesh.vbos); // Create 2 buffers: vertex data and the indices
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbos[0]); // Activates the buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gMesh.vbos[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+
+    // Create Vertex Attribute Pointers
+    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
+    glEnableVertexAttribArray(2);
+}
+
+
 void destroyMesh(GLMesh& gMesh)
 {
     glDeleteVertexArrays(1, &gMesh.vao);
@@ -2435,6 +2678,43 @@ void drawLampTop(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, G
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleLampTop");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // bind textures on corresponding texture units
+    glActiveTexture(textureNum);
+    glBindTexture(GL_TEXTURE_2D, textureName);
+
+    // Activate the VBOs contained within the mesh's VA
+    glBindVertexArray(gMesh.vao);
+
+    // Draws the triangles
+    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+
+}
+
+
+void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
+{
+    glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.0f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(2.5f, 2.0f, 1.5f));
+    glm::vec2 gUVScale(1.0f, 1.0f);
+
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = translation * rotation * scale;
+
+    // Set the shader to be used
+    glUseProgram(shaderProgramID);
+
+    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleBalloons");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
