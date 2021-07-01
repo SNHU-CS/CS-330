@@ -2542,7 +2542,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
 }
 
 
-// draw coffee table legs, couch legs, balloon string, balloon string holder
+// draw coffee table legs, couch legs, balloon string
 void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     // Set the shader to be used
@@ -2624,9 +2624,10 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 }
 
-
+// draws lamp bottom and balloon holder
 void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
+    // ********* LAMP BOTTOM *********
     glm::mat4 scale = glm::scale(glm::vec3(0.25f, 0.5f, 0.25f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     glm::mat4 translation = glm::translate(glm::vec3(-5.0f, 1.85f, 1.5f));
@@ -2646,8 +2647,40 @@ void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleLampBottom");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // bind textures on corresponding texture units
+    glActiveTexture(textureNum);
+    glBindTexture(GL_TEXTURE_2D, textureName);
+
+    // Activate the VBOs contained within the mesh's VA
+    glBindVertexArray(gMesh.vao);
+
+    // Draws the triangles
+    glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
+
+
+    // ********* BALLOON HOLDER *********
+    scale = glm::scale(glm::vec3(0.2f, 0.1f, 0.2f));
+    rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    translation = glm::translate(glm::vec3(2.5f, 1.32f, 1.6f));
+
+    // Model matrix: transformations are applied right-to-left order
+    model = translation * rotation * scale;
+
+    // Set the shader to be used
+    glUseProgram(shaderProgramID);
+
+    modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    projLoc = glGetUniformLocation(shaderProgramID, "projection");
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleLampBottom");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
