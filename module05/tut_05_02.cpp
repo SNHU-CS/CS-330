@@ -1827,7 +1827,7 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
         glm::vec3( 3.0f, 0.1f, 2.0f), // B: left back leg
     };
 
-    // counts the number of kegs
+    // counts the number of legs
     int legCount = sizeof(legPosition) / sizeof(legPosition[0]);
 
     // draws each leg
@@ -1861,38 +1861,54 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 //IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTable)
 void drawSideDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
-    glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.3f));
-    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(-5.0f, 0.8f, 1.51f));
-    glm::vec2 gUVScale(1.0f, 1.00f);
-
-    // Model matrix: transformations are applied right-to-left order
-    glm::mat4 model = translation * rotation * scale;
-
     // Set the shader to be used
     glUseProgram(shaderProgramID);
 
-    // Retrieves and passes transform matrices to the Shader program
-    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
 
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleSideDrawer");
-    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+    glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.3f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::vec2 gUVScale(1.0f, 1.00f);
 
-    // bind textures on corresponding texture units
-    glActiveTexture(textureNum);
-    glBindTexture(GL_TEXTURE_2D, textureName);
+    glm::vec3 dresserPosition[] = {
+        // 1st dresser (A/left)
+        glm::vec3(-5.0f, 0.8f, 1.51f), // dresser A: left
+        // 2nd dresser (B/right)
+        glm::vec3( 2.5f, 0.8f, 1.51f), // dresser B: right
+    };
 
-    // Activate the VBOs contained within the mesh's VA
-    glBindVertexArray(gMesh.vao);
+    // counts the number of objects
+    int dresserCount = sizeof(dresserPosition) / sizeof(dresserPosition[0]);
 
-    // Draws the triangles
-    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+    // draws each leg
+    for (unsigned int i = 0; i < dresserCount; i++)
+    {
+        glm::mat4 translation = glm::translate(glm::vec3(dresserPosition[i]));
+
+        // Model matrix: transformations are applied right-to-left order
+        glm::mat4 model = translation * rotation * scale;
+
+        // Retrieves and passes transform matrices to the Shader program
+        GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleSideDrawer");
+        glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+        // bind textures on corresponding texture units
+        glActiveTexture(textureNum);
+        glBindTexture(GL_TEXTURE_2D, textureName);
+
+        // Activate the VBOs contained within the mesh's VA
+        glBindVertexArray(gMesh.vao);
+
+        // Draws the triangles
+        glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+    }
 }
 
 
