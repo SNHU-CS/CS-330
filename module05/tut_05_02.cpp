@@ -59,18 +59,15 @@ namespace
     GLuint gSideTableProgramId;
     GLuint gSideDrawerProgramId;
     GLuint gHouseFloorProgramId;
-    GLuint gRugProgramId;
     GLuint gHouseWallProgramId;
     GLuint gHouseDoorProgramId;
     GLuint gPaintingProgramId;
     GLuint gCoffeeTableProgramId;
     GLuint gTableLegsProgramId;
-    GLuint gHouseWreathProgramId;
     GLuint gLampBottomProgramId;
     GLuint gLampTopProgramId;
     GLuint gBalloonsProgramId;
-    GLuint gCouchSeatsProgramId;
-    GLuint gCouchArmRestsProgramId;
+    GLuint gCouchProgramId;
 
 
     // TODO: check into bindless textures later
@@ -88,18 +85,14 @@ namespace
     GLuint texHouseDoor; 
     GLuint texPainting;  
     GLuint texCoffeeTable; 
-    GLuint texRug; 
-    GLuint texWreath; 
     GLuint texMarbleCream; 
     GLuint texCottonCream; 
     GLenum texLampTop;
     GLenum texLampBottom;
-    GLuint texFabric; 
     GLuint texMetalBlack;
     GLuint texTableLegs;
-    GLuint texWoodOakFine; 
-    GLuint texWalnutMed; 
     GLuint texBalloons;
+    GLuint texCouch;
 
     // assign texture slots (TEXTURE NUM #)
     GLenum texNumSideTable;
@@ -113,6 +106,7 @@ namespace
     GLenum texNumLampTop;
     GLenum texNumLampBottom;
     GLenum texNumBalloons;
+    GLenum texNumCouch;
 
     // UV scale of textures
     // check if can define values within shader, draw or mesh later
@@ -120,20 +114,15 @@ namespace
     glm::vec2 gUVScaleSideTable;
     glm::vec2 gUVScaleSideDrawer;
     glm::vec2 gUVScaleHouseFloor;
-    glm::vec2 gUVScaleRug;
     glm::vec2 gUVScaleHouseWall;
     glm::vec2 gUVScaleHouseDoor;
-    glm::vec2 gUVScaleWreath;
     glm::vec2 gUVScalePainting;
     glm::vec2 gUVScaleCoffeeTable;    
     glm::vec2 gUVScaleTableLegs;    
     glm::vec2 gUVScaleLampTop;
     glm::vec2 gUVScaleLampBottom;
     glm::vec2 gUVScaleBalloons;
-    glm::vec2 gUVScaleCouchSeats;
-    glm::vec2 gUVScaleCouchLegs;
-    glm::vec2 gUVScaleCouchArmRests;
-
+    glm::vec2 gUVScaleCouch;
 
     // Stores the GL data relative to a given mesh
     struct GLMesh
@@ -150,18 +139,14 @@ namespace
     GLMesh gMeshSideTable;
     GLMesh gMeshSideDrawer;
     GLMesh gMeshHouseFloor;
-    GLMesh gMeshRug;
     GLMesh gMeshHouseWall;
     GLMesh gMeshHouseDoor;
-    GLMesh gMeshHouseWreath;
     GLMesh gMeshPainting;
     GLMesh gMeshLamp;
     GLMesh gMeshBalloons;
     GLMesh gMeshCoffeeTable;
     GLMesh gMeshTableLegs;
-    GLMesh gMeshCouchSeats;
-    GLMesh gMeshCouchLegs;
-    GLMesh gMeshCouchArmRests;
+    GLMesh gMeshCouch;
 
 
     // Cube and light color
@@ -175,6 +160,7 @@ namespace
     glm::vec3 gLightScale(0.3f);
 }
 
+
 // *********** USER-DEFINED FUNCTIONS **********
 // initialize libraries and events
 bool initializeOGL(int, char* [], GLFWwindow** window);
@@ -186,7 +172,6 @@ void destroyShaderProgram(GLuint programId);
 
 // window resize and projection
 void resizeWindow(GLFWwindow* window, int width, int height);
-
 
 // user Inputs
 void mousePositionCallback(GLFWwindow* window, double xpos, double ypos);
@@ -200,46 +185,39 @@ void flipImageVertical(unsigned char* image, int width, int height, int channels
 bool createTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode);
 void destroyTexture(GLuint textureId);
 // TODO: research batch texture deletion
-//void deleteAllTexture(GLuint& textureIdAll, int texCount);
+// void deleteAllTexture(GLuint& textureIdAll, int texCount);
 
 
 // create mesh
 // TODO: check for method to destroy as a batch
 void destroyMesh(GLMesh& gMesh);
-
 void createMesh(GLMesh& gMesh);
 void createMeshSideTable(GLMesh& gMesh);
 void createMeshSideDrawer(GLMesh& gMesh);
 void createMeshHouseFloor(GLMesh& gMesh);
-void createMeshRug(GLMesh& gMesh);
 void createMeshHouseWall(GLMesh& gMesh);
 void createMeshHouseDoor(GLMesh& gMesh);
-void createMeshWreath(GLMesh& gMesh);
 void createMeshPainting(GLMesh& gMesh);
 void createMeshLamp(GLMesh& gMesh);
 void createMeshCoffeeTable(GLMesh& gMesh);
 void createMeshTableLegs(GLMesh& gMesh);
 void createMeshBalloons(GLMesh& gMesh);
 void createMeshCouch(GLMesh& gMesh);
-void createMeshCouchArmRests(GLMesh& gMesh);
 
 
 // draw objects
 void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawSideDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
-void drawRug(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawHouseDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
-void drawWreath(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawLampTop(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
-void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
-void drawCouchArmRests(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
+void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 
 void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 
@@ -260,13 +238,13 @@ const GLchar* vertexShaderSource = GLSL(440,
     uniform mat4 view;
     uniform mat4 projection;
 
-void main()
-{
-    gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices into clip coordinates
-    vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // get fragment/pixel position in world space only (exclude view and projection)
-    vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
-    vertexTextureCoordinate = textureCoordinate;
-}
+    void main()
+    {
+        gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices into clip coordinates
+        vertexFragmentPos = vec3(model * vec4(position, 1.0f)); // get fragment/pixel position in world space only (exclude view and projection)
+        vertexNormal = mat3(transpose(inverse(model))) * normal; // get normal vectors in world space only and exclude normal translation properties
+        vertexTextureCoordinate = textureCoordinate;
+    }
 );
 
 
@@ -545,9 +523,28 @@ const GLchar* balloonsFragShader = GLSL(440,
 );
 
 
+// Fragment Shader: couch seats and couch back rest
+const GLchar* couchFragShader = GLSL(440,
+    in vec2 vertexTextureCoordinate;
+
+    out vec4 fragmentColor;
+
+    uniform sampler2D texCouch;
+    uniform vec2 gUVScaleCouch;
+
+    void main()
+    {
+        vec4 fragTex = texture(texCouch, vertexTextureCoordinate * gUVScaleCouch);
+        if (fragTex.a < 0.1)
+            discard;
+        fragmentColor = fragTex;
+}
+);
+
+
 
 // flip images vertically
-// Images are loaded with Y axis going down, but OpenGL's Y axis goes up
+// Images are loaded with Y axis going down. OpenGL's Y axis goes up
 void flipImageVertical(unsigned char* image, int width, int height, int channels)
 {
     for (int j = 0; j < height / 2; ++j)
@@ -565,6 +562,7 @@ void flipImageVertical(unsigned char* image, int width, int height, int channels
         }
     }
 }
+
 
 // ********** MAIN CLASS ***********
 int main(int argc, char* argv[])
@@ -589,15 +587,8 @@ int main(int argc, char* argv[])
     createMeshTableLegs(gMeshTableLegs);
     createMeshLamp(gMeshLamp);
     createMeshBalloons(gMeshBalloons);
-    /*
-    createMeshRug)(gMeshRug);
-    createMeshWreath(gMeshHouseWreath);
-    createMeshBalloons(gMeshBalloons);
-    createMeshCoffeeTable(gMeshCoffeeTable);
-    createMeshCouchSeats(gMeshCouchSeats);
-    createMeshCouchLegs(gMeshCouchLegs);
-    createMeshCouchArmRests(gMeshCouchArmRests);
-    */
+    createMeshCouch(gMeshCouch);
+
 
     /* ISSUE: started once added door in program.
     * when all exceptions are disabled within shaders, program works
@@ -608,78 +599,59 @@ int main(int argc, char* argv[])
     // create the fragment shader programs
     if (!createShaderProgram(vertexShaderSource, cubeFragShader, gCubeProgramId))
         cout << "whatsupppppCube" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, sideTableFragShader, gSideTableProgramId))
         cout << "Shader crash/return false: side table" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, sideDrawerFragShader, gSideDrawerProgramId))
         cout << "Shader crash/return false: side table drawers" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, houseFloorFragShader, gHouseFloorProgramId))
         cout << "Shader crash/return false: floor" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, houseWallFragShader, gHouseWallProgramId))
         cout << "Shader crash/return false: wall" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, houseDoorFragShader, gHouseDoorProgramId))
         cout << "Shader crash/return false: door" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, paintingFragShader, gPaintingProgramId))
         cout << "Shader crash/return false: painting" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, coffeeTableFragShader, gCoffeeTableProgramId))
         cout << "Shader crash/return false: coffee table" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, tableLegsFragShader, gTableLegsProgramId))
         cout << "Shader crash/return false: table legs" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, lampBottomFragShader, gLampBottomProgramId))
         cout << "Shader crash/return false: lamp bottom" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, lampTopFragShader, gLampTopProgramId))
         cout << "Shader crash/return false: lamp top" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, balloonsFragShader, gBalloonsProgramId))
         cout << "Shader crash/return false: balloons" << endl;
-    //return EXIT_FAILURE;
+        //return EXIT_FAILURE;
 
- /*
-
-if (!createShaderProgram(vertexShaderSource, rugFragShader, gRugProgramId))
-    return EXIT_FAILURE;
-
-if (!createShaderProgram(vertexShaderSource, houseWreathFragShader, gHouseWreathProgramId))
-    return EXIT_FAILURE;
-
-if (!createShaderProgram(vertexShaderSource, balloonsFragShader, gBalloonsProgramId))
-    return EXIT_FAILURE;
-
-if (!createShaderProgram(vertexShaderSource, couchSeatsFragShader, gCouchSeatsProgramId))
-    return EXIT_FAILURE;
-
-if (!createShaderProgram(vertexShaderSource, couchLegsFragShader, gCouchArmRestsProgramId))
-    return EXIT_FAILURE;
-
-if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegsProgramId))
-    return EXIT_FAILURE;
-
-*/
+    if (!createShaderProgram(vertexShaderSource, couchFragShader, gCouchProgramId))
+        cout << "Shader crash/return false: couch" << endl;
+        //return EXIT_FAILURE;
 
 
-
-// TODO: MINIMIZE INTO FUNCTION(S) LATER
-// TEXTURE: wood, dark brown/red solid
+    // TODO: MINIMIZE INTO FUNCTION(S) LATER
+    // TEXTURE: wood, dark brown/red solid
     const char* texFilename = "../../resources/textures/wood-dark-rotate.png";
     if (!createTexture(texFilename, texCoffeeTable, GL_REPEAT, GL_LINEAR))
     {
@@ -817,6 +789,18 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     glUniform1i(glGetUniformLocation(gBalloonsProgramId, "texBalloons"), 10);
     texNumBalloons = GL_TEXTURE10;
 
+    // TEXTURE: red woven fabric
+    texFilename = "../../resources/textures/rubber-green.jpg";
+    if (!createTexture(texFilename, texCouch, GL_REPEAT, GL_LINEAR))
+    {
+        cout << "Failed to load texture " << texFilename << endl;
+        return EXIT_FAILURE;
+    }
+    // balloons
+    glUseProgram(gCouchProgramId);
+    glUniform1i(glGetUniformLocation(gCouchProgramId, "texCouch"), 11);
+    texNumCouch = GL_TEXTURE11;
+
 
     // render loop. 
     // (exit key is esc, defined at "exit" (at end of main class)
@@ -853,12 +837,10 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyMesh(gMeshTableLegs);
     destroyMesh(gMeshLamp);
     destroyMesh(gMeshBalloons);
+    destroyMesh(gMeshCouch);
     /*
     destroyMesh(gMeshRug);
     destroyMesh(gMeshHouseWreath);
-    destroyMesh(gMeshBalloons);
-    destroyMesh(gMeshCouchSeats);
-    destroyMesh(gMeshCouchLegs);
     destroyMesh(gMeshCouchArmRests);
     */
 
@@ -879,17 +861,11 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyTexture(texLampBottom);
     destroyTexture(texLampTop);
     destroyTexture(texBalloons);
+    destroyTexture(texCouch);
     /*
-    destroyTexture(texRug); // 7 image
-    destroyTexture(texWreath); // 8
-    destroyTexture(texMarbleCream); // 9
-    destroyTexture(texCottonCream); // 10
-    destroyTexture(texFabricRed); // 11
-    destroyTexture(texMetalBlack); // 12
-    destroyTexture(texWoodOakFine); // 13
-    destroyTexture(texWalnutMed); // 14
+    destroyTexture(texRug);
+    destroyTexture(texWreath);
     */
-
 
     // release fragment shader programs
     destroyShaderProgram(gSideTableProgramId);
@@ -903,14 +879,11 @@ if (!createShaderProgram(vertexShaderSource, couchArmRestsFragShader, gCouchLegs
     destroyShaderProgram(gLampBottomProgramId);
     destroyShaderProgram(gLampTopProgramId);
     destroyShaderProgram(gBalloonsProgramId);
+    destroyShaderProgram(gCouchProgramId);
     /*
      destroyShaderProgram(gRugProgramId);
      destroyShaderProgram(gHouseWreathProgramId);
-
-     destroyShaderProgram(gBalloonsProgramId);
-     destroyShaderProgram(gCouchSeatsProgramId);
      destroyShaderProgram(gCouchArmRestsProgramId);
-     destroyShaderProgram(gCouchLegsProgramId);
      */
 
     exit(EXIT_SUCCESS); // Terminates the program successfully
@@ -951,6 +924,8 @@ void rendering(glm::mat4 view, glm::mat4 projection)
     drawLampBottom(view, projection, gLampBottomProgramId, gMeshLamp, texNumLampBottom, texLampBottom);
     drawLampTop(view, projection, gLampTopProgramId, gMeshLamp, texNumLampTop, texLampTop);
     drawBalloons(view, projection, gBalloonsProgramId, gMeshBalloons, texNumBalloons, texBalloons);
+    drawCouch(view, projection, gCouchProgramId, gMeshCouch, texNumCouch, texCouch);
+
     
     // Deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
@@ -1127,7 +1102,6 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 
 
 // ********** TEXTURES AND IMAGES **********
-
 // generates settings for individual texture 
 // assumes all images are declared and processed as GL_TEXTURE_2D
 bool createTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode)
@@ -2167,6 +2141,84 @@ void createMeshBalloons(GLMesh& gMesh)
 }
 
 
+void createMeshCouch(GLMesh& gMesh)
+{
+    GLfloat verts[] = {
+        // Vertex Positions    // normals  // textures
+        // front
+        -1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         1.0f,  0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+         1.0f,  0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -1.0f,  0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        // back
+        -1.0f, -0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         1.0f, -0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+         1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, -0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        // left Coffee
+        -1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -1.0f,  0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, -0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        // right Coffee
+         1.0f,  0.2f,  0.75f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         1.0f,  0.2f, -0.75f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+         1.0f, -0.2f, -0.75f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         1.0f, -0.2f, -0.75f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         1.0f, -0.2f,  0.75f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         1.0f,  0.2f,  0.75f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         // bottom
+        -1.0f, -0.2f, -0.75f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+         1.0f, -0.2f, -0.75f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+         1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+         1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+        -1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+        -1.0f, -0.2f, -0.75f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+        // top
+        -1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+         1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
+    };
+
+
+    const GLuint floatsPerVertex = 3;
+    const GLuint floatsPerNormal = 3;
+    const GLuint floatsPerUV = 2;
+
+    gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
+
+    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glBindVertexArray(gMesh.vao);
+
+    // buffer for vertex data
+    glGenBuffers(1, &gMesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+
+    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+
+    // Create Vertex Attribute Pointers
+    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
+    glEnableVertexAttribArray(2);
+}
+
+
 void destroyMesh(GLMesh& gMesh)
 {
     glDeleteVertexArrays(1, &gMesh.vao);
@@ -2466,7 +2518,7 @@ void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
     //painting
     glm::mat4 scale = glm::scale(glm::vec3(2.9f, 2.3f, 0.1f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(-1.5f, 4.0f, 0.1f));
+    glm::mat4 translation = glm::translate(glm::vec3(-1.4f, 4.0f, 0.1f));
     glm::vec2 gUVScale(1.0f, 1.0f);
 
     // Model matrix: transformations are applied right-to-left order
@@ -2504,7 +2556,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
 
     // ********** TOP of coffee table ******************
     // create model view: scale, rotate, translate
-    glm::mat4 scale = glm::scale(glm::vec3(2.5f, 0.5f, 1.3f));
+    glm::mat4 scale = glm::scale(glm::vec3(2.0f, 0.5f, 1.3f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     glm::mat4 translation = glm::translate(glm::vec3(-1.0f, 0.8f, 5.5f));
     glm::vec2 gUVScale(2.0f, 0.25f);
@@ -2563,10 +2615,10 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     // transition. each leg has a unique position
     glm::vec3 legPosition[] = {
         // 1st dresser
-        glm::vec3(-3.0f, 0.3f, 5.2f), // right front leg
-        glm::vec3( 1.0f, 0.3f, 5.2f), // left front leg
-        glm::vec3(-3.0f, 0.3f, 5.8f), // right back leg
-        glm::vec3( 1.0f, 0.3f, 5.8f) // left back leg
+        glm::vec3(-2.75f, 0.3f, 5.2f), // right front leg
+        glm::vec3( 0.75f, 0.3f, 5.2f), // left front leg
+        glm::vec3(-2.75f, 0.3f, 5.8f), // right back leg
+        glm::vec3( 0.75f, 0.3f, 5.8f) // left back leg
     };
 
     // counts the number of objects
@@ -2627,6 +2679,14 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 // draws lamp bottom and balloon holder
 void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
+    // Set the shader to be used
+    glUseProgram(shaderProgramID);
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
     // ********* LAMP BOTTOM *********
     glm::mat4 scale = glm::scale(glm::vec3(0.25f, 0.5f, 0.25f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
@@ -2636,16 +2696,8 @@ void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
 
-    // Set the shader to be used
-    glUseProgram(shaderProgramID);
-
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
-    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
-    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
-
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleLampBottom");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
@@ -2669,16 +2721,8 @@ void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     // Model matrix: transformations are applied right-to-left order
     model = translation * rotation * scale;
 
-    // Set the shader to be used
-    glUseProgram(shaderProgramID);
-
     modelLoc = glGetUniformLocation(shaderProgramID, "model");
-    viewLoc = glGetUniformLocation(shaderProgramID, "view");
-    projLoc = glGetUniformLocation(shaderProgramID, "projection");
-
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
     UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleLampBottom");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
@@ -2766,6 +2810,86 @@ void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
     // Draws the triangles
     glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 
+}
+
+
+void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
+{
+    // Set the shader to be used
+    glUseProgram(shaderProgramID);
+
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    // ********* COUCH SEATS *********
+    glm::mat4 scale = glm::scale(glm::vec3(2.5f, 1.5f, 1.5f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(-1.25f, 0.8f, 1.5f));
+    glm::vec2 gUVScale(1.0f, 1.0f);
+
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = translation * rotation * scale;
+
+
+    // Retrieves and passes transform matrices to the Shader program
+    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleCouch");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // bind textures on corresponding texture units
+    glActiveTexture(textureNum);
+    //  glBindTexture(GL_TEXTURE_2D, texWoodHerring);
+    glBindTexture(GL_TEXTURE_2D, textureName);
+
+    // Activate the VBOs contained within the mesh's VA
+    glBindVertexArray(gMesh.vao);
+
+    // Draws the triangles
+    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+
+    // Draws the triangles
+
+  /*
+    // ********* COUCH BACK REST *********
+    glm::mat4 scale = glm::scale(glm::vec3(20.0f, 0.2f, 20.0f));
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 10.0f));
+    glm::vec2 gUVScale(5.0f, 4.00f);
+
+    // Model matrix: transformations are applied right-to-left order
+    glm::mat4 model = translation * rotation * scale;
+
+    // Set the shader to be used
+    glUseProgram(shaderProgramID);
+
+    // Retrieves and passes transform matrices to the Shader program
+    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
+    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleCouch");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+
+    // bind textures on corresponding texture units
+    glActiveTexture(textureNum);
+    //  glBindTexture(GL_TEXTURE_2D, texWoodHerring);
+    glBindTexture(GL_TEXTURE_2D, textureName);
+
+    // Activate the VBOs contained within the mesh's VA
+    glBindVertexArray(gMesh.vao);
+
+    // Draws the triangles
+    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+*/
 }
 
 
