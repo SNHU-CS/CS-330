@@ -1160,53 +1160,53 @@ void createMesh(GLMesh& gMesh)
     GLfloat verts[] = {
         //Positions          //Normals
         // ------------------------------------------------------
-    //Back Face          //Negative Z Normal  Texture Coords.
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+        //Back Face          //Negative Z Normal  Texture Coords.
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-    //Front Face         //Positive Z Normal
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+        //Front Face         //Positive Z Normal
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
 
-    //Left Face          //Negative X Normal
-   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-   -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-   -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        //Left Face          //Negative X Normal
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-   //Right Face         //Positive X Normal
-   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+           //Right Face         //Positive X Normal
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-   //Bottom Face        //Negative Y Normal
-  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+           //Bottom Face        //Negative Y Normal
+         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+          0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+          0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+          0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-  //Top Face           //Positive Y Normal
- -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-  0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
- -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
- -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+          //Top Face           //Positive Y Normal
+         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+          0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1238,7 +1238,6 @@ void createMesh(GLMesh& gMesh)
 }
 
 
-// look into separating legs vs drawers OR reducing coding
 void createMeshSideTable(GLMesh& gMesh)
 {
     GLfloat verts[] = {
@@ -1525,7 +1524,7 @@ void createMeshPainting(GLMesh& gMesh)
     glEnableVertexAttribArray(2);
 }
 
-// create mesh coffee table 
+
 void createMeshCoffeeTable(GLMesh& gMesh)
 {
     GLfloat verts[] = {
@@ -1604,7 +1603,7 @@ void createMeshCoffeeTable(GLMesh& gMesh)
 }
 
 
-// create mesh coffee table 
+// mesh for coffee table legs and couch legs
 void createMeshTableLegs(GLMesh& gMesh)
 {
     /// mapped out to max triagnels (1 large tri in middle, 3 medium tri around, and 6 tri as the edges)
@@ -1756,8 +1755,8 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     // Set the shader to be used
     glUseProgram(shaderProgramID);
 
-    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));   
-     
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
+
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
 
@@ -1765,77 +1764,85 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 
-
-
     // ********** dresser main cuboid ************************
-   // dresser cuboid - 1 per table, currently 2 tables
-   // create model view: scale, rotate, translate
+    // dresser cuboid - 1 per table, currently 2 tables
+    // create model view: scale, rotate, translate
     glm::mat4 scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
 
+    glm::vec3 dresserPosition[] = {
+        // 1st dresser (A/left)
+        glm::vec3(-5.0f, 0.8f, 1.5f), // dresser A: left
+        // 2nd dresser (B/right)
+        glm::vec3(2.5f, 0.8f, 1.5f) // dresser B: right
+    };
 
+    // counts the number of dressers
+    int dresserCount = sizeof(dresserPosition) / sizeof(dresserPosition[0]);
 
+    // draws each leg
+    for (unsigned int i = 0; i < dresserCount; i++)
+    {
+        // recalculates model matrix with new position
+        glm::mat4 translation = glm::translate(glm::vec3(dresserPosition[i]));
+        glm::vec2 gUVScale(0.50f, 0.50f);
 
-    glm::mat4 translation = glm::translate(glm::vec3(-5.0f, 0.8f, 1.5f));
-    glm::vec2 gUVScale(0.50f, 0.50f);
+        // Model matrix: transformations are applied right-to-left order
+        glm::mat4 model = translation * rotation * scale;
 
-    // Model matrix: transformations are applied right-to-left order
-    glm::mat4 model = translation * rotation * scale;
+        // Retrieves and passes transform matrices to the Shader program
+        GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-    // Retrieves and passes transform matrices to the Shader program
-    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleSideDresser");
+        glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleSideDresser");
-    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
+        // Activate the VBOs contained within the mesh's VAO
+        glBindVertexArray(gMesh.vao);
 
-    // Activate the VBOs contained within the mesh's VAO
-    glBindVertexArray(gMesh.vao);
+        // bind textures on corresponding texture units
+        glActiveTexture(textureNum);
+        glBindTexture(GL_TEXTURE_2D, textureName);
 
-    // bind textures on corresponding texture units
-    glActiveTexture(textureNum); // 15
-    glBindTexture(GL_TEXTURE_2D, textureName);
+        glBindVertexArray(gMesh.vao);
 
-    glBindVertexArray(gMesh.vao);
+        glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
+    }
 
-    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-
-
-    // ********** side table legs (4) ************************
-  
-    // scale for legs (uniform size for all 4 legs)
+    // ********** side table legs (4 per table) ************************
     scale = glm::scale(glm::vec3(0.15f, 0.3f, 0.2f));
     // legs uses same rotation as dresser cuboid.
     glm::vec2 gUVScaleLegs(0.25f, 0.25f);
 
     // transition / each leg has a unique position
     glm::vec3 legPosition[] = {
-        // 1st dresser
+        // 1st dresser (A/left)
         glm::vec3(-4.5f, 0.1f, 1.0f), // A: right front leg
         glm::vec3(-5.5f, 0.1f, 1.0f), // A: left front leg
         glm::vec3(-4.5f, 0.1f, 2.0f), // A: right back leg
         glm::vec3(-5.5f, 0.1f, 2.0f), // A: left back leg
+        // 2nd dresser (B/right)
         glm::vec3( 2.0f, 0.1f, 1.0f), // B: right front leg
         glm::vec3( 3.0f, 0.1f, 1.0f), // B: left front leg
         glm::vec3( 2.0f, 0.1f, 2.0f), // B: right back leg
         glm::vec3( 3.0f, 0.1f, 2.0f), // B: left back leg
     };
 
-    // counts the number of objects
+    // counts the number of kegs
     int legCount = sizeof(legPosition) / sizeof(legPosition[0]);
 
     // draws each leg
     for (unsigned int i = 0; i < legCount; i++)
     {
         // recalculates model matrix with new position
-        translation = glm::translate(glm::vec3(legPosition[i]));
-        model = translation * rotation * scale;
+        glm::mat4 translation = glm::translate(glm::vec3(legPosition[i]));
+        glm::mat4 model = translation * rotation * scale;
 
         // Retrieves and passes transform matrices to the Shader program
-        modelLoc = glGetUniformLocation(shaderProgramID, "model");
+        GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         // UV scale for dresser legs
-        UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleDresserLegs");
+        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleDresserLegs");
         glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleLegs));
 
         // Activate the VBOs contained within the mesh's VAO
@@ -1915,7 +1922,7 @@ void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
-    glActiveTexture(textureNum); // 15
+    glActiveTexture(textureNum);
     //  glBindTexture(GL_TEXTURE_2D, texWoodHerring);
     glBindTexture(GL_TEXTURE_2D, textureName);
 
@@ -1962,7 +1969,7 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
 
     // bind textures on corresponding texture units
-    glActiveTexture(textureNum); // 15
+    glActiveTexture(textureNum);
     glBindTexture(GL_TEXTURE_2D, textureName);
 
     // Activate the VBOs contained within the mesh's VA
@@ -2000,7 +2007,7 @@ void drawHouseDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
-    glActiveTexture(textureNum); // 15
+    glActiveTexture(textureNum);
     glBindTexture(GL_TEXTURE_2D, textureName);
 
     // Activate the VBOs contained within the mesh's VA
@@ -2039,7 +2046,7 @@ void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
-    glActiveTexture(textureNum); // 15
+    glActiveTexture(textureNum);
     glBindTexture(GL_TEXTURE_2D, textureName);
 
     // Activate the VBOs contained within the mesh's VA
@@ -2049,8 +2056,6 @@ void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
 }
 
-
-// draw coffee table
 
 void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
@@ -2085,7 +2090,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
     glBindVertexArray(gMesh.vao);
 
     // bind textures on corresponding texture units
-    glActiveTexture(textureNum); // 15
+    glActiveTexture(textureNum);
     glBindTexture(GL_TEXTURE_2D, textureName);
 
     glBindVertexArray(gMesh.vao);
@@ -2141,7 +2146,7 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
         glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
         // bind textures on corresponding texture units
-        glActiveTexture(textureNum); // 15
+        glActiveTexture(textureNum);
         glBindTexture(GL_TEXTURE_2D, textureName);
 
         // Activate the VBOs contained within the mesh's VA
@@ -2193,7 +2198,7 @@ void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMe
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
-    glActiveTexture(textureNum); // 15
+    glActiveTexture(textureNum);
     glBindTexture(GL_TEXTURE_2D, textureName);
 
     // Draws the triangles
