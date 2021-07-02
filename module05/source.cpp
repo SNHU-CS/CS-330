@@ -1,7 +1,7 @@
 /****************************
 * Author: Katie Stapleton
 * Date: 07/2021
-* Programming: OpenGL 4.4 with GLFW, GLEW using C++
+* Programming: OpenGL 4.4 with GLFW, GLEW, GLAD using C++
 * Software: Visual Studio 2019+. Program executes via ".sln" file and selecting a start program. 
 * Description: created a small 3D scene of a living room.
 *     Scene can be navigation by the user
