@@ -149,14 +149,14 @@ namespace
 
 
     // key light
-    glm::vec3 gLightPosition(-0.5f, 5.6f, 4.6f);
-    glm::vec3 gLightColor(0.0f, 1.0f, 0.0f);
+    glm::vec3 gLightPosition(0.5f, 7.6f, 10.6f);
+    glm::vec3 gLightColor(1.0f, 1.0f, 1.0f);
     glm::vec3 gLightScale(1.0f);
 
     // fill/spot light
-    glm::vec3 gLightPositionSpot(-10.5f, 1.0f, 4.6f);
-    glm::vec3 gLightColorSpot(1.0f, 0.0f, 0.0f);
-    glm::vec3 gLightScaleSpot(0.2f);
+    glm::vec3 gLightPositionSpot(-3.5f, 2.0f, 4.6f);
+    glm::vec3 gLightColorSpot(1.0f, 1.0f, 1.0f);
+    glm::vec3 gLightScaleSpot(0.f);
 }
 
 
@@ -276,7 +276,7 @@ const GLchar* sideTableFragShader = GLSL(440,
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.5f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
@@ -291,7 +291,7 @@ const GLchar* sideTableFragShader = GLSL(440,
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.5), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -324,13 +324,13 @@ const GLchar* sideDrawerFragShader = GLSL(440,
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.5f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
         vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
         vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        float impact = max(dot(norm, lightDirection), 0.48);// Calculate diffuse impact by generating dot product of normal and light
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate Specular lighting
@@ -339,7 +339,7 @@ const GLchar* sideDrawerFragShader = GLSL(440,
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.4), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -374,13 +374,13 @@ const GLchar* houseFloorFragShader = GLSL(440,
         /*Phong lighting model calculations to generate ambient, diffuse, and specular components*/
 
         // calculate ambient lighting
-        float ambientStrength = 0.5f; // Set ambient or global lighting strength
+        float ambientStrength = 0.65f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate diffuse lighting
         vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
         vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.0);// Calculate diffuse impact by generating dot product of normal and light
+        float impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate specular lighting
@@ -389,7 +389,7 @@ const GLchar* houseFloorFragShader = GLSL(440,
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.6), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
         
         // Calculate phong result with texture
@@ -424,13 +424,13 @@ const GLchar* houseWallFragShader = GLSL(440,
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.6f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
         vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
         vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        float impact = max(dot(norm, lightDirection), 0.2);// Calculate diffuse impact by generating dot product of normal and light
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate Specular lighting
@@ -439,7 +439,7 @@ const GLchar* houseWallFragShader = GLSL(440,
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.3), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -472,7 +472,7 @@ const GLchar* houseDoorFragShader = GLSL(440,
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.4f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
@@ -487,7 +487,7 @@ const GLchar* houseDoorFragShader = GLSL(440,
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.9), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -521,22 +521,22 @@ const GLchar* paintingFragShader = GLSL(440,
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.35f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
         vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
         vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        float impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate Specular lighting
         float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
+        float highlightSize = 3.0f; // Set specular highlight size
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.2), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -569,22 +569,22 @@ const GLchar* coffeeTableFragShader = GLSL(440,
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.3f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
         vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
         vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        float impact = max(dot(norm, lightDirection), 0.2);// Calculate diffuse impact by generating dot product of normal and light
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
+        float specularIntensity = 0.1f; // Set specular light strength
+        float highlightSize = 10.0f; // Set specular highlight size
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.1), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -623,7 +623,7 @@ const GLchar* tableLegsFragShader = GLSL(440,
         // calculate Diffuse lighting
         vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
         vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        float impact = max(dot(norm, lightDirection), 1.0);// Calculate diffuse impact by generating dot product of normal and light
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate Specular lighting
@@ -632,7 +632,7 @@ const GLchar* tableLegsFragShader = GLSL(440,
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.8), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -665,7 +665,7 @@ const GLchar* lampBottomFragShader = GLSL(440,
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.4f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
@@ -675,12 +675,12 @@ const GLchar* lampBottomFragShader = GLSL(440,
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
+        float specularIntensity = 0.2f; // Set specular light strength
         float highlightSize = 5.0f; // Set specular highlight size
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.3), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -713,7 +713,7 @@ const GLchar* lampTopFragShader = GLSL(440,
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.5f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
@@ -723,12 +723,12 @@ const GLchar* lampTopFragShader = GLSL(440,
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
+        float specularIntensity = 0.2f; // Set specular light strength
         float highlightSize = 5.0f; // Set specular highlight size
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.5), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -762,22 +762,22 @@ uniform vec3 viewPosition;
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.3f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
         vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
         vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        float impact = max(dot(norm, lightDirection), 0.7);// Calculate diffuse impact by generating dot product of normal and light
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
+        float specularIntensity = 0.2f; // Set specular light strength
+        float highlightSize = 1.0f; // Set specular highlight size
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.5), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
@@ -810,22 +810,22 @@ const GLchar* couchFragShader = GLSL(440,
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        float ambientStrength = 0.4f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate Diffuse lighting
         vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
         vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        float impact = max(dot(norm, lightDirection), 0.3);// Calculate diffuse impact by generating dot product of normal and light
         vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
         // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
+        float specularIntensity = 4.0f; // Set specular light strength
+        float highlightSize = 20.0f; // Set specular highlight size
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
         vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.5), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
