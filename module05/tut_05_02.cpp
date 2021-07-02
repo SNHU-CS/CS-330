@@ -49,7 +49,7 @@ namespace
 
     // camera 
     // defines where camera is positioned
-    Camera gCamera(glm::vec3(0.2f, 4.6f, 19.9f)); // do not change. precalcated to fit scene at 0.2f, 5.6f, 9.9f
+    Camera gCamera(glm::vec3(-0.4f, 2.2f, 10.5f)); // do not change. precalcated to fit scene at 0.2f, 5.6f, 9.9f
     float gLastX = WINDOW_WIDTH / 2.0f;
     float gLastY = WINDOW_HEIGHT / 2.0f;
     bool gFirstMouse = true;
