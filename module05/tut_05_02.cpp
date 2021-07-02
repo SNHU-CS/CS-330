@@ -111,6 +111,7 @@ namespace
     // check if can define values within shader, draw or mesh later
     glm::vec2 gUVScale;
     glm::vec2 gUVScaleSideTable;
+    glm::vec2 gUVScaleSideLegs;
     glm::vec2 gUVScaleSideDrawer;
     glm::vec2 gUVScaleHouseFloor;
     glm::vec2 gUVScaleHouseWall;
@@ -255,23 +256,22 @@ const GLchar* sideTableFragShader = GLSL(440,
     //out vec4 fragmentColor2;
 
     uniform sampler2D texSideTable;
-    uniform vec2 uvScaleSideDresser;
-    uniform vec2 uvScaleDresserLegs;
+    uniform vec2 gUVScaleSideTable;
+    uniform vec2 gUVScaleSideLegs;
     //uniform vec3 lightColor;
     //uniform vec3 lightPos;
 
     void main()
     {
         // https://open.gl/textures
-        vec4 fragTexFrame = texture(texSideTable, vertexTextureCoordinate * uvScaleSideDresser);
-        vec4 fragTexLegs = texture(texSideTable, vertexTextureCoordinate * uvScaleDresserLegs);
+        vec4 fragTexFrame = texture(texSideTable, vertexTextureCoordinate * gUVScaleSideTable);
+        vec4 fragTexLegs = texture(texSideTable, vertexTextureCoordinate * gUVScaleSideLegs);
 
         if (fragTexFrame.a < 0.1)
             discard;
         fragmentColor = fragTexFrame;
-        // fragmentColor = fragtexFrame * fragtexLegs;
-        // fragmentColor = fragtexFrame + fragtexLegs;
-
+        // fragmentColor = fragTexFrame * fragTexLegs;
+        // fragmentColor = fragTexFrame + fragTexLegs;
     }
 );
 
@@ -282,11 +282,11 @@ const GLchar* sideDrawerFragShader = GLSL(440,
     out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
 
     uniform sampler2D texSideDrawer;
-    uniform vec2 uvScaleSideDrawer;
+    uniform vec2 gUVScaleSideDrawer;
 
     void main()
     {
-        vec4 fragTex = texture(texSideDrawer, vertexTextureCoordinate * uvScaleSideDrawer);
+        vec4 fragTex = texture(texSideDrawer, vertexTextureCoordinate * gUVScaleSideDrawer);
         if (fragTex.a < 0.1)
             discard;
         fragmentColor = fragTex;
@@ -296,19 +296,59 @@ const GLchar* sideDrawerFragShader = GLSL(440,
 
 // fragment shader: house floor 
 const GLchar* houseFloorFragShader = GLSL(440,
+    in vec3 vertexFragmentPos; // outgoing color/pixels to fragment shader
+    in vec3 vertexNormal; // outgoing normals to fragment shader
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor;
 
-    uniform sampler2D texHouseFloor;
-    uniform vec2 uvScaleHouseFloor;
+    uniform vec3 objectColor;
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
+        uniform sampler2D texHouseFloor;
+        uniform vec2 gUVScaleHouseFloor;
 
     void main()
     {
-        vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * uvScaleHouseFloor);
+        /*Phong lighting model calculations to generate ambient, diffuse, and specular components*/
+
+        // calculate ambient lighting
+        float ambientStrength = 0.1f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.0);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate specular lighting
+        float specularIntensity = 0.8f; // Set specular light strength
+        float highlightSize = 16.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm); // Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+        
+        //texture
+        vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * gUVScaleHouseFloor);
+        if (fragTex.a < 0.1)
+            discard;
+
+
+        // Calculate phong result
+        vec3 phong = (ambient + diffuse + specular);
+
+        //fragmentColor = vec4(phong, 1.0f); // Send lighting results to GPU
+        fragmentColor = vec4(phong, 1.0); // Send lighting results to GPU
+        /*
+        vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * gUVScaleHouseFloor);
         if (fragTex.a < 0.1)
             discard;
         fragmentColor = fragTex;
+        */
     }
 );
 
@@ -320,11 +360,11 @@ const GLchar* houseWallFragShader = GLSL(440,
     out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
 
     uniform sampler2D texHouseWall;
-    uniform vec2 uvScaleHouseWall;
+    uniform vec2 gUVScaleHouseWall;
 
     void main()
     {
-        vec4 fragTex = texture(texHouseWall, vertexTextureCoordinate * uvScaleHouseWall);
+        vec4 fragTex = texture(texHouseWall, vertexTextureCoordinate * gUVScaleHouseWall);
         if (fragTex.a < 0.1)
             discard;
         fragmentColor = fragTex;
@@ -371,18 +411,18 @@ const GLchar* paintingFragShader = GLSL(440,
 );
 
 
-// Fragment Shader: table
+// Fragment Shader: coffee table
 const GLchar* coffeeTableFragShader = GLSL(440,
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
 
     uniform sampler2D texCoffeeTable;
-    uniform vec2 uvScaleCoffeeTable;
+    uniform vec2 gUVScaleCoffeeTable;
 
     void main()
     {
-        vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * uvScaleCoffeeTable);
+        vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * gUVScaleCoffeeTable);
         if (fragTex.a < 0.1)
             discard;
         fragmentColor = fragTex;
@@ -2120,8 +2160,8 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
         // Retrieves and passes transform matrices to the Shader program
         GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleSideDresser");
+        
+        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleSideTable");
         glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
         // Activate the VBOs contained within the mesh's VAO
@@ -2168,9 +2208,9 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
         // Retrieves and passes transform matrices to the Shader program
         GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
+        
         // UV scale for dresser legs
-        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleDresserLegs");
+        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleSideLegs");
         glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScaleLegs));
 
         // Activate the VBOs contained within the mesh's VAO
@@ -2223,8 +2263,8 @@ void drawSideDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
         // Retrieves and passes transform matrices to the Shader program
         GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleSideDrawer");
+ 
+        GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleSideDrawer");
         glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
         // bind textures on corresponding texture units
@@ -2262,7 +2302,7 @@ void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleHouseFloor");
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleHouseFloor");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
@@ -2305,8 +2345,8 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleHouseWall");
+    
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleHouseWall");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
     // ADDED LIGHTING
     glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
@@ -2426,8 +2466,8 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScaleCoffeeTable");
+    
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleCoffeeTable");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // Activate the VBOs contained within the mesh's VAO
