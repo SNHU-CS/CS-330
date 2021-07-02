@@ -150,13 +150,13 @@ namespace
 
     // key light
     glm::vec3 gLightPosition(0.5f, 7.6f, 10.6f);
-    glm::vec3 gLightColor(1.0f, 1.0f, 1.0f);
+    glm::vec3 gLightColor(0.95f, 0.95f, 0.95f);
     glm::vec3 gLightScale(1.0f);
 
     // fill/spot light
-    glm::vec3 gLightPositionSpot(-3.5f, 2.0f, 4.6f);
+    glm::vec3 gLightPositionSpot(-5.0f, 2.2f, 3.0f);
     glm::vec3 gLightColorSpot(1.0f, 1.0f, 1.0f);
-    glm::vec3 gLightScaleSpot(0.f);
+    glm::vec3 gLightScaleSpot(0.2f);
 }
 
 
@@ -412,6 +412,8 @@ const GLchar* houseWallFragShader = GLSL(440,
 
     uniform vec3 lightColor;
     uniform vec3 lightPos;
+    uniform vec3 lightColorSpot;
+    uniform vec3 lightPosSpot;
     uniform vec3 viewPosition;
     uniform sampler2D texHouseWall;
     uniform vec2 gUVScaleHouseWall;
@@ -446,6 +448,35 @@ const GLchar* houseWallFragShader = GLSL(440,
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
 
         fragmentColor = vec4(keyLight, 1.0f);
+
+        /*
+        // ****** SPOT LIGHT ******
+        //Calculate Ambient lighting
+        float ambientStrengthSpot = 0.7f; // Set ambient or global lighting strength
+        vec3 ambientSpot = ambientStrengthSpot * lightColorSpot; // Generate ambient light color
+
+        //Calculate Diffuse lighting
+        norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        lightDirection = normalize(lightPosSpot - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuseSpot = impact * lightColorSpot; // Generate diffuse light color
+
+        //Calculate Specular lighting
+        float specularIntensitySpot = 0.9f; // Set specular light strength
+        highlightSize = 3.0f; // Set specular highlight size
+        viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        //Calculate specular component
+        specularComponent = pow(max(dot(viewDir, reflectDir), 0.2), highlightSize);
+        vec3 specularSpot = specularIntensitySpot * specularComponent * lightColorSpot;
+
+        vec3 fillLight = (ambientSpot + diffuseSpot + specularSpot) * fragTex.xyz;
+
+        //fragmentColor = vec4(fillLight, 1.0f);
+
+        fragmentColor = vec4(keyLight, 0.2f) + vec4(fillLight, 1.0f);
+        */
+
     }
 );
 
@@ -654,6 +685,8 @@ const GLchar* lampBottomFragShader = GLSL(440,
     uniform vec3 lightColor;
     uniform vec3 lightPos;
     uniform vec3 viewPosition;
+    uniform vec3 lightColorSpot;
+    uniform vec3 lightPosSpot;
     uniform sampler2D texLampBottom;
     uniform vec2 gUVScaleLampBottom;
 
@@ -663,6 +696,7 @@ const GLchar* lampBottomFragShader = GLSL(440,
         if (fragTex.a < 0.1)
             discard;
 
+        // ***** KEY LIGHT ******
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
         float ambientStrength = 0.4f; // Set ambient or global lighting strength
@@ -687,6 +721,34 @@ const GLchar* lampBottomFragShader = GLSL(440,
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
 
         fragmentColor = vec4(keyLight, 1.0f);
+
+        /*
+        // ****** SPOT LIGHT ******
+        //Calculate Ambient lighting
+        float ambientStrengthSpot = 0.7f; // Set ambient or global lighting strength
+        vec3 ambientSpot = ambientStrengthSpot * lightColorSpot; // Generate ambient light color
+
+        //Calculate Diffuse lighting
+        norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        lightDirection = normalize(lightPosSpot - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuseSpot = impact * lightColorSpot; // Generate diffuse light color
+
+        //Calculate Specular lighting
+        float specularIntensitySpot = 0.9f; // Set specular light strength
+        highlightSize = 3.0f; // Set specular highlight size
+        viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        //Calculate specular component
+        specularComponent = pow(max(dot(viewDir, reflectDir), 0.2), highlightSize);
+        vec3 specularSpot = specularIntensitySpot * specularComponent * lightColorSpot;
+
+        vec3 fillLight = (ambientSpot + diffuseSpot + specularSpot) * fragTex.xyz;
+
+        //fragmentColor = vec4(fillLight, 1.0f);
+
+        fragmentColor = vec4(keyLight, 0.2f) + vec4(fillLight, 1.0f);
+        */
     }
 );
 
@@ -702,6 +764,8 @@ const GLchar* lampTopFragShader = GLSL(440,
     uniform vec3 lightColor;
     uniform vec3 lightPos;
     uniform vec3 viewPosition;
+    uniform vec3 lightColorSpot;
+    uniform vec3 lightPosSpot;
     uniform sampler2D texLampTop;
     uniform vec2 gUVScaleLampTop;
 
@@ -710,7 +774,7 @@ const GLchar* lampTopFragShader = GLSL(440,
         vec4 fragTex = texture(texLampTop, vertexTextureCoordinate * gUVScaleLampTop);
         if (fragTex.a < 0.1)
             discard;
-
+        // ***** KEY LIGHT ******
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate Ambient lighting
         float ambientStrength = 0.5f; // Set ambient or global lighting strength
@@ -734,8 +798,35 @@ const GLchar* lampTopFragShader = GLSL(440,
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
 
-        fragmentColor = vec4(keyLight, 1.0f);
+       fragmentColor = vec4(keyLight, 1.0f);
 
+        /*
+        // ****** SPOT LIGHT ******
+        //Calculate Ambient lighting
+        float ambientStrengthSpot = 0.7f; // Set ambient or global lighting strength
+        vec3 ambientSpot = ambientStrengthSpot * lightColorSpot; // Generate ambient light color
+
+        //Calculate Diffuse lighting
+        norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        lightDirection = normalize(lightPosSpot - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuseSpot = impact * lightColorSpot; // Generate diffuse light color
+
+        //Calculate Specular lighting
+        float specularIntensitySpot = 0.9f; // Set specular light strength
+        highlightSize = 3.0f; // Set specular highlight size
+        viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        //Calculate specular component
+        specularComponent = pow(max(dot(viewDir, reflectDir), 0.2), highlightSize);
+        vec3 specularSpot = specularIntensitySpot * specularComponent * lightColorSpot;
+
+        vec3 fillLight = (ambientSpot + diffuseSpot + specularSpot) * fragTex.xyz;
+
+        //fragmentColor = vec4(fillLight, 1.0f);
+        
+        fragmentColor = vec4(keyLight, 0.2f) + vec4(fillLight, 1.0f);
+        */
     }
 );
 
@@ -2669,6 +2760,8 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
     GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
     GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint lightColorLocSpot = glGetUniformLocation(shaderProgramID, "lightColorSpot");
+    GLint lightPositionLocSpot = glGetUniformLocation(shaderProgramID, "lightPosSpot");
     GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -2677,6 +2770,8 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 
     glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
     glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    glUniform3f(lightColorLocSpot, gLightColorSpot.r, gLightColorSpot.g, gLightColorSpot.b);
+    glUniform3f(lightPositionLocSpot, gLightPositionSpot.x, gLightPositionSpot.y, gLightPositionSpot.z);
     const glm::vec3 cameraPosition = gCamera.Position;
     glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
@@ -2979,11 +3074,15 @@ void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
     GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
     GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
+    GLint lightColorLocSpot = glGetUniformLocation(shaderProgramID, "lightColorSpot");
+    GLint lightPositionLocSpot = glGetUniformLocation(shaderProgramID, "lightPosSpot");
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
     glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
     glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    glUniform3f(lightColorLocSpot, gLightColorSpot.r, gLightColorSpot.g, gLightColorSpot.b);
+    glUniform3f(lightPositionLocSpot, gLightPositionSpot.x, gLightPositionSpot.y, gLightPositionSpot.z);
     const glm::vec3 cameraPosition = gCamera.Position;
     glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
@@ -3057,6 +3156,8 @@ void drawLampTop(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, G
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
     GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
     GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint lightColorLocSpot = glGetUniformLocation(shaderProgramID, "lightColorSpot");
+    GLint lightPositionLocSpot = glGetUniformLocation(shaderProgramID, "lightPosSpot");
     GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -3065,6 +3166,8 @@ void drawLampTop(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, G
 
     glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
     glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    glUniform3f(lightColorLocSpot, gLightColorSpot.r, gLightColorSpot.g, gLightColorSpot.b);
+    glUniform3f(lightPositionLocSpot, gLightPositionSpot.x, gLightPositionSpot.y, gLightPositionSpot.z);
     const glm::vec3 cameraPosition = gCamera.Position;
     glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
