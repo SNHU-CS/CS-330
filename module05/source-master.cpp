@@ -6,8 +6,18 @@
 * Description: created a small 3D scene of a living room.
 *     Scene can be navigation by the user
 *     Light and texturing applied to the scene
+* Basic template/orignated from Southern New Hampshire University
 ******************************/
 
+/*********************************************
+* Coding review (for myself)
+* remaining "TODO"s are not necessary, but have been noted 
+* they are included to improve the code and/or scene when time permits
+* 
+* !!IMPORTANT TODO!! create constructors to call on functions from other files. 
+*      place functions in corresponding files
+*      remember to update coding to match new locations
+**********************************************/
 // ********** IMPORTS/INCLUDE ***********
 // libraries
 #include <iostream>         // cout, cerr
@@ -38,17 +48,6 @@
 #endif
 
 using namespace std; // Standard namespace
-
-/*********************************************
-* Coding review (for myself)
-* remaining "TODO"s are not necessary, but have been noted 
-* they are included to improve the code and/or scene when time permits
-* 
-* !!IMPORTANT TODO!! create constructors to call on functions from other files. 
-*      place functions in corresponding files
-*      remember to update coding to match new locations
-**********************************************/
-
 
 
 // ********** NAMESPACE ***********
