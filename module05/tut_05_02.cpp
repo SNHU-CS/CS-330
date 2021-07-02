@@ -1,3 +1,12 @@
+/****************************
+* Author: Katie Stapleton
+* Date: 07/2021
+* Requires: OpenGL 4.4 with GLFW, GLEW using C++
+* Description: created a small 3D scene of a living room.
+*     Scene can be navigation by the user
+*     Light and texturing applied to the scene
+******************************/
+
 // ********** IMPORTS/INCLUDE ***********
 // libraries
 #include <iostream>         // cout, cerr
@@ -29,6 +38,17 @@
 
 using namespace std; // Standard namespace
 
+/*********************************************
+* Coding review (for myself)
+* remaining "TODO"s are not necessary, but have been noted 
+* they are included to improve the code and/or scene when time permits
+* 
+* !!IMPORTANT TODO!! create constructors to call on functions from other files. 
+*      place functions in corresponding files
+*      remember to update coding to match new locations
+**********************************************/
+
+
 
 // ********** NAMESPACE ***********
 // Unnamed namespace
@@ -49,7 +69,7 @@ namespace
 
     // camera 
     // defines where camera is positioned
-    Camera gCamera(glm::vec3(-0.4f, 2.2f, 10.5f)); // do not change. precalcated to fit scene at 0.2f, 5.6f, 9.9f
+    Camera gCamera(glm::vec3(-0.4f, 2.2f, 10.5f));
     float gLastX = WINDOW_WIDTH / 2.0f;
     float gLastY = WINDOW_HEIGHT / 2.0f;
     bool gFirstMouse = true;
@@ -84,8 +104,6 @@ namespace
     GLuint texHouseDoor; 
     GLuint texPainting;  
     GLuint texCoffeeTable; 
-    GLuint texMarbleCream; 
-    GLuint texCottonCream; 
     GLenum texLampTop;
     GLenum texLampBottom;
     GLuint texMetalBlack;
@@ -196,7 +214,7 @@ void createMeshHouseFloor(GLMesh& gMesh);
 void createMeshHouseWall(GLMesh& gMesh);
 void createMeshHouseDoor(GLMesh& gMesh);
 void createMeshPainting(GLMesh& gMesh);
-void createMeshLamp(GLMesh& gMesh);
+void createMeshLamp(GLMesh& gMesh); // used for both lamp's base and shade (bottom/top)
 void createMeshCoffeeTable(GLMesh& gMesh);
 void createMeshTableLegs(GLMesh& gMesh);
 void createMeshBalloons(GLMesh& gMesh);
@@ -213,12 +231,12 @@ void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
 void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawLampTop(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
-void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
+void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 
 
-// ****** VERTEX SHADER SOURCE CODE
+// ****** VERTEX SHADER SOURCE CODE (universal)
 // Vertex Shader Source Code
 const GLchar* vertexShaderSource = GLSL(440,
 
@@ -245,10 +263,7 @@ const GLchar* vertexShaderSource = GLSL(440,
 
 
 // ****** FRAGMENT SHADER SOURCE CODE
-// UNABLE TO GET VERTEX TO ACCEPT A 2ND/DIFFERENT SET OF COORDINATES
-// SOLUTION: create another frag shader (research other opportunities later)
-
-// Fragment Shader: side table
+// fragment shader: side table
 const GLchar* sideTableFragShader = GLSL(440,
     in vec3 vertexFragmentPos;
     in vec3 vertexNormal;
@@ -274,35 +289,36 @@ const GLchar* sideTableFragShader = GLSL(440,
         if (fragTexLegs.a < 0.1)
             discard;
 
-        //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.5f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+        // phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate ambient lighting
+        float ambientStrength = 0.5f; // set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // generate ambient light color
 
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); // normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5); // calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // generate diffuse light color
 
-        // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular lighting
+        float specularIntensity = 0.0f; // set specular light strength
+        float highlightSize = 5.0f; // set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm); // calculate reflection vector
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.5), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
-        // calculate result
-        vec3 keyLight = (ambient + diffuse + specular) * fragTexFrame.xyz; //*fragTexLegs.xyz;
+        // calculate result for phong lighting
+        vec3 keyLight = (ambient + diffuse + specular) * fragTexFrame.xyz; // * fragTexLegs.xyz;
 
         fragmentColor = vec4(keyLight, 1.0f);
 
     }
 );
 
-// Fragment Shader: side table drawer
+
+// fragment shader: side table drawer
 const GLchar* sideDrawerFragShader = GLSL(440,
     in vec3 vertexFragmentPos;
     in vec3 vertexNormal;
@@ -323,21 +339,19 @@ const GLchar* sideDrawerFragShader = GLSL(440,
             discard;
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.5f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.48);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate ambient lighting
+        float ambientStrength = 0.5f;
+        vec3 ambient = ambientStrength * lightColor;
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos);
+        float impact = max(dot(norm, lightDirection), 0.48);
+        vec3 diffuse = impact * lightColor;
+        // calculate specular lighting
+        float specularIntensity = 0.0f;
+        float highlightSize = 5.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos);
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.4), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
@@ -366,35 +380,31 @@ const GLchar* houseFloorFragShader = GLSL(440,
 
     void main()
     {
-        //texture
+        // texture
         vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * gUVScaleHouseFloor);
         if (fragTex.a < 0.1)
             discard;        
         
-        /*Phong lighting model calculations to generate ambient, diffuse, and specular components*/
-
+        // phong lighting model calculations to generate ambient, diffuse, and specular components
         // calculate ambient lighting
-        float ambientStrength = 0.65f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
+        float ambientStrength = 0.65f; // calculate view direction
+        vec3 ambient = ambientStrength * lightColor; // generate ambient light color
         // calculate diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
+        vec3 norm = normalize(vertexNormal); // normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.6); // calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // generate diffuse light color 
         // calculate specular lighting
-        float specularIntensity = 0.8f; // Set specular light strength
-        float highlightSize = 16.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        float specularIntensity = 0.8f; 
+        float highlightSize = 16.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); 
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.6), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
         
         // Calculate phong result with texture
         vec3 phong = (ambient + diffuse + specular) * fragTex.xyz;
-
         fragmentColor = vec4(phong, 1.0); // Send lighting results to GPU
         //fragmentColor = fragTex;
 
@@ -424,56 +434,49 @@ const GLchar* houseWallFragShader = GLSL(440,
         if (fragTex.a < 0.1)
             discard;
 
-        //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.6f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.2);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate ambient lighting
+        float ambientStrength = 0.6f; 
+        vec3 ambient = ambientStrength * lightColor; 
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); 
+        float impact = max(dot(norm, lightDirection), 0.2);
+        vec3 diffuse = impact * lightColor; 
+        // calculate specular lighting
+        float specularIntensity = 0.0f; // set specular light strength
+        float highlightSize = 5.0f; // set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm); // calculate reflection vector
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.3), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
-
         fragmentColor = vec4(keyLight, 1.0f);
 
         /*
         // ****** SPOT LIGHT ******
-        //Calculate Ambient lighting
-        float ambientStrengthSpot = 0.7f; // Set ambient or global lighting strength
-        vec3 ambientSpot = ambientStrengthSpot * lightColorSpot; // Generate ambient light color
-
-        //Calculate Diffuse lighting
-        norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        lightDirection = normalize(lightPosSpot - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuseSpot = impact * lightColorSpot; // Generate diffuse light color
-
-        //Calculate Specular lighting
-        float specularIntensitySpot = 0.9f; // Set specular light strength
-        highlightSize = 3.0f; // Set specular highlight size
-        viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        //Calculate ambient lighting
+        float ambientStrengthSpot = 0.7f; 
+        vec3 ambientSpot = ambientStrengthSpot * lightColorSpot; 
+        //Calculate diffuse lighting
+        norm = normalize(vertexNormal); 
+        lightDirection = normalize(lightPosSpot - vertexFragmentPos); 
+        impact = max(dot(norm, lightDirection), 0.6);
+        vec3 diffuseSpot = impact * lightColorSpot; 
+        //Calculate specular lighting
+        float specularIntensitySpot = 0.9f; 
+        highlightSize = 3.0f; 
+        viewDir = normalize(viewPosition - vertexFragmentPos); 
+        reflectDir = reflect(-lightDirection, norm);
         //Calculate specular component
         specularComponent = pow(max(dot(viewDir, reflectDir), 0.2), highlightSize);
         vec3 specularSpot = specularIntensitySpot * specularComponent * lightColorSpot;
 
         vec3 fillLight = (ambientSpot + diffuseSpot + specularSpot) * fragTex.xyz;
-
         //fragmentColor = vec4(fillLight, 1.0f);
-
         fragmentColor = vec4(keyLight, 0.2f) + vec4(fillLight, 1.0f);
         */
 
@@ -502,32 +505,28 @@ const GLchar* houseDoorFragShader = GLSL(440,
             discard;
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.4f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate ambient lighting
+        float ambientStrength = 0.4f; 
+        vec3 ambient = ambientStrength * lightColor; 
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); 
+        float impact = max(dot(norm, lightDirection), 0.5);
+        vec3 diffuse = impact * lightColor; 
+        // calculate specular lighting
+        float specularIntensity = 0.0f; 
+        float highlightSize = 5.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); 
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.9), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
-
         fragmentColor = vec4(keyLight, 1.0f);
     }
 );
-
 
 
 // fragment shader: painting
@@ -551,34 +550,31 @@ const GLchar* paintingFragShader = GLSL(440,
             discard;
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.35f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 3.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate ambient lighting
+        float ambientStrength = 0.35f; 
+        vec3 ambient = ambientStrength * lightColor; 
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); 
+        float impact = max(dot(norm, lightDirection), 0.6);
+        vec3 diffuse = impact * lightColor; 
+        // calculate specular lighting
+        float specularIntensity = 0.0f; 
+        float highlightSize = 3.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); 
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.2), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
-
         fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
-// Fragment Shader: coffee table
+// fragment shader: coffee table
 const GLchar* coffeeTableFragShader = GLSL(440,
     in vec3 vertexFragmentPos;
     in vec3 vertexNormal;
@@ -599,34 +595,31 @@ const GLchar* coffeeTableFragShader = GLSL(440,
             discard;
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.3f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.2);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 0.1f; // Set specular light strength
-        float highlightSize = 10.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate ambient lighting
+        float ambientStrength = 0.3f; 
+        vec3 ambient = ambientStrength * lightColor;
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); 
+        float impact = max(dot(norm, lightDirection), 0.2);
+        vec3 diffuse = impact * lightColor; 
+        // calculate specular lighting
+        float specularIntensity = 0.1f; 
+        float highlightSize = 10.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); 
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.1), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
-
         fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
-// Fragment Shader: legs for tables (and other furniture)
+// fragment shader: legs for tables (and other furniture)
 const GLchar* tableLegsFragShader = GLSL(440,
     in vec3 vertexFragmentPos;
     in vec3 vertexNormal;
@@ -647,34 +640,31 @@ const GLchar* tableLegsFragShader = GLSL(440,
             discard;
 
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.2f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 1.0);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 0.0f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate ambient lighting
+        float ambientStrength = 0.2f; 
+        vec3 ambient = ambientStrength * lightColor; 
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); 
+        float impact = max(dot(norm, lightDirection), 1.0);
+        vec3 diffuse = impact * lightColor; 
+        // calculate specular lighting
+        float specularIntensity = 0.0f; 
+        float highlightSize = 5.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); 
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.8), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
-
         fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
-// Fragment Shader: lamp bottom (base)
+// fragment shader: lamp bottom (base)
 const GLchar* lampBottomFragShader = GLSL(440,
     in vec3 vertexFragmentPos;
     in vec3 vertexNormal;
@@ -698,62 +688,55 @@ const GLchar* lampBottomFragShader = GLSL(440,
 
         // ***** KEY LIGHT ******
         //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.4f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 0.2f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate ambient lighting
+        float ambientStrength = 0.4f; 
+        vec3 ambient = ambientStrength * lightColor; 
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); 
+        float impact = max(dot(norm, lightDirection), 0.5);
+        vec3 diffuse = impact * lightColor; 
+        // calculate specular lighting
+        float specularIntensity = 0.2f; 
+        float highlightSize = 5.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); 
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.3), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
-
         fragmentColor = vec4(keyLight, 1.0f);
 
         /*
         // ****** SPOT LIGHT ******
-        //Calculate Ambient lighting
-        float ambientStrengthSpot = 0.7f; // Set ambient or global lighting strength
-        vec3 ambientSpot = ambientStrengthSpot * lightColorSpot; // Generate ambient light color
-
-        //Calculate Diffuse lighting
-        norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        lightDirection = normalize(lightPosSpot - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuseSpot = impact * lightColorSpot; // Generate diffuse light color
-
-        //Calculate Specular lighting
-        float specularIntensitySpot = 0.9f; // Set specular light strength
-        highlightSize = 3.0f; // Set specular highlight size
-        viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        //Calculate ambient lighting
+        float ambientStrengthSpot = 0.7f; 
+        vec3 ambientSpot = ambientStrengthSpot * lightColorSpot; 
+        //Calculate diffuse lighting
+        norm = normalize(vertexNormal); 
+        lightDirection = normalize(lightPosSpot - vertexFragmentPos); 
+        impact = max(dot(norm, lightDirection), 0.6);
+        vec3 diffuseSpot = impact * lightColorSpot; 
+        //Calculate specular lighting
+        float specularIntensitySpot = 0.9f; 
+        highlightSize = 3.0f; 
+        viewDir = normalize(viewPosition - vertexFragmentPos); 
+        reflectDir = reflect(-lightDirection, norm);
         //Calculate specular component
         specularComponent = pow(max(dot(viewDir, reflectDir), 0.2), highlightSize);
         vec3 specularSpot = specularIntensitySpot * specularComponent * lightColorSpot;
 
         vec3 fillLight = (ambientSpot + diffuseSpot + specularSpot) * fragTex.xyz;
-
         //fragmentColor = vec4(fillLight, 1.0f);
-
         fragmentColor = vec4(keyLight, 0.2f) + vec4(fillLight, 1.0f);
         */
     }
 );
 
 
-// Fragment Shader: lamp top (shade)
+// fragment shader: lamp top (shade)
 const GLchar* lampTopFragShader = GLSL(440,
     in vec3 vertexFragmentPos;
     in vec3 vertexNormal;
@@ -775,63 +758,56 @@ const GLchar* lampTopFragShader = GLSL(440,
         if (fragTex.a < 0.1)
             discard;
         // ***** KEY LIGHT ******
-        //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.5f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 0.2f; // Set specular light strength
-        float highlightSize = 5.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate ambient lighting
+        float ambientStrength = 0.5f; 
+        vec3 ambient = ambientStrength * lightColor; 
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); 
+        float impact = max(dot(norm, lightDirection), 0.5);
+        vec3 diffuse = impact * lightColor; 
+        // calculate specular lighting
+        float specularIntensity = 0.2f; 
+        float highlightSize = 5.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); 
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.5), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
-
        fragmentColor = vec4(keyLight, 1.0f);
 
         /*
         // ****** SPOT LIGHT ******
-        //Calculate Ambient lighting
-        float ambientStrengthSpot = 0.7f; // Set ambient or global lighting strength
-        vec3 ambientSpot = ambientStrengthSpot * lightColorSpot; // Generate ambient light color
-
-        //Calculate Diffuse lighting
-        norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        lightDirection = normalize(lightPosSpot - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        impact = max(dot(norm, lightDirection), 0.6);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuseSpot = impact * lightColorSpot; // Generate diffuse light color
-
-        //Calculate Specular lighting
-        float specularIntensitySpot = 0.9f; // Set specular light strength
-        highlightSize = 3.0f; // Set specular highlight size
-        viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        //Calculate ambient lighting
+        float ambientStrengthSpot = 0.7f; 
+        vec3 ambientSpot = ambientStrengthSpot * lightColorSpot; 
+        //Calculate diffuse lighting
+        norm = normalize(vertexNormal); 
+        lightDirection = normalize(lightPosSpot - vertexFragmentPos); 
+        impact = max(dot(norm, lightDirection), 0.6);
+        vec3 diffuseSpot = impact * lightColorSpot; 
+        //Calculate specular lighting
+        float specularIntensitySpot = 0.9f; 
+        highlightSize = 3.0f; 
+        viewDir = normalize(viewPosition - vertexFragmentPos); 
+        reflectDir = reflect(-lightDirection, norm);
         //Calculate specular component
         specularComponent = pow(max(dot(viewDir, reflectDir), 0.2), highlightSize);
         vec3 specularSpot = specularIntensitySpot * specularComponent * lightColorSpot;
 
         vec3 fillLight = (ambientSpot + diffuseSpot + specularSpot) * fragTex.xyz;
-
         //fragmentColor = vec4(fillLight, 1.0f);
-        
         fragmentColor = vec4(keyLight, 0.2f) + vec4(fillLight, 1.0f);
         */
     }
 );
 
 
-// Fragment Shader: balloons
+// fragment shader: balloons
 const GLchar* balloonsFragShader = GLSL(440,
     in vec3 vertexFragmentPos;
     in vec3 vertexNormal;
@@ -851,35 +827,32 @@ const GLchar* balloonsFragShader = GLSL(440,
         if (fragTex.a < 0.1)
             discard;
 
-        //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.3f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.7);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 0.2f; // Set specular light strength
-        float highlightSize = 1.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate ambient lighting
+        float ambientStrength = 0.3f; 
+        vec3 ambient = ambientStrength * lightColor; 
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); 
+        float impact = max(dot(norm, lightDirection), 0.7);
+        vec3 diffuse = impact * lightColor; 
+        // calculate specular lighting
+        float specularIntensity = 0.2f; 
+        float highlightSize = 1.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); 
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.5), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
-
         fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
-// Fragment Shader: couch seats and couch back rest
+// fragment shader: couch seats and couch back rest
 const GLchar* couchFragShader = GLSL(440,
     in vec3 vertexFragmentPos;
     in vec3 vertexNormal;
@@ -899,37 +872,33 @@ const GLchar* couchFragShader = GLSL(440,
         if (fragTex.a < 0.1)
             discard;
 
-        //Phong lighting model calculations to generate ambient, diffuse, and specular components
-        // calculate Ambient lighting
-        float ambientStrength = 0.4f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        // calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.3);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        // calculate Specular lighting
-        float specularIntensity = 4.0f; // Set specular light strength
-        float highlightSize = 20.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate ambient lighting
+        float ambientStrength = 0.4f; 
+        vec3 ambient = ambientStrength * lightColor; 
+        // calculate diffuse lighting
+        vec3 norm = normalize(vertexNormal); 
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); 
+        float impact = max(dot(norm, lightDirection), 0.3);
+        vec3 diffuse = impact * lightColor; 
+        // calculate specular lighting
+        float specularIntensity = 4.0f; 
+        float highlightSize = 20.0f; 
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); 
+        vec3 reflectDir = reflect(-lightDirection, norm);
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.5), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
 
         // calculate result
         vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
-
         fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
-
 // flip images vertically
-// Images are loaded with Y axis going down. OpenGL's Y axis goes up
+// images are loaded with Y axis going down (OpenGL's Y axis goes up)
 void flipImageVertical(unsigned char* image, int width, int height, int channels)
 {
     for (int j = 0; j < height / 2; ++j)
@@ -956,11 +925,11 @@ int main(int argc, char* argv[])
     if (!initializeOGL(argc, argv, &gWindow))
         return EXIT_FAILURE;
 
-    // Sets the background color of the window to black (it will be implicitely used by glClear)
+    // sets the background color of the window to black (it will be implicitely used by glClear)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    // create the mesh for objects (creas VBO)
-    // TODO: raise exceptions
+    // create the mesh for objects (creates VBO)
+    // TODO: add raise exceptions
     createMeshSideTable(gMeshSideTable);
     createMeshSideDrawer(gMeshSideDrawer);
     createMeshHouseFloor(gMeshHouseFloor);;
@@ -974,11 +943,11 @@ int main(int argc, char* argv[])
     createMeshCouch(gMeshCouch);
 
 
-    /* ISSUE: started once added door in program.
-    * when all exceptions are disabled within shaders, program works
-    * when expections are enable, throws ANY/ALL expections. in either form, statement is not shown
-    * started when added programming for texture5 for the door
-    * TRIED: viewing fragshader, draw in rendering, and draw function. did not find conflicts
+    /* FIXME: program automatically shuts down if raise exceptions are uncommented
+    * Begin when adding doors into program
+    * failure message is NOT showing in display/log, but raise exceptions for shaders cause the program to crash
+    *  TRIED: viewed fragshader, rendering, and draw functions. Did not find conflicts
+    * - consider reviewing the create shaders program to see if coding was altered
     */
 
     if (!createShaderProgram(vertexShaderSource, sideTableFragShader, gSideTableProgramId))
@@ -1030,7 +999,7 @@ int main(int argc, char* argv[])
         //return EXIT_FAILURE;
 
 
-    // TODO: MINIMIZE INTO FUNCTION(S) LATER
+    // TODO: consider changing into functions
     // TEXTURE: wood, dark brown/red solid
     const char* texFilename = "../../resources/textures/wood-dark-rotate.png";
     if (!createTexture(texFilename, texCoffeeTable, GL_REPEAT, GL_LINEAR))
@@ -1094,27 +1063,27 @@ int main(int argc, char* argv[])
     texNumHouseWall = GL_TEXTURE4;
 
 
-    // TEXTURE: door, old
+    // TEXTURE (IMAGE): door, old/rustic
     texFilename = "../../resources/images/door-dark-wood.png";
     if (!createTexture(texFilename, texHouseDoor, GL_CLAMP_TO_EDGE, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    //  door
+    // door
     glUseProgram(gHouseDoorProgramId);
     glUniform1i(glGetUniformLocation(gHouseDoorProgramId, "texHouseDoor"), 5);
     texNumHouseDoor = GL_TEXTURE5;
 
 
-    // TEXTURE: painted image
+    // TEXTURE (IMAGE): painted image of sunset
     texFilename = "../../resources/images/framed-sunset-lrg.png";
     if (!createTexture(texFilename, texPainting, GL_CLAMP_TO_EDGE, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    //  image
+    // painting
     glUseProgram(gPaintingProgramId);
     glUniform1i(glGetUniformLocation(gPaintingProgramId, "texPainting"), 6);
     texNumPainting = GL_TEXTURE6;
@@ -1127,7 +1096,7 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     } 
-    //  table legs, furniture legs
+    // table legs, furniture legs
     glUseProgram(gTableLegsProgramId);
     glUniform1i(glGetUniformLocation(gTableLegsProgramId, "texTableLegs"), 7);
     texNumTableLegs = GL_TEXTURE7;
@@ -1140,7 +1109,7 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    // lamp base
+    // lamp base/bottom
     glUseProgram(gLampBottomProgramId);
     glUniform1i(glGetUniformLocation(gLampBottomProgramId, "texLampBottom"), 8);
     texNumLampBottom = GL_TEXTURE8;
@@ -1152,12 +1121,12 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    // lamp shade
+    // lamp shade/top
     glUseProgram(gLampTopProgramId);
     glUniform1i(glGetUniformLocation(gLampTopProgramId, "texLampTop"), 9);
     texNumLampTop = GL_TEXTURE9;
 
-    // TEXTURE: smooth rubber
+    // TEXTURE: smooth green rubber
     texFilename = "../../resources/textures/rubber-green.jpg";
     if (!createTexture(texFilename, texBalloons, GL_REPEAT, GL_LINEAR))
     {
@@ -1176,27 +1145,26 @@ int main(int argc, char* argv[])
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
     }
-    // balloons
+    // couch
     glUseProgram(gCouchProgramId);
     glUniform1i(glGetUniformLocation(gCouchProgramId, "texCouch"), 11);
     texNumCouch = GL_TEXTURE11;
 
 
-    // render loop. 
-    // (exit key is esc, defined at "exit" (at end of main class)
+    // render loop
     while (!glfwWindowShouldClose(gWindow))
     {
         // per-frame timing
         float currentFrame = glfwGetTime();
         gDeltaTime = currentFrame - gLastFrame;
         gLastFrame = currentFrame;
-        // input
+        // user input
         keyboardNavigationCallback(gWindow);
 
         glm::mat4 view = gCamera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(gCamera.Zoom), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, 0.1f, 100.0f);
 
-       // creates and draws all objects
+        // function containing all object draws
         rendering(view, projection);
 
         // poll for user or OS activity
@@ -1204,8 +1172,8 @@ int main(int argc, char* argv[])
     }
 
 
-    // release mesh data
     // TODO: look into batch release destroy/release
+    // release mesh data
     destroyMesh(gMeshSideTable);
     destroyMesh(gMeshSideDrawer);
     destroyMesh(gMeshHouseFloor);
@@ -1217,15 +1185,9 @@ int main(int argc, char* argv[])
     destroyMesh(gMeshLamp);
     destroyMesh(gMeshBalloons);
     destroyMesh(gMeshCouch);
-    /*
-    destroyMesh(gMeshRug);
-    destroyMesh(gMeshHouseWreath);
-    destroyMesh(gMeshCouchArmRests);
-    */
 
     // release texture
-    //     // TODO: look into batch release destroy/release. 
-    // OpenGL 4.4 destroy textures function (don't forget that "s")
+    // TODO: Look into batch release destroy/release; research OpenGL 4.4 destroyTextures function (don't forget that "s")
     destroyTexture(gTextureId);
     destroyTexture(texSideTable);
     destroyTexture(texSideDrawer);
@@ -1241,10 +1203,6 @@ int main(int argc, char* argv[])
     destroyTexture(texLampTop);
     destroyTexture(texBalloons);
     destroyTexture(texCouch);
-    /*
-    destroyTexture(texRug);
-    destroyTexture(texWreath);
-    */
 
     // release fragment shader programs
     destroyShaderProgram(gSideTableProgramId);
@@ -1259,21 +1217,14 @@ int main(int argc, char* argv[])
     destroyShaderProgram(gLampTopProgramId);
     destroyShaderProgram(gBalloonsProgramId);
     destroyShaderProgram(gCouchProgramId);
-    /*
-     destroyShaderProgram(gRugProgramId);
-     destroyShaderProgram(gHouseWreathProgramId);
-     destroyShaderProgram(gCouchArmRestsProgramId);
-     */
 
     exit(EXIT_SUCCESS); // Terminates the program successfully
 }
 
 
 // ********** RENDERING **********
-// Functioned called to render a frame
 void rendering(glm::mat4 view, glm::mat4 projection)
 {
-
     // Clear the frame and z buffers
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1281,13 +1232,9 @@ void rendering(glm::mat4 view, glm::mat4 projection)
     // Enable z-depth
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // move to cube (or remove if cube is deleted)
-    // Activate the cube VAO (used by cube)
-
-    // TODO: assign variable to hold texture number
+    // draws each object in scene. certain functions draw multiple objects
+    // draws both side tables
     drawSideTable(view, projection, gSideTableProgramId, gMeshSideTable, texNumSideTable, texSideTable);
     drawSideDrawer(view, projection, gSideDrawerProgramId, gMeshSideDrawer, texNumSideDrawer, texSideDrawer);
     drawHouseFloor(view, projection, gHouseFloorProgramId, gMeshHouseFloor, texNumHouseFloor, texHouseFloor);
@@ -1295,14 +1242,14 @@ void rendering(glm::mat4 view, glm::mat4 projection)
     drawHouseDoor(view, projection, gHouseDoorProgramId, gMeshHouseDoor, texNumHouseDoor, texHouseDoor);
     drawPainting(view, projection, gPaintingProgramId, gMeshPainting, texNumPainting, texPainting);
     drawCoffeeTable(view, projection, gCoffeeTableProgramId, gMeshCoffeeTable, texNumCoffeeTable, texCoffeeTable);
+    // draws coffee table legs, couch legs, and balloon string
     drawTableLegs(view, projection, gTableLegsProgramId, gMeshTableLegs, texNumTableLegs, texTableLegs);
     drawLampBottom(view, projection, gLampBottomProgramId, gMeshLamp, texNumLampBottom, texLampBottom);
     drawLampTop(view, projection, gLampTopProgramId, gMeshLamp, texNumLampTop, texLampTop);
     drawBalloons(view, projection, gBalloonsProgramId, gMeshBalloons, texNumBalloons, texBalloons);
     drawCouch(view, projection, gCouchProgramId, gMeshCouch, texNumCouch, texCouch);
 
-    
-    // Deactivate the Vertex Array Object and shader program
+    // deactivate the Vertex Array Object and shader program
     glBindVertexArray(0);
     glUseProgram(0);
 
@@ -1321,9 +1268,9 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef __APPLE__
+    #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+    #endif
 
     // GLFW: window creation
     * window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
@@ -1336,8 +1283,7 @@ bool initializeOGL(int argc, char* argv[], GLFWwindow** window)
     glfwMakeContextCurrent(*window);
     glfwSetFramebufferSizeCallback(*window, resizeWindow);
 
-
-    // tell GLFW to capture our mouse
+    // tell GLFW to capture mouse within scene
     glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(*window, mousePositionCallback);
     glfwSetScrollCallback(*window, mouseScrollCallback);
@@ -1369,7 +1315,7 @@ void resizeWindow(GLFWwindow* window, int width, int height)
 
 
 // ********** KEYBOARD-BASED NAVIGATION **********
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// process user input via keyboard for navigating the scene
 void keyboardNavigationCallback(GLFWwindow* window)
 {
     static const float cameraSpeed = 2.5f;
@@ -1395,8 +1341,9 @@ void keyboardNavigationCallback(GLFWwindow* window)
 }
 
 // Change projection to ortho
-// FIX ME: does not change to ortho. Tried GetKey method, but causes indefinite loop when ortho projection change is added
 // source: https://stackoverflow.com/questions/51873906/is-there-a-way-to-process-only-one-input-event-after-a-key-is-pressed-using-glfw
+// FIXME: does not change to ortho. Tried GetKey method, but causes indefinite loop when ortho projection ios enable
+//        currently disabled; prints statement when key is pressed
 void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_P && action == GLFW_PRESS)
@@ -1477,8 +1424,8 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 
 
 // ********** TEXTURES AND IMAGES **********
+// !!IMPORTANT!!: assumes all images are declared and processed as GL_TEXTURE_2D. (s,t) are also assumed to be the same  !!IMPORTANT!!
 // generates settings for individual texture 
-// assumes all images are declared and processed as GL_TEXTURE_2D
 bool createTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, GLint gTexFilterMode)
 {
     int width, height, channels;
@@ -1524,11 +1471,7 @@ bool createTexture(const char* filename, GLuint& textureId, GLint gTexWrapMode, 
 }
 
 
-// load all textures
-/* IMPORTANT: By default, assumes all images are declared and processed as GL_TEXTURE_2D.
- *    Specify location, textureID, Wrap Parameter and Filter Parameter
- *    To make S or T different from each other, a custom loop needs to be made, based on the createTexture */
-
+// TODO: research batch texture deletion
  // delete textures. change this to default later
 void deleteAllTexture(GLuint& textureIdAll, int texCount)
 {
@@ -1536,6 +1479,7 @@ void deleteAllTexture(GLuint& textureIdAll, int texCount)
     // source: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDeleteTextures.xhtml
     glDeleteTextures(texCount, &textureIdAll);
 }
+
 
 // remove once deleteTexture properly functions/enabled
 void destroyTexture(GLuint textureId)
@@ -1548,22 +1492,22 @@ void destroyTexture(GLuint textureId)
 // Implements the UCreateShaders function
 bool createShaderProgram(const char* vtxShaderSource, const char* FragShader, GLuint& programId)
 {
-    // Compilation and linkage error reporting
+    // compilation and linkage error reporting
     int success = 0;
     char infoLog[512];
 
-    // Create a Shader program object.
+    // create a Shader program object.
     programId = glCreateProgram();
 
-    // Create the vertex and fragment shader objects
+    // create the vertex and fragment shader objects
     GLuint vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
 
-    // Retrive the shader source
+    // retrive the shader source
     glShaderSource(vertexShaderId, 1, &vtxShaderSource, NULL);
     glShaderSource(fragmentShaderId, 1, &FragShader, NULL);
 
-    // Compile the vertex shader, and print compilation errors (if any)
+    // compile the vertex shader, and print compilation errors (if any)
     glCompileShader(vertexShaderId); // compile the vertex shader
     // check for shader compile errors
     glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &success);
@@ -1586,7 +1530,7 @@ bool createShaderProgram(const char* vtxShaderSource, const char* FragShader, GL
         return false;
     }
 
-    // Attached compiled shaders to the shader program
+    // attached compiled shaders to the shader program
     glAttachShader(programId, vertexShaderId);
     glAttachShader(programId, fragmentShaderId);
 
@@ -1614,52 +1558,53 @@ void destroyShaderProgram(GLuint programId)
 
 // ********** OBJECT MESH **********
 
+// draws both side tables
 void createMeshSideTable(GLMesh& gMesh)
 {
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
         // back
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
         // left side
-        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f,
         // right side
-         0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
          // bottom
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f,
         // top
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
+        -0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1668,16 +1613,15 @@ void createMeshSideTable(GLMesh& gMesh)
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao); // note: can generate multiple VAOs or buffers at the same time
     glBindVertexArray(gMesh.vao);
 
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -1696,12 +1640,12 @@ void createMeshSideDrawer(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // place at front of side table dresser cube
-        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left bottom
-         0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right bottom
-         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right top
-         0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right top
-        -0.55f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // left top
-        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f  // left bottom
+        -0.55f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // left bottom
+         0.55f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // right bottom
+         0.55f,  0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, // right top
+         0.55f,  0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, // right top
+        -0.55f,  0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f, // left top
+        -0.55f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f  // left bottom
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1710,18 +1654,17 @@ void createMeshSideDrawer(GLMesh& gMesh)
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
-    // Create Vertex Attribute Pointers
+    // create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
     glEnableVertexAttribArray(0);
 
@@ -1738,12 +1681,12 @@ void createMeshHouseFloor(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // place at front of side table dresser cube
-        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // left back
-         1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right back
-         1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right front
-         1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right front
-        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left front
-        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f  // left back
+        -1.0f, 0.0f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f, // left back
+         1.0f, 0.0f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, // right back
+         1.0f, 0.0f,  1.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // right front
+         1.0f, 0.0f,  1.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // right front
+        -1.0f, 0.0f,  1.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // left front
+        -1.0f, 0.0f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f  // left back
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1752,16 +1695,15 @@ void createMeshHouseFloor(GLMesh& gMesh)
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -1780,12 +1722,12 @@ void createMeshHouseWall(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // place at front of side table dresser cube
-        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // left bottom
-         1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // right bottom
-         1.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right top
-         1.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // right top
-        -1.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left top
-        -1.0f, 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f  // left bottom
+        -1.0f, 0.0f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f, // left bottom
+         1.0f, 0.0f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, // right bottom
+         1.0f, 1.0f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // right top
+         1.0f, 1.0f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // right top
+        -1.0f, 1.0f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // left top
+        -1.0f, 0.0f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f  // left bottom
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1794,16 +1736,15 @@ void createMeshHouseWall(GLMesh& gMesh)
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -1822,12 +1763,12 @@ void createMeshHouseDoor(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
-        -0.55f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         0.55f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         0.55f, 1.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.55f, 1.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -0.55f, 1.0f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-        -0.55f, 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
+        -0.55f, 0.0f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+         0.55f, 0.0f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+         0.55f, 1.0f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+         0.55f, 1.0f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+        -0.55f, 1.0f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+        -0.55f, 0.0f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1836,16 +1777,15 @@ void createMeshHouseDoor(GLMesh& gMesh)
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -1864,12 +1804,12 @@ void createMeshPainting(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
-         -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         0.55f, 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.55f, 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -0.55f, 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-        -0.55f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
+        -0.55f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+         0.55f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+         0.55f,  0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+         0.55f,  0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+        -0.55f,  0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+        -0.55f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f
     };
 
     const GLuint floatsPerVertex = 3;
@@ -1878,16 +1818,15 @@ void createMeshPainting(GLMesh& gMesh)
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -1906,47 +1845,47 @@ void createMeshCoffeeTable(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
-        -1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f,  0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         1.0f,  0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -1.0f,  0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -1.0f, -0.25f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+         1.0f, -0.25f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+         1.0f,  0.25f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+         1.0f,  0.25f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+        -1.0f,  0.25f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+        -1.0f, -0.25f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
         // back
-        -1.0f, -0.25f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-         1.0f, -0.25f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-         1.0f,  0.25f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-         1.0f,  0.25f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        -1.0f,  0.25f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        -1.0f, -0.25f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -1.0f, -0.25f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+         1.0f, -0.25f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+         1.0f,  0.25f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+         1.0f,  0.25f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        -1.0f,  0.25f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+        -1.0f, -0.25f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
         // left Coffee
-        -1.0f,  0.25f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -1.0f,  0.25f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -1.0f, -0.25f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, -0.25f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, -0.25f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-        -1.0f,  0.25f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -1.0f,  0.25f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+        -1.0f,  0.25f, -0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+        -1.0f, -0.25f, -0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+        -1.0f, -0.25f, -0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+        -1.0f, -0.25f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+        -1.0f,  0.25f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
         // right Coffee
-         1.0f,  0.25f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         1.0f,  0.25f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         1.0f, -0.25f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f, -0.25f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f, -0.25f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         1.0f,  0.25f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         1.0f,  0.25f,  0.5f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+         1.0f,  0.25f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+         1.0f, -0.25f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+         1.0f, -0.25f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+         1.0f, -0.25f,  0.5f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+         1.0f,  0.25f,  0.5f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f,
          // bottom
-        -1.0f, -0.25f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, -0.25f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-         1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-         1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        -1.0f, -0.25f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        -1.0f, -0.25f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, -0.25f, -0.5f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+         1.0f, -0.25f, -0.5f,  0.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+         1.0f, -0.25f,  0.5f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+         1.0f, -0.25f,  0.5f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+        -1.0f, -0.25f,  0.5f,  0.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+        -1.0f, -0.25f, -0.5f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f,
         // top
-        -1.0f,  0.25f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f,  0.25f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         1.0f,  0.25f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-         1.0f,  0.25f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -1.0f,  0.25f,  0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -1.0f,  0.25f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
+        -1.0f,  0.25f, -0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+         1.0f,  0.25f, -0.5f,  1.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+         1.0f,  0.25f,  0.5f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+         1.0f,  0.25f,  0.5f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+        -1.0f,  0.25f,  0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+        -1.0f,  0.25f, -0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f
     };
 
 
@@ -1956,16 +1895,15 @@ void createMeshCoffeeTable(GLMesh& gMesh)
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -1979,12 +1917,11 @@ void createMeshCoffeeTable(GLMesh& gMesh)
 }
 
 
-// mesh for coffee table legs and couch legs (only tube, has no top/bottom)
+// mesh for coffee table legs and couch legs (only cylinder tube, has no top/bottom)
 void createMeshTableLegs(GLMesh& gMesh)
 {
     // source: https://stackoverflow.com/questions/59468388/how-the-heck-do-you-use-gl-triangle-fan-to-draw-a-circle-in-opengl
     // coordinate calculations: https://www.sr-research.com/circular-coordinate-calculator/
-
     GLfloat verts[] = {
         // Vertex Positions       // normals         // textures
         // top
@@ -2080,27 +2017,23 @@ void createMeshTableLegs(GLMesh& gMesh)
         24, 13,  1  // bottom
     };
     
-
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
     const GLuint floatsPerUV = 2;
 
-
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
-
+    // create 2 buffers: vertex data, indices
     gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]));
     glGenBuffers(2, gMesh.vbos); // Create 2 buffers: vertex data and the indices
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbos[0]); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
-
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbos[0]); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gMesh.vbos[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -2113,13 +2046,12 @@ void createMeshTableLegs(GLMesh& gMesh)
     glEnableVertexAttribArray(2);
 }
 
-// mesh for lamp, both top and bottom
+
+// mesh for lamp, full cylinder
 void createMeshLamp(GLMesh& gMesh)
 {
-
     // source: https://stackoverflow.com/questions/59468388/how-the-heck-do-you-use-gl-triangle-fan-to-draw-a-circle-in-opengl
     // coordinate calculations: https://www.sr-research.com/circular-coordinate-calculator/
-
     GLfloat verts[] = {
         // Vertex Positions       // normals         // textures
         // top center point
@@ -2159,7 +2091,6 @@ void createMeshLamp(GLMesh& gMesh)
     // Index data to share position data of cylinder
     // top and bottom are "triangle fan" for a better texture display
     GLushort indices[] = {
-        
         // top
         0, 1, 2, 
         0, 2, 3,
@@ -2217,27 +2148,23 @@ void createMeshLamp(GLMesh& gMesh)
         24, 13,  1  // bottom
     };
 
-
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
     const GLuint floatsPerUV = 2;
 
-
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
-
+    // create 2 buffers: vertex data, indices
     gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]));
     glGenBuffers(2, gMesh.vbos); // Create 2 buffers: vertex data and the indices
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbos[0]); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
-
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbos[0]); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gMesh.vbos[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -2254,7 +2181,6 @@ void createMeshLamp(GLMesh& gMesh)
 void createMeshBalloons(GLMesh& gMesh)
 {
     // coordinate calculations: https://www.sr-research.com/circular-coordinate-calculator/
-
     GLfloat verts[] = {
         // Vertex Positions       // normals         // textures
         // top center point
@@ -2303,7 +2229,6 @@ void createMeshBalloons(GLMesh& gMesh)
 
         // bottom center point
          0.000f, -0.75f,  0.000f,  0.2f, 0.5f, 0.5f,  0.0f, 0.0f // 37 (0), center bottom center
-
     };
 
     // Index data to share position data of cylinder
@@ -2311,18 +2236,18 @@ void createMeshBalloons(GLMesh& gMesh)
     GLushort indices[] = {
         
         // top
-        0, 1, 2,
-        0, 2, 3,
-        0, 3, 4,
-        0, 4, 5,
-        0, 5, 6,
-        0, 6, 7,
-        0, 7, 8,
-        0, 8, 9,
-        0, 9, 10,
+        0,  1,  2,
+        0,  2,  3,
+        0,  3,  4,
+        0,  4,  5,
+        0,  5,  6,
+        0,  6,  7,
+        0,  7,  8,
+        0,  8,  9,
+        0,  9, 10,
         0, 10, 11,
         0, 11, 12,
-        0, 12, 1,
+        0, 12,  1,
 		
         // bottom
         37, 13, 14,
@@ -2399,27 +2324,23 @@ void createMeshBalloons(GLMesh& gMesh)
         24, 13, 25,
     };
 
-
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
     const GLuint floatsPerUV = 2;
 
-
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
-
+    // create 2 buffers: vertex data, indices
     gMesh.nIndices = sizeof(indices) / (sizeof(indices[0]));
     glGenBuffers(2, gMesh.vbos); // Create 2 buffers: vertex data and the indices
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbos[0]); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
-
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbos[0]); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gMesh.vbos[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -2438,58 +2359,57 @@ void createMeshCouch(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions    // normals  // textures
         // front
-        -1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f,  0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         1.0f,  0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        -1.0f,  0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -1.0f, -0.2f,  0.75f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+         1.0f, -0.2f,  0.75f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+         1.0f,  0.2f,  0.75f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+         1.0f,  0.2f,  0.75f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+        -1.0f,  0.2f,  0.75f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+        -1.0f, -0.2f,  0.75f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
         // back
-        -1.0f, -0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-         1.0f, -0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-         1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-         1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        -1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        -1.0f, -0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -1.0f, -0.2f, -0.75f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+         1.0f, -0.2f, -0.75f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+         1.0f,  0.2f, -0.75f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+         1.0f,  0.2f, -0.75f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        -1.0f,  0.2f, -0.75f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+        -1.0f, -0.2f, -0.75f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
         // left 
-        -1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -1.0f,  0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, -0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-        -1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -1.0f,  0.2f,  0.75f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+        -1.0f,  0.2f, -0.75f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+        -1.0f, -0.2f, -0.75f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+        -1.0f, -0.2f, -0.75f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+        -1.0f, -0.2f,  0.75f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+        -1.0f,  0.2f,  0.75f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
         // right 
-         1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-         1.0f,  0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-         1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, -0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         1.0f,  0.2f,  0.75f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+         1.0f,  0.2f, -0.75f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+         1.0f, -0.2f, -0.75f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+         1.0f, -0.2f, -0.75f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+         1.0f, -0.2f,  0.75f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+         1.0f,  0.2f,  0.75f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
          // bottom
-        -1.0f, -0.2f, -0.75f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, -0.2f, -0.75f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-         1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-         1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        -1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        -1.0f, -0.2f, -0.75f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, -0.2f, -0.75f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+         1.0f, -0.2f, -0.75f,  0.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+         1.0f, -0.2f,  0.75f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+         1.0f, -0.2f,  0.75f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+        -1.0f, -0.2f,  0.75f,  0.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+        -1.0f, -0.2f, -0.75f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f,
         // top
         /* original 
-        -1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-         1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
+        -1.0f,  0.2f, -0.75f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+         1.0f,  0.2f, -0.75f,  1.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+         1.0f,  0.2f,  0.75f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+         1.0f,  0.2f,  0.75f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+        -1.0f,  0.2f,  0.75f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+        -1.0f,  0.2f, -0.75f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f
         */
         // attempted to brighten lighting on left side of top/couch
-        -1.0f,  0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-         1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-         1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -1.0f,  0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f
+        -1.0f,  0.2f, -0.75f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+         1.0f,  0.2f, -0.75f,  1.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+         1.0f,  0.2f,  0.75f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+         1.0f,  0.2f,  0.75f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+        -1.0f,  0.2f,  0.75f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+        -1.0f,  0.2f, -0.75f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f
     };
-
 
     const GLuint floatsPerVertex = 3;
     const GLuint floatsPerNormal = 3;
@@ -2497,16 +2417,15 @@ void createMeshCouch(GLMesh& gMesh)
 
     gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
 
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
+    glGenVertexArrays(1, &gMesh.vao);
     glBindVertexArray(gMesh.vao);
 
     // buffer for vertex data
     glGenBuffers(1, &gMesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); 
 
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
+    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);
 
     // Create Vertex Attribute Pointers
     glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
@@ -2528,7 +2447,7 @@ void destroyMesh(GLMesh& gMesh)
 
 
 // ********** DRAW OBJECTS **********
-
+// draws both side tables
 void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     glUseProgram(shaderProgramID);
@@ -2549,7 +2468,7 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
 
 
-    // ********** dresser main cuboid ************************
+    //********** dresser main cuboid ************************
     // dresser cuboid - 1 per table, currently 2 tables
     // create model view: scale, rotate, translate
     glm::mat4 scale = glm::scale(glm::vec3(1.3f, 1.2f, 1.3f));
@@ -2593,7 +2512,7 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
         glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
     }
 
-    // ********** side table legs (4 per table) ************************
+    //********** side table legs (4 per table) ************************
     scale = glm::scale(glm::vec3(0.15f, 0.3f, 0.2f));
     // legs uses same rotation as dresser cuboid.
     glm::vec2 gUVScaleLegs(0.25f, 0.25f);
@@ -2642,8 +2561,8 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     }
 }
 
-
-//IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTable)
+// draws both side table drawers
+//IMPORTANT: remember to keep in-sync with side tables (drawSideTable)
 void drawSideDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     glUseProgram(shaderProgramID);
@@ -2755,7 +2674,6 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0, 0.1f, 0.0f));
     glm::mat4 translation = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
     glm::vec2 gUVScale(40.0f, 20.0f);
-
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
@@ -2892,14 +2810,11 @@ void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
 
 void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
-
-    // ********** TOP of coffee table ******************
     // create model view: scale, rotate, translate
     glm::mat4 scale = glm::scale(glm::vec3(2.0f, 0.5f, 1.3f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
     glm::mat4 translation = glm::translate(glm::vec3(-1.25f, 0.8f, 5.5f));
     glm::vec2 gUVScale(2.0f, 0.25f);
-
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
@@ -2941,7 +2856,7 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
 }
 
 
-// draw coffee table legs, couch legs, balloon string
+// draws coffee table legs, couch legs, balloon string
 void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     // Set the shader to be used
@@ -2968,7 +2883,6 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     
     // transition. each leg has a unique position
     glm::vec3 legPositionCoffee[] = {
-        // 1st dresser
         glm::vec3(-3.0f, 0.3f, 5.2f), // right front leg
         glm::vec3( 0.5f, 0.3f, 5.2f), // left front leg
         glm::vec3(-3.0f, 0.3f, 5.8f), // right back leg
@@ -3003,8 +2917,9 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
         // Draws the triangles
         glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
     }
+    
 
-        // ********* COFFEE TABLE LEGS (4) *********
+    // ********* COUCH LEGS (4) *********
     scale = glm::scale(glm::vec3(0.15f, 0.5f, 0.15f));
     
     // transition. each leg has a unique position
@@ -3240,7 +3155,7 @@ void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
 
 }
 
-
+// draws couch seats and couch back rest
 void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     // Set the shader to be used
@@ -3259,6 +3174,7 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
     const glm::vec3 cameraPosition = gCamera.Position;
     glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
+
     // ********* COUCH SEATS *********
     glm::mat4 scale = glm::scale(glm::vec3(2.5f, 1.5f, 1.5f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
@@ -3267,7 +3183,6 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
 
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
-
 
     // Retrieves and passes transform matrices to the Shader program
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
@@ -3286,8 +3201,6 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
 
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-
-    // Draws the triangles
 
   
     // ********* COUCH BACK REST *********
@@ -3315,5 +3228,4 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
 
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-
 }
