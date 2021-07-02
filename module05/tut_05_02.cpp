@@ -80,7 +80,7 @@ namespace
     GLuint texSideTable;
     GLuint texSideDrawer;
     GLuint texHouseFloor;
-    GLuint texWallpaper;
+    GLuint texHouseWall;
     GLuint texHouseDoor; 
     GLuint texPainting;  
     GLuint texCoffeeTable; 
@@ -148,15 +148,15 @@ namespace
     GLMesh gMeshCouch;
 
 
-    // Cube and light color
-    //m::vec3 gObjectColor(0.6f, 0.5f, 0.75f);
-    glm::vec3 gObjectColor(1.f, 0.2f, 0.0f);
-    glm::vec3 gLightColor(1.0f, 1.0f, 1.0f);
+    // key light
+    glm::vec3 gLightPosition(-0.5f, 5.6f, 4.6f);
+    glm::vec3 gLightColor(0.0f, 1.0f, 0.0f);
+    glm::vec3 gLightScale(1.0f);
 
-    // PROJECTING CUBE LIGHT
-    // Light position and scale
-    glm::vec3 gLightPosition(1.5f, 0.5f, 3.0f);
-    glm::vec3 gLightScale(0.3f);
+    // fill/spot light
+    glm::vec3 gLightPositionSpot(-10.5f, 1.0f, 4.6f);
+    glm::vec3 gLightColorSpot(1.0f, 0.0f, 0.0f);
+    glm::vec3 gLightScaleSpot(0.2f);
 }
 
 
@@ -250,16 +250,18 @@ const GLchar* vertexShaderSource = GLSL(440,
 
 // Fragment Shader: side table
 const GLchar* sideTableFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing SideDresser color (smaller cube) to the GPU
-    //out vec4 fragmentColor2;
+    out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texSideTable;
     uniform vec2 gUVScaleSideTable;
     uniform vec2 gUVScaleSideLegs;
-    //uniform vec3 lightColor;
-    //uniform vec3 lightPos;
 
     void main()
     {
@@ -269,18 +271,48 @@ const GLchar* sideTableFragShader = GLSL(440,
 
         if (fragTexFrame.a < 0.1)
             discard;
-        fragmentColor = fragTexFrame;
-        // fragmentColor = fragTexFrame * fragTexLegs;
-        // fragmentColor = fragTexFrame + fragTexLegs;
+        if (fragTexLegs.a < 0.1)
+            discard;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTexFrame.xyz; //*fragTexLegs.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
+
     }
 );
 
 // Fragment Shader: side table drawer
 const GLchar* sideDrawerFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing gSideDrawer color (smaller cube) to the GPU
+    out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texSideDrawer;
     uniform vec2 gUVScaleSideDrawer;
 
@@ -289,32 +321,60 @@ const GLchar* sideDrawerFragShader = GLSL(440,
         vec4 fragTex = texture(texSideDrawer, vertexTextureCoordinate * gUVScaleSideDrawer);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
 // fragment shader: house floor 
 const GLchar* houseFloorFragShader = GLSL(440,
-    in vec3 vertexFragmentPos; // outgoing color/pixels to fragment shader
-    in vec3 vertexNormal; // outgoing normals to fragment shader
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal; 
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor;
 
-    uniform vec3 objectColor;
     uniform vec3 lightColor;
     uniform vec3 lightPos;
     uniform vec3 viewPosition;
-        uniform sampler2D texHouseFloor;
-        uniform vec2 gUVScaleHouseFloor;
+    uniform sampler2D texHouseFloor;
+    uniform vec2 gUVScaleHouseFloor;
 
     void main()
     {
+        //texture
+        vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * gUVScaleHouseFloor);
+        if (fragTex.a < 0.1)
+            discard;        
+        
         /*Phong lighting model calculations to generate ambient, diffuse, and specular components*/
 
         // calculate ambient lighting
-        float ambientStrength = 0.1f; // Set ambient or global lighting strength
+        float ambientStrength = 0.5f; // Set ambient or global lighting strength
         vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
         // calculate diffuse lighting
@@ -327,38 +387,32 @@ const GLchar* houseFloorFragShader = GLSL(440,
         float specularIntensity = 0.8f; // Set specular light strength
         float highlightSize = 16.0f; // Set specular highlight size
         vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm); // Calculate reflection vector
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
         // calculate specular component
         float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
         vec3 specular = specularIntensity * specularComponent * lightColor;
         
-        //texture
-        vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * gUVScaleHouseFloor);
-        if (fragTex.a < 0.1)
-            discard;
+        // Calculate phong result with texture
+        vec3 phong = (ambient + diffuse + specular) * fragTex.xyz;
 
-
-        // Calculate phong result
-        vec3 phong = (ambient + diffuse + specular);
-
-        //fragmentColor = vec4(phong, 1.0f); // Send lighting results to GPU
         fragmentColor = vec4(phong, 1.0); // Send lighting results to GPU
-        /*
-        vec4 fragTex = texture(texHouseFloor, vertexTextureCoordinate * gUVScaleHouseFloor);
-        if (fragTex.a < 0.1)
-            discard;
-        fragmentColor = fragTex;
-        */
+        //fragmentColor = fragTex;
+
     }
 );
 
 
 // Fragment Shader: house wall 
 const GLchar* houseWallFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
+    out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texHouseWall;
     uniform vec2 gUVScaleHouseWall;
 
@@ -367,17 +421,46 @@ const GLchar* houseWallFragShader = GLSL(440,
         vec4 fragTex = texture(texHouseWall, vertexTextureCoordinate * gUVScaleHouseWall);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
 // fragment shader: house door
 const GLchar* houseDoorFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texHouseDoor;
     uniform vec2 gUVScaleHouseDoor;
 
@@ -386,7 +469,31 @@ const GLchar* houseDoorFragShader = GLSL(440,
         vec4 fragTex = texture(texHouseDoor, vertexTextureCoordinate * gUVScaleHouseDoor);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
@@ -394,10 +501,15 @@ const GLchar* houseDoorFragShader = GLSL(440,
 
 // fragment shader: painting
 const GLchar* paintingFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texPainting;
     uniform vec2 gUVScalePainting;
 
@@ -406,17 +518,46 @@ const GLchar* paintingFragShader = GLSL(440,
         vec4 fragTex = texture(texPainting, vertexTextureCoordinate * gUVScalePainting);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
 // Fragment Shader: coffee table
 const GLchar* coffeeTableFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
-    out vec4 fragmentColor; // For outgoing gHouseFloor color (smaller cube) to the GPU
+    out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texCoffeeTable;
     uniform vec2 gUVScaleCoffeeTable;
 
@@ -425,17 +566,46 @@ const GLchar* coffeeTableFragShader = GLSL(440,
         vec4 fragTex = texture(texCoffeeTable, vertexTextureCoordinate * gUVScaleCoffeeTable);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
 // Fragment Shader: legs for tables (and other furniture)
 const GLchar* tableLegsFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texTableLegs;
     uniform vec2 gUVScaleTableLegs;
 
@@ -444,17 +614,46 @@ const GLchar* tableLegsFragShader = GLSL(440,
         vec4 fragTex = texture(texTableLegs, vertexTextureCoordinate * gUVScaleTableLegs);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
 // Fragment Shader: lamp bottom (base)
 const GLchar* lampBottomFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texLampBottom;
     uniform vec2 gUVScaleLampBottom;
 
@@ -463,17 +662,46 @@ const GLchar* lampBottomFragShader = GLSL(440,
         vec4 fragTex = texture(texLampBottom, vertexTextureCoordinate * gUVScaleLampBottom);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
 // Fragment Shader: lamp top (shade)
 const GLchar* lampTopFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texLampTop;
     uniform vec2 gUVScaleLampTop;
 
@@ -482,17 +710,47 @@ const GLchar* lampTopFragShader = GLSL(440,
         vec4 fragTex = texture(texLampTop, vertexTextureCoordinate * gUVScaleLampTop);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
+
     }
 );
 
 
 // Fragment Shader: balloons
 const GLchar* balloonsFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+uniform vec3 viewPosition;
     uniform sampler2D texBalloons;
     uniform vec2 gUVScaleBalloons;
 
@@ -501,17 +759,46 @@ const GLchar* balloonsFragShader = GLSL(440,
         vec4 fragTex = texture(texBalloons, vertexTextureCoordinate * gUVScaleBalloons);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
     }
 );
 
 
 // Fragment Shader: couch seats and couch back rest
 const GLchar* couchFragShader = GLSL(440,
+    in vec3 vertexFragmentPos;
+    in vec3 vertexNormal;
     in vec2 vertexTextureCoordinate;
 
     out vec4 fragmentColor;
 
+    uniform vec3 lightColor;
+    uniform vec3 lightPos;
+    uniform vec3 viewPosition;
     uniform sampler2D texCouch;
     uniform vec2 gUVScaleCouch;
 
@@ -520,8 +807,32 @@ const GLchar* couchFragShader = GLSL(440,
         vec4 fragTex = texture(texCouch, vertexTextureCoordinate * gUVScaleCouch);
         if (fragTex.a < 0.1)
             discard;
-        fragmentColor = fragTex;
-}
+
+        //Phong lighting model calculations to generate ambient, diffuse, and specular components
+        // calculate Ambient lighting
+        float ambientStrength = 0.2f; // Set ambient or global lighting strength
+        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
+
+        // calculate Diffuse lighting
+        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
+        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
+        float impact = max(dot(norm, lightDirection), 0.5);// Calculate diffuse impact by generating dot product of normal and light
+        vec3 diffuse = impact * lightColor; // Generate diffuse light color
+
+        // calculate Specular lighting
+        float specularIntensity = 0.0f; // Set specular light strength
+        float highlightSize = 5.0f; // Set specular highlight size
+        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
+        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
+        // calculate specular component
+        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
+        vec3 specular = specularIntensity * specularComponent * lightColor;
+
+        // calculate result
+        vec3 keyLight = (ambient + diffuse + specular) * fragTex.xyz;
+
+        fragmentColor = vec4(keyLight, 1.0f);
+    }
 );
 
 
@@ -681,7 +992,7 @@ int main(int argc, char* argv[])
 
     // TEXTURE: blue geo pattern
     texFilename = "../../resources/textures/pattern-geo.png";
-    if (!createTexture(texFilename, texWallpaper, GL_REPEAT, GL_LINEAR))
+    if (!createTexture(texFilename, texHouseWall, GL_REPEAT, GL_LINEAR))
     {
         cout << "Failed to load texture " << texFilename << endl;
         return EXIT_FAILURE;
@@ -828,7 +1139,7 @@ int main(int argc, char* argv[])
     destroyTexture(texSideTable);
     destroyTexture(texSideDrawer);
     destroyTexture(texHouseFloor);
-    destroyTexture(texWallpaper);
+    destroyTexture(texHouseWall);
     destroyTexture(texHouseDoor);
     destroyTexture(texPainting);
     destroyTexture(texWoodSolidDark);
@@ -889,7 +1200,7 @@ void rendering(glm::mat4 view, glm::mat4 projection)
     drawSideTable(view, projection, gSideTableProgramId, gMeshSideTable, texNumSideTable, texSideTable);
     drawSideDrawer(view, projection, gSideDrawerProgramId, gMeshSideDrawer, texNumSideDrawer, texSideDrawer);
     drawHouseFloor(view, projection, gHouseFloorProgramId, gMeshHouseFloor, texNumHouseFloor, texHouseFloor);
-    drawHouseWall(view, projection, gHouseWallProgramId, gMeshHouseWall, texNumHouseWall, texWallpaper);
+    drawHouseWall(view, projection, gHouseWallProgramId, gMeshHouseWall, texNumHouseWall, texHouseWall);
     drawHouseDoor(view, projection, gHouseDoorProgramId, gMeshHouseDoor, texNumHouseDoor, texHouseDoor);
     drawPainting(view, projection, gPaintingProgramId, gMeshPainting, texNumPainting, texPainting);
     drawCoffeeTable(view, projection, gCoffeeTableProgramId, gMeshCoffeeTable, texNumCoffeeTable, texCoffeeTable);
@@ -2120,16 +2431,22 @@ void destroyMesh(GLMesh& gMesh)
 
 void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
-    // Set the shader to be used
     glUseProgram(shaderProgramID);
-
-    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
 
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+    glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
 
 
     // ********** dresser main cuboid ************************
@@ -2229,14 +2546,20 @@ void drawSideTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 //IMPORTANT: remember to keep in-sync (positioning) with side tables (drawSideTable)
 void drawSideDrawer(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
-    // Set the shader to be used
     glUseProgram(shaderProgramID);
 
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     glm::mat4 scale = glm::scale(glm::vec3(1.0f, 1.0f, 1.3f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
@@ -2297,10 +2620,18 @@ void drawHouseFloor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleHouseFloor");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
@@ -2336,21 +2667,22 @@ void drawHouseWall(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
-
     GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
     GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
-
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleHouseWall");
-    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
-    // ADDED LIGHTING
     glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
     glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+
+    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleHouseWall");
+    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
 
     // bind textures on corresponding texture units
     glActiveTexture(textureNum);
@@ -2371,7 +2703,6 @@ void drawHouseDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glm::mat4 translation = glm::translate(glm::vec3(5.0f, -0.1f, 0.1f));
     glm::vec2 gUVScale(1.0f, 1.0f);
 
-
     // Model matrix: transformations are applied right-to-left order
     glm::mat4 model = translation * rotation * scale;
 
@@ -2382,10 +2713,18 @@ void drawHouseDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleHouseDoor");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
@@ -2404,7 +2743,6 @@ void drawHouseDoor(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
 
 void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
-
     //painting
     glm::mat4 scale = glm::scale(glm::vec3(2.9f, 2.3f, 0.1f));
     glm::mat4 rotation = glm::rotate(0.0f, glm::vec3(0.0f, 0.1f, 0.0f));
@@ -2417,14 +2755,21 @@ void drawPainting(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
     // Set the shader to be used
     glUseProgram(shaderProgramID);
 
-    // Retrieves and passes transform matrices to the Shader program
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScalePainting");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
@@ -2462,10 +2807,18 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
     
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleCoffeeTable");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
@@ -2492,9 +2845,16 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
     
    
     // ********* COFFEE TABLE LEGS (4) *********
@@ -2607,16 +2967,25 @@ void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID,
     glDrawElements(GL_TRIANGLES, gMesh.nIndices, GL_UNSIGNED_SHORT, NULL); // Draws the triangle
 }
 
+
 // draws lamp bottom and balloon holder
 void drawLampBottom(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
 {
     // Set the shader to be used
     glUseProgram(shaderProgramID);
+
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     // ********* LAMP BOTTOM *********
     glm::mat4 scale = glm::scale(glm::vec3(0.25f, 0.5f, 0.25f));
@@ -2686,10 +3055,18 @@ void drawLampTop(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, G
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleLampTop");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
@@ -2723,10 +3100,18 @@ void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, 
     GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
     
     GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "gUVScaleBalloons");
     glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
@@ -2751,9 +3136,16 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
 
     GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
     GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
+    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
+    GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
+    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
+    const glm::vec3 cameraPosition = gCamera.Position;
+    glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
     // ********* COUCH SEATS *********
     glm::mat4 scale = glm::scale(glm::vec3(2.5f, 1.5f, 1.5f));
