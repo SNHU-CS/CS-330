@@ -55,7 +55,6 @@ namespace
     bool gFirstMouse = true;
 
     // Frag shader program IDs
-    GLuint gCubeProgramId;
     GLuint gSideTableProgramId;
     GLuint gSideDrawerProgramId;
     GLuint gHouseFloorProgramId;
@@ -135,7 +134,6 @@ namespace
     };
 
     // mesh data
-    GLMesh gMesh;
     GLMesh gMeshSideTable;
     GLMesh gMeshSideDrawer;
     GLMesh gMeshHouseFloor;
@@ -191,7 +189,6 @@ void destroyTexture(GLuint textureId);
 // create mesh
 // TODO: check for method to destroy as a batch
 void destroyMesh(GLMesh& gMesh);
-void createMesh(GLMesh& gMesh);
 void createMeshSideTable(GLMesh& gMesh);
 void createMeshSideDrawer(GLMesh& gMesh);
 void createMeshHouseFloor(GLMesh& gMesh);
@@ -218,8 +215,6 @@ void drawCoffeeTable(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramI
 void drawBalloons(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawTableLegs(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
-
-void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName);
 
 
 // ****** VERTEX SHADER SOURCE CODE
@@ -251,58 +246,6 @@ const GLchar* vertexShaderSource = GLSL(440,
 // ****** FRAGMENT SHADER SOURCE CODE
 // UNABLE TO GET VERTEX TO ACCEPT A 2ND/DIFFERENT SET OF COORDINATES
 // SOLUTION: create another frag shader (research other opportunities later)
-
-// Cube Fragment Shader Source Code
-const GLchar* cubeFragShader = GLSL(440,
-
-    in vec3 vertexNormal; // For incoming normals
-    in vec3 vertexFragmentPos; // For incoming fragment position
-    in vec2 vertexTextureCoordinate;
-
-    out vec4 fragmentColor; // For outgoing cube color to the GPU
-
-    // Uniform / Global variables for object color, light color, light position, and camera/view position
-    uniform vec3 objectColor;
-    uniform vec3 lightColor;
-    uniform vec3 lightPos;
-    uniform vec3 viewPosition;
-    uniform sampler2D uTexture; // Useful when working with multiple textures
-    uniform vec2 uvScale;
-
-
-    void main()
-    {
-        //Phong lighting model calculations to generate ambient, diffuse, and specular components
-
-        //Calculate Ambient lighting
-        float ambientStrength = 0.1f; // Set ambient or global lighting strength
-        vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-        //Calculate Diffuse lighting
-        vec3 norm = normalize(vertexNormal); // Normalize vectors to 1 unit
-        vec3 lightDirection = normalize(lightPos - vertexFragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on cube
-        float impact = max(dot(norm, lightDirection), 0.0);// Calculate diffuse impact by generating dot product of normal and light
-        vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-        //Calculate Specular lighting
-        float specularIntensity = 0.8f; // Set specular light strength
-        float highlightSize = 16.0f; // Set specular highlight size
-        vec3 viewDir = normalize(viewPosition - vertexFragmentPos); // Calculate view direction
-        vec3 reflectDir = reflect(-lightDirection, norm);// Calculate reflection vector
-        //Calculate specular component
-        float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
-        vec3 specular = specularIntensity * specularComponent * lightColor;
-
-        // Texture holds the color to be used for all three components
-        vec4 textureColor = texture(uTexture, vertexTextureCoordinate * uvScale);
-
-        // Calculate phong result
-        vec3 phong = (ambient + diffuse + specular) * textureColor.xyz;
-
-        fragmentColor = vec4(phong, 1.0); // Send lighting results to GPU
-    }
-);
-
 
 // Fragment Shader: side table
 const GLchar* sideTableFragShader = GLSL(440,
@@ -574,9 +517,8 @@ int main(int argc, char* argv[])
     // Sets the background color of the window to black (it will be implicitely used by glClear)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    // create the mesh for objects
+    // create the mesh for objects (creas VBO)
     // TODO: raise exceptions
-    createMesh(gMesh); // Calls the function to create the Vertex Buffer Object
     createMeshSideTable(gMeshSideTable);
     createMeshSideDrawer(gMeshSideDrawer);
     createMeshHouseFloor(gMeshHouseFloor);;
@@ -596,10 +538,6 @@ int main(int argc, char* argv[])
     * started when added programming for texture5 for the door
     * TRIED: viewing fragshader, draw in rendering, and draw function. did not find conflicts
     */
-    // create the fragment shader programs
-    if (!createShaderProgram(vertexShaderSource, cubeFragShader, gCubeProgramId))
-        cout << "whatsupppppCube" << endl;
-        //return EXIT_FAILURE;
 
     if (!createShaderProgram(vertexShaderSource, sideTableFragShader, gSideTableProgramId))
         cout << "Shader crash/return false: side table" << endl;
@@ -826,7 +764,6 @@ int main(int argc, char* argv[])
 
     // release mesh data
     // TODO: look into batch release destroy/release
-    destroyMesh(gMesh);
     destroyMesh(gMeshSideTable);
     destroyMesh(gMeshSideDrawer);
     destroyMesh(gMeshHouseFloor);
@@ -909,10 +846,6 @@ void rendering(glm::mat4 view, glm::mat4 projection)
     // Activate the cube VAO (used by cube)
 
     // TODO: assign variable to hold texture number
-    DrawCube(view, projection, gCubeProgramId, gMesh, GL_TEXTURE0, texWoodSolidDark);
-    // DrawLight();
-
-
     drawSideTable(view, projection, gSideTableProgramId, gMeshSideTable, texNumSideTable, texSideTable);
     drawSideDrawer(view, projection, gSideDrawerProgramId, gMeshSideDrawer, texNumSideDrawer, texSideDrawer);
     drawHouseFloor(view, projection, gHouseFloorProgramId, gMeshHouseFloor, texNumHouseFloor, texHouseFloor);
@@ -1238,89 +1171,6 @@ void destroyShaderProgram(GLuint programId)
 }
 
 // ********** OBJECT MESH **********
-void createMesh(GLMesh& gMesh)
-{
-    // Position and Color data
-    GLfloat verts[] = {
-        //Positions          //Normals
-        // ------------------------------------------------------
-        //Back Face          //Negative Z Normal  Texture Coords.
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-        //Front Face         //Positive Z Normal
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-
-        //Left Face          //Negative X Normal
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-           //Right Face         //Positive X Normal
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-           //Bottom Face        //Negative Y Normal
-         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-          0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-          0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-          0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-          //Top Face           //Positive Y Normal
-         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-          0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-    };
-
-    const GLuint floatsPerVertex = 3;
-    const GLuint floatsPerNormal = 3;
-    const GLuint floatsPerUV = 2;
-
-    gMesh.nVertices = sizeof(verts) / (sizeof(verts[0]) * (floatsPerVertex + floatsPerNormal + floatsPerUV));
-
-    glGenVertexArrays(1, &gMesh.vao); // we can also generate multiple VAOs or buffers at the same time
-    glBindVertexArray(gMesh.vao);
-
-    // buffer for vertex data
-    glGenBuffers(1, &gMesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, gMesh.vbo); // Activates the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW); // Sends vertex or coordinate data to the GPU
-
-    // Strides between vertex coordinates is 6 (x, y, z, r, g, b, a). A tightly packed stride is 0.
-    GLint stride = sizeof(float) * (floatsPerVertex + floatsPerNormal + floatsPerUV);// The number of floats before each
-
-    // Create Vertex Attribute Pointers
-    glVertexAttribPointer(0, floatsPerVertex, GL_FLOAT, GL_FALSE, stride, 0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, floatsPerNormal, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * floatsPerVertex));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, floatsPerUV, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * (floatsPerVertex + floatsPerNormal)));
-    glEnableVertexAttribArray(2);
-}
-
 
 void createMeshSideTable(GLMesh& gMesh)
 {
@@ -2921,55 +2771,5 @@ void drawCouch(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLM
 
     // Draws the triangles
     glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-
-}
-
-
-void DrawCube(glm::mat4 view, glm::mat4 projection, GLuint shaderProgramID, GLMesh& gMesh, GLenum textureNum, GLuint textureName)
-{
-    glBindVertexArray(gMesh.vao);
-
-    glUseProgram(shaderProgramID);
-    glm::mat4 scale = glm::scale(glm::vec3(3.0f, 2.0f, -3.0f));
-    glm::mat4 rotation = glm::rotate(15.0f, glm::vec3(0.0, 0.1f, 0.0f));
-    glm::mat4 translation = glm::translate(glm::vec3(0.0f, 2.0f, 2.0f));
-
-    // Model matrix: transformations are applied right-to-left order
-    glm::mat4 model = translation * rotation * scale;
-    // TRANSLATION^^^ AND SCALE^^^ nothing new
-    glm::vec2 gUVScale(0.5f, 10.0f);
-
-    // Retrieves and passes transform matrices to the Shader program
-    GLint modelLoc = glGetUniformLocation(shaderProgramID, "model");
-    GLint viewLoc = glGetUniformLocation(shaderProgramID, "view");
-    GLint projLoc = glGetUniformLocation(shaderProgramID, "projection");
-
-    //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    //glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    //glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    // Reference matrix uniforms from the Cube Shader program for the cub color, light color, light position, and camera position
-    GLint objectColorLoc = glGetUniformLocation(shaderProgramID, "objectColor");
-    GLint lightColorLoc = glGetUniformLocation(shaderProgramID, "lightColor");
-    GLint lightPositionLoc = glGetUniformLocation(shaderProgramID, "lightPos");
-    //GLint viewPositionLoc = glGetUniformLocation(shaderProgramID, "viewPosition");
-
-    // Pass color, light, and camera data to the Cube Shader program's corresponding uniforms
-    glUniform3f(objectColorLoc, gObjectColor.r, gObjectColor.g, gObjectColor.b);
-    glUniform3f(lightColorLoc, gLightColor.r, gLightColor.g, gLightColor.b);
-    glUniform3f(lightPositionLoc, gLightPosition.x, gLightPosition.y, gLightPosition.z);
-    //const glm::vec3 cameraPosition = gCamera.Position;
-    //glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-    GLint UVScaleLoc = glGetUniformLocation(shaderProgramID, "uvScale");
-    glUniform2fv(UVScaleLoc, 1, glm::value_ptr(gUVScale));
-
-    // bind textures on corresponding texture units
-    glActiveTexture(textureNum);
-    glBindTexture(GL_TEXTURE_2D, textureName);
-
-    // Draws the triangles
-    glDrawArrays(GL_TRIANGLES, 0, gMesh.nVertices);
-
 
 }
