@@ -841,7 +841,7 @@ const GLchar* balloonsFragShader = GLSL(440,
 
     uniform vec3 lightColor;
     uniform vec3 lightPos;
-uniform vec3 viewPosition;
+    uniform vec3 viewPosition;
     uniform sampler2D texBalloons;
     uniform vec2 gUVScaleBalloons;
 
@@ -1633,19 +1633,19 @@ void createMeshSideTable(GLMesh& gMesh)
         -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
         -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
         // left side
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         // right side
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
          // bottom
         -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
          0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
@@ -2258,51 +2258,51 @@ void createMeshBalloons(GLMesh& gMesh)
     GLfloat verts[] = {
         // Vertex Positions       // normals         // textures
         // top center point
-         0.000f,  0.75f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 0, center top center
+         0.000f,  0.75f,  0.000f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, // 0, center top center
         // top
-         0.579f,  0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 1, top right middle
-         0.501f,  0.5f,  0.289f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 2, top right front 
-         0.289f,  0.5f,  0.501f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 3, top right front
-         0.000f,  0.5f,  0.579f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 4, top middle front
-        -0.289f,  0.5f,  0.501f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 5, top left front 
-        -0.501f,  0.5f,  0.289f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 6, top left front
-        -0.579f,  0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 7, top left middle
-        -0.501f,  0.5f, -0.289f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 8, top left back
-        -0.289f,  0.5f, -0.501f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 9, top left back  
-         0.000f,  0.5f, -0.579f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 10, top middle back
-         0.289f,  0.5f, -0.501f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 11, top right back
-         0.501f,  0.5f, -0.289f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 12, top right back
+         0.579f,  0.5f,  0.000f,  0.2f, 0.2f, 0.8f,  1.0f, 1.0f, // 1, top right middle
+         0.501f,  0.5f,  0.289f,  0.1f, 0.1f, 1.0f,  0.0f, 1.0f, // 2, top right front 
+         0.289f,  0.5f,  0.501f,  0.2f, 0.2f, 0.8f,  1.0f, 1.0f, // 3, top right front
+         0.000f,  0.5f,  0.579f,  0.5f, 0.5f, 0.5f,  0.0f, 1.0f, // 4, top middle front
+        -0.289f,  0.5f,  0.501f,  0.8f, 0.8f, 0.2f,  1.0f, 1.0f, // 5, top left front 
+        -0.501f,  0.5f,  0.289f,  0.9f, 0.9f, 0.1f,  0.0f, 1.0f, // 6, top left front
+        -0.579f,  0.5f,  0.000f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, // 7, top left middle
+        -0.501f,  0.5f, -0.289f,  0.9f, 0.9f, 0.1f,  0.0f, 1.0f, // 8, top left back
+        -0.289f,  0.5f, -0.501f,  0.8f, 0.8f, 0.2f,  1.0f, 1.0f, // 9, top left back  
+         0.000f,  0.5f, -0.579f,  0.5f, 0.5f, 0.5f,  0.0f, 1.0f, // 10, top middle back
+         0.289f,  0.5f, -0.501f,  0.1f, 0.2f, 0.8f,  1.0f, 1.0f, // 11, top right back
+         0.501f,  0.5f, -0.289f,  0.1f, 0.1f, 1.0f,  0.0f, 1.0f, // 12, top right back
 
         // bottom
-         0.579f,  -0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 13 (1), bottom right middle
-         0.501f,  -0.5f,  0.289f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 14 (2), bottom right front
-         0.289f,  -0.5f,  0.501f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 15 (3), bottom right front
-         0.000f,  -0.5f,  0.579f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 16 (4), bottom middle front
-        -0.289f,  -0.5f,  0.501f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 17 (5), bottom left front
-        -0.501f,  -0.5f,  0.289f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 18 (6), bottom left front
-        -0.579f,  -0.5f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 19 (7), bottom left middle
-        -0.501f,  -0.5f, -0.289f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 20 (8), bottom left back
-        -0.289f,  -0.5f, -0.501f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 21 (9), bottom left back
-         0.000f,  -0.5f, -0.579f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 22 (10), bottom middle back
-         0.289f,  -0.5f, -0.501f,  0.0f, 0.0f, 0.1f,  1.0f, 1.0f, // 23 (11), bottom right back
-         0.501f,  -0.5f, -0.289f,  0.0f, 0.0f, 0.1f,  0.0f, 1.0f, // 24 (12), bottom right back
+         0.579f,  -0.5f,  0.000f,  0.2f, 0.2f, 0.8f,  1.0f, 1.0f, // 13 (1), bottom right middle
+         0.501f,  -0.5f,  0.289f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f, // 14 (2), bottom right front
+         0.289f,  -0.5f,  0.501f,  0.2f, 0.2f, 0.8f,  1.0f, 1.0f, // 15 (3), bottom right front
+         0.000f,  -0.5f,  0.579f,  0.5f, 0.5f, 0.5f,  0.0f, 1.0f, // 16 (4), bottom middle front
+        -0.289f,  -0.5f,  0.501f,  0.8f, 0.8f, 0.2f,  1.0f, 1.0f, // 17 (5), bottom left front
+        -0.501f,  -0.5f,  0.289f,  0.9f, 0.9f, 0.1f,  0.0f, 1.0f, // 18 (6), bottom left front
+        -0.579f,  -0.5f,  0.000f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, // 19 (7), bottom left middle
+        -0.501f,  -0.5f, -0.289f,  0.9f, 0.9f, 0.1f,  0.0f, 1.0f, // 20 (8), bottom left back
+        -0.289f,  -0.5f, -0.501f,  0.8f, 0.8f, 0.2f,  1.0f, 1.0f, // 21 (9), bottom left back
+         0.000f,  -0.5f, -0.579f,  0.5f, 0.5f, 0.5f,  0.0f, 1.0f, // 22 (10), bottom middle back
+         0.289f,  -0.5f, -0.501f,  0.2f, 0.2f, 0.8f,  1.0f, 1.0f, // 23 (11), bottom right back
+         0.501f,  -0.5f, -0.289f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f, // 24 (12), bottom right back
         
 		//center
-         0.965f,  0.0f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 25 (13, 1), center right middle
-         0.835f,  0.0f,  0.482f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 26 (14, 2), center right front
-         0.482f,  0.0f,  0.835f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 27 (15, 3), center right front
-         0.000f,  0.0f,  0.965f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 28 (16, 4), center middle front
-        -0.482f,  0.0f,  0.835f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 29 (17, 5), center left front
-        -0.835f,  0.0f,  0.482f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 30 (18, 6), center left front
-        -0.965f,  0.0f,  0.000f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 31 (19, 7), center left middle
-        -0.835f,  0.0f, -0.482f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 32 (20, 8), center left back
-        -0.482f,  0.0f, -0.835f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 33 (21, 9), center left back
-         0.000f,  0.0f, -0.965f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 34 (22, 10), center middle back
-         0.482f,  0.0f, -0.835f,  0.0f, 0.0f, 0.1f,  1.0f, 0.0f, // 35 (23, 11), center right back
-         0.835f,  0.0f, -0.482f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f, // 36 (24, 12), center right back
+         0.965f,  0.0f,  0.000f,  0.2f, 0.2f, 0.8f,  1.0f, 0.0f, // 25 (13, 1), center right middle
+         0.835f,  0.0f,  0.482f,  0.1f, 0.1f, 1.0f,  0.0f, 0.0f, // 26 (14, 2), center right front
+         0.482f,  0.0f,  0.835f,  0.2f, 0.2f, 0.8f,  1.0f, 0.0f, // 27 (15, 3), center right front
+         0.000f,  0.0f,  0.965f,  0.5f, 0.5f, 0.5f,  0.0f, 0.0f, // 28 (16, 4), center middle front
+        -0.482f,  0.0f,  0.835f,  0.8f, 0.8f, 0.2f,  1.0f, 0.0f, // 29 (17, 5), center left front
+        -0.835f,  0.0f,  0.482f,  0.9f, 0.9f, 0.1f,  0.0f, 0.0f, // 30 (18, 6), center left front
+        -0.965f,  0.0f,  0.000f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f, // 31 (19, 7), center left middle
+        -0.835f,  0.0f, -0.482f,  0.9f, 0.9f, 0.1f,  0.0f, 0.0f, // 32 (20, 8), center left back
+        -0.482f,  0.0f, -0.835f,  0.8f, 0.8f, 0.2f,  1.0f, 0.0f, // 33 (21, 9), center left back
+         0.000f,  0.0f, -0.965f,  0.5f, 0.5f, 0.5f,  0.0f, 0.0f, // 34 (22, 10), center middle back
+         0.482f,  0.0f, -0.835f,  0.2f, 0.2f, 0.8f,  1.0f, 0.0f, // 35 (23, 11), center right back
+         0.835f,  0.0f, -0.482f,  0.1f, 0.1f, 1.0f,  0.0f, 0.0f, // 36 (24, 12), center right back
 
         // bottom center point
-         0.000f, -0.75f,  0.000f,  0.0f, 0.0f, 0.1f,  0.0f, 0.0f // 37 (0), center bottom center
+         0.000f, -0.75f,  0.000f,  0.2f, 0.5f, 0.5f,  0.0f, 0.0f // 37 (0), center bottom center
 
     };
 
@@ -2451,20 +2451,20 @@ void createMeshCouch(GLMesh& gMesh)
          1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         -1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
         -1.0f, -0.2f, -0.75f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-        // left Coffee
+        // left 
         -1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
         -1.0f,  0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
         -1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         -1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         -1.0f, -0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
         -1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        // right Coffee
-         1.0f,  0.2f,  0.75f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-         1.0f,  0.2f, -0.75f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-         1.0f, -0.2f, -0.75f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f, -0.2f, -0.75f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         1.0f, -0.2f,  0.75f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-         1.0f,  0.2f,  0.75f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        // right 
+         1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         1.0f,  0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+         1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f, -0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f, -0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+         1.0f,  0.2f,  0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
          // bottom
         -1.0f, -0.2f, -0.75f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
          1.0f, -0.2f, -0.75f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
@@ -2473,12 +2473,21 @@ void createMeshCouch(GLMesh& gMesh)
         -1.0f, -0.2f,  0.75f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
         -1.0f, -0.2f, -0.75f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
         // top
+        /* original 
         -1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
          1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
          1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
          1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
         -1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
         -1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
+        */
+        // attempted to brighten lighting on left side of top/couch
+        -1.0f,  0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f,  0.2f, -0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+         1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -1.0f,  0.2f,  0.75f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -1.0f,  0.2f, -0.75f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f
     };
 
 
