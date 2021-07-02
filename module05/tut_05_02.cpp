@@ -1,7 +1,8 @@
 /****************************
 * Author: Katie Stapleton
 * Date: 07/2021
-* Requires: OpenGL 4.4 with GLFW, GLEW using C++
+* Programming: OpenGL 4.4 with GLFW, GLEW using C++
+* Software: Visual Studio 2019+. Program executes via ".sln" file and selecting a start program. 
 * Description: created a small 3D scene of a living room.
 *     Scene can be navigation by the user
 *     Light and texturing applied to the scene
@@ -1012,7 +1013,7 @@ int main(int argc, char* argv[])
     glUniform1i(glGetUniformLocation(gCoffeeTableProgramId, "texCoffeeTable"), 0);
     texNumCoffeeTable = GL_TEXTURE0;
 
-    // TEXTURE: wood, straigtened rustic scratched
+    // TEXTURE: wood, dark wood
     texFilename = "../../resources/textures/wood-dark.png";
     if (!createTexture(texFilename, texSideTable, GL_REPEAT, GL_LINEAR))
     {
