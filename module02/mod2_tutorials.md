@@ -35,7 +35,7 @@ This example has two functions that you should pay attention to. These two funct
 
 ### The Main Function and the Render Loop
 
-The main function calls `UInitialize` and runs an infinite loop called the _render loop_ (in game developmenet, this is sometimes called the _game loop_). The render loop draws every frame of the application, so the frequency with which it is called dictates the frame rate (such as 60 fps).
+The main function calls `UInitialize` and runs an infinite loop called the _render loop_ (in game development, this is sometimes called the _game loop_). The render loop draws every frame of the application, so the frequency with which it is called dictates the frame rate (such as 60 fps).
 
     // main function. Entry point to the OpenGL program
     int main(int argc, char* argv[])
